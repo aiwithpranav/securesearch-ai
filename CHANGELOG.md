@@ -1,0 +1,26 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+### Added
+- Phase 2A: Backend Foundation
+- Docker Compose setup with Postgres (pgvector 0.8.0), Redis (7.4.2), and Mailpit (v1.22.0).
+- FastAPI backend modular monolith skeleton.
+- Environment variables validation (env doctor).
+- Structured JSON logging and X-Request-ID middleware.
+- Problem Details error handling.
+- Health (`/api/v1/health`) and ready (`/api/v1/ready`) endpoints.
+- Alembic database migration configuration.
+- Basic test suite for health check and env doctor.
+
+## [v0.1] - 2026-10-09
+### Added
+- Phase 1: Landing Page
+- Frontend built with Next.js 16.4.0, React 19.3.0, Tailwind 4.3.3, TypeScript 5.9.
+- Dark premium design with interactive components (Hover-glow cards, scroll reveal).
+- Interactive demo component and 60-second tour dialog.
+- Responsive layout with accessibility features (Performance 99, Accessibility 96).

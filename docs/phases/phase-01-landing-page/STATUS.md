@@ -15,16 +15,18 @@
 - Implemented `<TourDialog>` native dialog with 60-second tour steps and animations.
 - Ensured `useReducedMotion` is supported across all motion components.
 - `npm run build` passes with no errors.
+- Owner-measured Lighthouse on a production build (npm run start), mobile: Performance 99, Accessibility 96.
 
 ## In progress
 - Nothing. Layer 3 is waiting for owner review.
 
 ## Next step
 - Owner reviews Layer 3 interactive demo and tour dialog.
-- Set CONTACT_EMAIL in `frontend/lib/site.ts` (placeholder you@example.com).
-- "Sign in" links to /login, which shows the 404 page until Phase 2.
 - Font is the system font stack. Self-hosted font + licence check is optional later.
-- Lighthouse not yet measured (needs your browser).
+
+## Open Issues
+- "Sign in" links to /login, which shows the 404 page until Phase 2C.
+- `CONTACT_EMAIL` in `frontend/lib/site.ts` is still a placeholder (`you@example.com`).
 - Legal pages are drafts, not legal advice.
 
 ## Decisions made this session
