@@ -1,19 +1,24 @@
-# STATUS: Phase 1, Layer 1 (7 Oct 2026)
+# STATUS: Phase 1, Layer 2 (motion)
 
 ## Done
 - Next.js 16.4.0, React 19.3.0, Tailwind 4.3.3, TypeScript 5.9 (pinned) in `frontend/`.
-- Design tokens in `frontend/app/globals.css` (will be FROZEN when you approve Layer 1).
-- Home page: hero, problem, how it works, static demo, first 2 minutes, security, features, teams, FAQ, final CTA, footer.
-- Pages: /privacy, /terms, /security, 404, sitemap, robots, favicon, share image.
-- `npm run build` passes (10 static pages).
+- Design tokens in `frontend/app/globals.css` (FROZEN).
+- Installed `motion` 14.x for interactions.
+- Added smooth scrolling to `<html>`.
+- Extracted interactive components to `_components/` (Server Component `page.tsx` preserved).
+- Implemented `<GlowCard>` hover effects with `pointermove` radial glow.
+- Implemented `<Reveal>` scroll animations with `<noscript>` fallback.
+- Implemented `<HowItWorks>` scroll-linked step highlights.
+- Implemented `<HeroDemo>` typing loop with hover pause and `sr-only` accessibility text.
+- Implemented `<AnimatedButton>` click press feedback.
+- Ensured `useReducedMotion` is supported across all motion components.
+- `npm run build` passes with no errors.
 
 ## In progress
-- Nothing. Layer 1 is waiting for owner review.
+- Nothing. Layer 2 is waiting for owner review.
 
 ## Next step
-- Owner reviews Layer 1. Then Layer 2 (motion): hover glow, scroll reveal, step highlight, hero demo loop.
-
-## Open issues
+- Owner reviews Layer 2 motion interactions and accessibility fallbacks.
 - Set CONTACT_EMAIL in `frontend/lib/site.ts` (placeholder you@example.com).
 - "Sign in" links to /login, which shows the 404 page until Phase 2.
 - Font is the system font stack. Self-hosted font + licence check is optional later.
