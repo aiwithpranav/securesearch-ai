@@ -1,4 +1,4 @@
-# STATUS: Phase 1, Layer 2 (motion)
+# STATUS: Phase 1, Layer 3 (interactive demo)
 
 ## Done
 - Next.js 16.4.0, React 19.3.0, Tailwind 4.3.3, TypeScript 5.9 (pinned) in `frontend/`.
@@ -6,19 +6,21 @@
 - Installed `motion` 14.x for interactions.
 - Added smooth scrolling to `<html>`.
 - Extracted interactive components to `_components/` (Server Component `page.tsx` preserved).
-- Implemented `<GlowCard>` hover effects with `pointermove` radial glow.
+- Implemented `<GlowCard>` hover effects with `pointermove` radial glow (fixed for mouse).
 - Implemented `<Reveal>` scroll animations with `<noscript>` fallback.
 - Implemented `<HowItWorks>` scroll-linked step highlights.
 - Implemented `<HeroDemo>` typing loop with hover pause and `sr-only` accessibility text.
 - Implemented `<AnimatedButton>` click press feedback.
+- Implemented `<InteractiveDemo>` with accessible tablist, selectable question chips, and cross-fading results.
+- Implemented `<TourDialog>` native dialog with 60-second tour steps and animations.
 - Ensured `useReducedMotion` is supported across all motion components.
 - `npm run build` passes with no errors.
 
 ## In progress
-- Nothing. Layer 2 is waiting for owner review.
+- Nothing. Layer 3 is waiting for owner review.
 
 ## Next step
-- Owner reviews Layer 2 motion interactions and accessibility fallbacks.
+- Owner reviews Layer 3 interactive demo and tour dialog.
 - Set CONTACT_EMAIL in `frontend/lib/site.ts` (placeholder you@example.com).
 - "Sign in" links to /login, which shows the 404 page until Phase 2.
 - Font is the system font stack. Self-hosted font + licence check is optional later.

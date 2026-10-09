@@ -5,6 +5,7 @@ import { Reveal } from "./_components/Reveal";
 import { HowItWorks } from "./_components/HowItWorks";
 import { HeroDemo } from "./_components/HeroDemo";
 import { AnimatedButton } from "./_components/AnimatedButton";
+import { InteractiveDemo } from "./_components/InteractiveDemo";
 
 const btnPrimary = "inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 font-medium text-bg hover:bg-accent2";
 const btnGhost = "inline-flex items-center justify-center rounded-lg border border-line px-5 py-3 font-medium text-text hover:border-accent2";
@@ -45,21 +46,7 @@ function Header() {
   );
 }
 
-function AnswerCard({ question, who, stages, answer, source }: { question: string; who?: string; stages: [string, string][]; answer: string; source?: string }) {
-  return (
-    <GlowCard className="rounded-2xl border border-line bg-surface p-5">
-      {who && <p className="mb-3 text-sm text-muted">{who}</p>}
-      <div className="rounded-lg bg-surface2 px-4 py-3 text-sm">{question}</div>
-      <ul className="mt-4 space-y-2 text-sm text-muted">
-        {stages.map(([l, t]) => (
-          <li key={l} className="flex justify-between"><span><span className="text-ok" aria-hidden>✓</span> {l}</span><span>{t}</span></li>
-        ))}
-      </ul>
-      <p className="mt-5 border-t border-line pt-4">{answer}</p>
-      {source && <p className="mt-2 text-sm text-accent2">{source}</p>}
-    </GlowCard>
-  );
-}
+
 
 const steps: [string, string][] = [
   ["You ask", "Type a question in your own words."],
@@ -126,10 +113,7 @@ export default function Home() {
         </Section>
 
         <Section id="demo" title="Same question. Different people. Different answers.">
-          <div className="grid gap-6 md:grid-cols-2">
-            <AnswerCard who="Rahul, Finance" question="How does Q3 budget approval work?" stages={[["Checking your access", "0.1 s"], ["Ranking the best matches", "0.3 s"]]} answer="Q3 budget approvals follow the steps in the Finance Budget Policy." source="Finance Budget Policy · sample data" />
-            <AnswerCard who="Aisha, Engineering" question="How does Q3 budget approval work?" stages={[["Checking your access", "0.1 s"], ["Ranking the best matches", "0.3 s"]]} answer="Could not find enough current, accessible source material to answer this." />
-          </div>
+          <InteractiveDemo />
         </Section>
 
         <Section id="start" title="Get started in two minutes">
