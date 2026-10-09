@@ -12,10 +12,10 @@
 - Tests for health check and env doctor
 
 ## In Progress
-- 
+- None
 
 ## Next Steps
 - Implement Authentication & User Models (Phase 2B)
 
 ## Open Issues
-- None
+- `pytest` run shows a deprecation warning: `StarletteDeprecationWarning: Using 'httpx' with 'starlette.testclient' is deprecated; install 'httpx2' instead.`
