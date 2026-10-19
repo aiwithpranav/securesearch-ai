@@ -1,4 +1,6 @@
-# STATUS: Phase 1, Layer 3 (interactive demo)
+# STATUS: Phase 1 (landing page): CLOSED
+
+Signed off by the owner and tagged `v0.1` (9 Oct 2026). This file was corrected on 19 Oct 2026; it used to say "waiting for owner review".
 
 ## Done
 - Next.js 16.4.0, React 19.3.0, Tailwind 4.3.3, TypeScript 5.9 (pinned) in `frontend/`.
@@ -18,20 +20,14 @@
 - Owner-measured Lighthouse on a production build (npm run start), mobile: Performance 99, Accessibility 96.
 
 ## In progress
-- Nothing. Layer 3 is waiting for owner review.
+- Nothing.
 
-## Next step
-- Owner reviews Layer 3 interactive demo and tour dialog.
-- Font is the system font stack. Self-hosted font + licence check is optional later.
-
-## Open Issues
-- "Sign in" links to /login, which shows the 404 page until Phase 2C.
-- `CONTACT_EMAIL` in `frontend/lib/site.ts` is still a placeholder (`you@example.com`).
+## Open issues (carried forward)
+- `CONTACT_EMAIL` in `frontend/lib/site.ts` is still a placeholder (`you@example.com`). Tracked in `docs/BACKLOG.md`.
 - Legal pages are drafts, not legal advice.
+- The "Sign in" links now lead to the real login page (Phase 2C).
+- Font is the system font stack. A self-hosted font with a licence check is optional later.
 
-## Decisions made this session
+## Decisions made
 - TypeScript pinned to 5.x (registry latest 7.x too new to vouch for).
-- No ESLint in Layer 1 (keeps it compact; add with CI in Phase 9).
-
-## Credentials/prerequisites still needed
-- None.
+- No ESLint in Layer 1 (add with CI in Phase 9).

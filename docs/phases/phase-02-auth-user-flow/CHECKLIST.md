@@ -13,7 +13,7 @@
 - [x] `/auth/me`; roles are read from the DB, not the token
 - [x] Admin: users, roles, departments; deactivate is immediate
 - [x] Seed script (8 personas + 1 deactivated user)
-- [x] 57 automated tests pass in the container
+- [x] 57 automated tests pass in the container (65 after the password-script tests)
 - [x] Owner approved 2B; PR #1 merged to `main`
 - [ ] Owner decisions on the ADR 023 "OWNER CHECK" items (items 1 to 4)
 
@@ -34,8 +34,9 @@
 - [x] Not part of Phase 2 any more; added to the Phase 4 brief
 
 ## Phase 2 close
-- [ ] PR for `feat/login-ui` merged (owner, on GitHub)
-- [ ] Final checks on `main`: 57 backend tests, 10 frontend tests, typecheck, build, live login
-- [ ] Owner answers on ADR 023 items 1 to 4 recorded
-- [ ] Stale Phase 1 `STATUS.md` fixed, Phase 2 STATUS closed, CHANGELOG `[v0.2]` section
-- [ ] Tag `v0.2` on the merge commit, pushed, verified
+- [x] PRs #1 to #4 merged (owner, on GitHub)
+- [x] Final checks on `main`: 65 backend tests, 10 frontend tests, typecheck, build, live login (19 Oct 2026)
+- [x] Owner answers on ADR 023 recorded
+- [x] Stale Phase 1 `STATUS.md` fixed, Phase 2 STATUS written, CHANGELOG `[v0.2]` section, backlog, architecture, README
+- [ ] Close-out PR merged (owner)
+- [ ] Tag `v0.2` on the merge commit, pushed, verified (after the owner's "go")

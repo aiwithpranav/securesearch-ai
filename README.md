@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done: Phase 1 (landing page), 2A (backend foundation). Built and awaiting owner review: 2B (auth backend). Next: 2C (login screens).
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`) and Phase 2 (authentication and user flow, tag `v0.2`). Next: Phase 3 (documents and ingestion), waiting for owner approval to start.
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -11,9 +11,9 @@
 * **Landing Page (Phase 1):** Dark premium design, interactive demos, and high accessibility standards.
 * **Backend Foundation (Phase 2A):** Dockerized backend with FastAPI, Postgres (pgvector), Redis, and Mailpit. Includes structural validations, JSON logging, and error handling.
 
-* **Auth backend (Phase 2B, implemented, awaiting owner review):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. API only: there is **no login screen yet** (Phase 2C). Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
+* **Auth backend (Phase 2B, implemented):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
 
-* **Login UI, layers 2C-1 and 2C-2 (implemented, awaiting owner review):** `/login` (validation, shake, Caps Lock hint, Remember me, all error states), `/forgot-password`, `/reset-password`, `/home` (your details, first-2-minutes guide, welcome tour), `/profile` (change password, sign out of all devices). Search and documents are **not built yet**; guide steps for them say "Coming in Phase N". Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
+* **Login UI (Phase 2C, implemented):** `/login` (validation, shake, Caps Lock hint, Remember me, all error states), `/forgot-password`, `/reset-password`, `/home` (your details, first-2-minutes guide, welcome tour), `/profile` (change password, sign out of all devices). Search and documents are **not built yet**; guide steps for them say "Coming in Phase N". Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
 
 ## Architecture Overview
 The system follows a modular monolith architecture, separating the Next.js frontend from the FastAPI Python backend. Data is persisted in PostgreSQL with pgvector for semantic search, cached in Redis. 
@@ -97,13 +97,16 @@ Tests use their own database (`<POSTGRES_DB>_test`) and need the services above 
 ```
 
 ## Roadmap
-* **Phase 2C (owner approved 2C-1 and 2C-2):** login, forgot/reset, profile, tour. The admin users page (2C-3) moves to Phase 4 (users, groups and access rules together).
-* **Phase 3:** Document Ingestion & Storage
-* **Phase 4:** Search & Retrieval
-* **Phase 5:** LLM Generation (RAG)
-* **Phase 6:** Audit Logging
-* **Phase 7:** Evaluation & Optimization
-* **Phase 8-9:** Syncing and CI/CD enhancements
+Phases follow the blueprint (v1.2). Done: Phase 1 and Phase 2.
+* **Phase 3:** Documents and ingestion (upload, parse, chunk, embed)
+* **Phase 4:** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
+* **Phase 5:** Hybrid retrieval (full-text + vector search, rerank)
+* **Phase 6:** Answers and citations (LLM, refusals, chat UI)
+* **Phase 7:** Audit and evaluation
+* **Phase 8:** Incremental sync and one real connector
+* **Phase 9:** Hardening and launch
+
+Loose ends and ideas: [docs/BACKLOG.md](docs/BACKLOG.md).
 
 ## Evaluation
 Not measured yet. Targets are in the blueprint; results will be published after Phase 7.
@@ -114,7 +117,8 @@ Not measured yet. Targets are in the blueprint; results will be published after 
 * Admin-initiated password reset is not built (needs a Change Request, see ADR 023).
 * No documents can be ingested or searched yet.
 * Document permissions (ACL) are not implemented yet; only account-level roles exist.
-* Not yet tested by a human end to end; automated tests only.
+* Screen-reader and full keyboard-only accessibility checks of the signed-in pages have not been done.
+* Demo accounts have easy-to-guess passwords on purpose. Use them on a developer machine only.
 * Legal pages are drafts and do not constitute legal advice.
 
 ## License / Contact
