@@ -13,7 +13,7 @@
 
 * **Auth backend (Phase 2B, implemented, awaiting owner review):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. API only: there is **no login screen yet** (Phase 2C). Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
 
-* **Login UI, layer 2C-1 (implemented, awaiting owner review):** `/login` page with validation, shake, Caps Lock hint, Remember me and all error states, plus a minimal `/home` that shows the signed-in user. Forgot/reset pages, profile and tour are **planned** (2C-2). Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
+* **Login UI, layers 2C-1 and 2C-2 (implemented, awaiting owner review):** `/login` (validation, shake, Caps Lock hint, Remember me, all error states), `/forgot-password`, `/reset-password`, `/home` (your details, first-2-minutes guide, welcome tour), `/profile` (change password, sign out of all devices). Search and documents are **not built yet**; guide steps for them say "Coming in Phase N". Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
 
 ## Architecture Overview
 The system follows a modular monolith architecture, separating the Next.js frontend from the FastAPI Python backend. Data is persisted in PostgreSQL with pgvector for semantic search, cached in Redis. 
@@ -40,7 +40,7 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000). Sign-in page: [http://localhost:3000/login](http://localhost:3000/login) (needs the backend below, with demo users seeded). The API address defaults to `http://localhost:8000`; override with `NEXT_PUBLIC_API_URL` (a public URL, not a secret).
 
-Frontend checks (from `frontend/`): `npm test` (5 unit tests, needs Node 22+), `npm run typecheck`, `npm run build`. Stop the dev server with Ctrl+C.
+Frontend checks (from `frontend/`): `npm test` (10 unit tests, needs Node 22+), `npm run typecheck`, `npm run build`. Stop the dev server with Ctrl+C.
 
 ### Backend (Docker Compose)
 Ensure you have Docker Desktop running.
@@ -97,7 +97,7 @@ Tests use their own database (`<POSTGRES_DB>_test`) and need the services above 
 ```
 
 ## Roadmap
-* **Phase 2C (in progress):** 2C-1 login (built), 2C-2 forgot/reset, profile, tour (next), 2C-3 admin users page (optional)
+* **Phase 2C (in progress):** 2C-1 login and 2C-2 forgot/reset, profile, tour (built, awaiting review); 2C-3 admin users page (optional)
 * **Phase 3:** Document Ingestion & Storage
 * **Phase 4:** Search & Retrieval
 * **Phase 5:** LLM Generation (RAG)
@@ -110,7 +110,7 @@ Not measured yet. Targets are in the blueprint; results will be published after 
 *Note: Lighthouse numbers for the frontend were measured locally by the owner on 9 Oct 2026 as Performance 99, Accessibility 96.*
 
 ## Known Limitations
-* The login page works, but "Forgot password?" still shows the 404 page until layer 2C-2. Route protection is client-side only; the API enforces access.
+* Route protection in the UI is client-side only; the API enforces access. The welcome tour is remembered per browser (it shows again on a new browser). The frontend must run on port 3000 (the backend allows only that address).
 * Admin-initiated password reset is not built (needs a Change Request, see ADR 023).
 * No documents can be ingested or searched yet.
 * Document permissions (ACL) are not implemented yet; only account-level roles exist.

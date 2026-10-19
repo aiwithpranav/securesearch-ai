@@ -18,15 +18,18 @@
 - [ ] Owner decisions on the ADR 023 "OWNER CHECK" items (items 1 to 4)
 
 ## 2C Login UI
-### 2C-1 Login and session (built, waiting for owner review)
+### 2C-1 Login and session (built, pushed)
 - [x] API client, in-memory session store, single-flight refresh
 - [x] `/login` with all states from blueprint 19.2
 - [x] Minimal `/home` and client-side guards
 - [x] Unit tests (5), typecheck, build, browser walkthrough
+- [ ] Owner manual checks (Caps Lock, Save-password prompt, Remember me)
+### 2C-2 Forgot/reset, profile, tour (built, waiting for owner review)
+- [x] Forgot and reset pages
+- [x] Profile: change password, sign out of all devices
+- [x] Shared header, welcome tour, first-2-minutes guide, login notices
+- [x] Unit tests (10 total), typecheck, build, browser walkthrough
 - [ ] Owner manual checks and approval
-### 2C-2 (not started)
-- [ ] Forgot and reset pages, profile (change password, sign out everywhere)
-- [ ] Expanded home, welcome tour, first-2-minutes guide
 ### 2C-3 (optional, not started)
 - [ ] Admin users page
 

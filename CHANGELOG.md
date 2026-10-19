@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Phase 2C-2: forgot/reset password pages, profile (change password, sign out of all devices), shared header, welcome tour (3 steps, skippable, remembered per browser), role-based first-2-minutes guide, login notices. 10 unit tests.
+- Demo users now use team member names (emails unchanged).
+
+### Added (2C-1)
 - Phase 2C-1: Login UI (branch `feat/login-ui`, awaiting owner review)
 - `/login` page (validation, shake, Caps Lock hint, Remember me, spinner, lockout and network messages), minimal `/home`, client-side guards.
 - Frontend API client with 15 s timeout, in-memory session store with single-flight refresh.

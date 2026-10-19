@@ -4,26 +4,10 @@ import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
-import { login } from "@/lib/session";
-import { MESSAGES, validateEmail, validatePassword } from "@/lib/validation";
+import { login, takeNotice } from "@/lib/session";
+import { MESSAGES, NOTICES, validateEmail, validatePassword } from "@/lib/validation";
 import { useSession } from "../_auth/AuthProvider";
-
-function ErrorIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 20 20" className="mt-0.5 h-4 w-4 shrink-0 fill-current">
-      <path d="M10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm-.9 4.5h1.8v5.2H9.1V6Zm0 6.7h1.8v1.8H9.1v-1.8Z" />
-    </svg>
-  );
-}
-
-function FieldError({ id, message }: { id: string; message: string }) {
-  return (
-    <p id={id} className="mt-2 flex items-start gap-2 text-sm text-bad">
-      <ErrorIcon />
-      <span>{message}</span>
-    </p>
-  );
-}
+import { ErrorIcon, FieldError, NoticeBox } from "../_auth/ui";
 
 const input = "w-full rounded-lg border bg-surface2 px-4 py-3 text-text placeholder:text-muted/60";
 
@@ -43,8 +27,20 @@ export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [shaking, setShaking] = useState(false);
 
+  const [notice, setNotice] = useState<string | null>(null);
+
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const noticeRead = useRef(false);
+
+  // One-time message from another flow: from memory (after change password / sign out
+  // everywhere) or from the address (?notice=..., used by the reset-password page).
+  useEffect(() => {
+    if (noticeRead.current) return; // development runs effects twice; read only once
+    noticeRead.current = true;
+    const key = takeNotice() ?? new URLSearchParams(window.location.search).get("notice");
+    if (key && NOTICES[key]) setNotice(NOTICES[key]);
+  }, []);
 
   // Already signed in (or just signed in): go to the home page.
   useEffect(() => {
@@ -112,6 +108,8 @@ export function LoginForm() {
 
       {/* Screen readers hear the problem; sighted users see it inline. */}
       <div role="alert" className="sr-only">{errorSummary ?? ""}</div>
+
+      {notice && !formError && <div className="mt-6"><NoticeBox message={notice} /></div>}
 
       {formError && (
         <div className="mt-6 flex items-start gap-2 rounded-lg border border-bad/60 bg-bad/10 p-3 text-sm text-bad">

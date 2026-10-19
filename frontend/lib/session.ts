@@ -86,6 +86,32 @@ export async function logout(): Promise<void> {
   clearSession();
 }
 
+// A one-time message for the login page ("Your password was changed...").
+// It lives here, not in the URL, so it survives the automatic redirect to /login.
+let pendingNotice: string | null = null;
+export function takeNotice(): string | null {
+  const n = pendingNotice;
+  pendingNotice = null;
+  return n;
+}
+
+/** Change password. The server ends ALL sessions, so we forget ours too. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await authedApi<void>("/auth/change-password", {
+    method: "POST",
+    body: { current_password: currentPassword, new_password: newPassword },
+  });
+  pendingNotice = "password-changed";
+  clearSession();
+}
+
+/** Sign out on every device (and this one). */
+export async function logoutAll(): Promise<void> {
+  await authedApi<void>("/auth/logout-all", { method: "POST" });
+  pendingNotice = "signed-out-everywhere";
+  clearSession();
+}
+
 /** Call a protected API endpoint. Refreshes the token first if it is about to expire,
  *  and retries once if the server says 401. */
 export async function authedApi<T>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
