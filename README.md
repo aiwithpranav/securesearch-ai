@@ -67,7 +67,7 @@ docker compose exec backend python -m app.scripts.seed_users
 - API docs (try login there): [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 - Mailpit inbox (reset and invite emails): [http://localhost:8025](http://localhost:8025)
 
-Demo users (synthetic): `swara@demo`, `pranav@demo`, `dhanashree@demo`, `akshay@demo`, `sanjana@demo`, `shivam@demo`, `prashant@demo` (admin), `karunesh@demo`. `former@demo` is deactivated on purpose. All share the password stored as `SEED_USER_PASSWORD` in your local `.env`.
+Demo users (synthetic): `swara@demo`, `pranav@demo`, `dhanashree@demo`, `akshay@demo`, `sanjana@demo`, `shivam@demo`, `prashant@demo` (admin), `karunesh@demo`. `former@demo` is deactivated on purpose. A fresh seed gives every demo user the shared `SEED_USER_PASSWORD` from your local `.env`. For name-based passwords, keep a local file `demo-credentials.local.txt` (git-ignored, lines like `email: password`) and run `Get-Content demo-credentials.local.txt | docker compose exec -T backend python -m app.scripts.set_user_passwords` from the repository root. These passwords are easy to guess on purpose: use them on a developer machine only, never on a real server.
 
 Stop: `docker compose down` (data kept). `docker compose down -v` also deletes the database.
 

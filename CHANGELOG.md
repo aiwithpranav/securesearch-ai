@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- `app/scripts/set_user_passwords.py`: sets individual demo passwords from a git-ignored local file (stdin, `email: password` lines). 8 parser tests (backend now 65 tests).
+- Demo user emails are name-based (for example `swara@demo`).
+
+### Added (2C-2)
 - Phase 2C-2: forgot/reset password pages, profile (change password, sign out of all devices), shared header, welcome tour (3 steps, skippable, remembered per browser), role-based first-2-minutes guide, login notices. 10 unit tests.
 - Demo users now use team member names (emails unchanged).
 
