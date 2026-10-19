@@ -97,7 +97,7 @@ Tests use their own database (`<POSTGRES_DB>_test`) and need the services above 
 ```
 
 ## Roadmap
-* **Phase 2C (in progress):** 2C-1 login and 2C-2 forgot/reset, profile, tour (built, awaiting review); 2C-3 admin users page (optional)
+* **Phase 2C (owner approved 2C-1 and 2C-2):** login, forgot/reset, profile, tour. The admin users page (2C-3) moves to Phase 4 (users, groups and access rules together).
 * **Phase 3:** Document Ingestion & Storage
 * **Phase 4:** Search & Retrieval
 * **Phase 5:** LLM Generation (RAG)

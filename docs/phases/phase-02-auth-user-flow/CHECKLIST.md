@@ -24,14 +24,18 @@
 - [x] Minimal `/home` and client-side guards
 - [x] Unit tests (5), typecheck, build, browser walkthrough
 - [ ] Owner manual checks (Caps Lock, Save-password prompt, Remember me)
-### 2C-2 Forgot/reset, profile, tour (built, waiting for owner review)
+### 2C-2 Forgot/reset, profile, tour (built, owner approved 2026-10-19)
 - [x] Forgot and reset pages
 - [x] Profile: change password, sign out of all devices
 - [x] Shared header, welcome tour, first-2-minutes guide, login notices
 - [x] Unit tests (10 total), typecheck, build, browser walkthrough
-- [ ] Owner manual checks and approval
-### 2C-3 (optional, not started)
-- [ ] Admin users page
+- [x] Owner approval
+### 2C-3 Admin users page: moved to Phase 4 (owner decision, 2026-10-19)
+- [x] Not part of Phase 2 any more; added to the Phase 4 brief
 
 ## Phase 2 close
-- [ ] Owner approval of all of Phase 2, then PR, merge, tag `v0.2`
+- [ ] PR for `feat/login-ui` merged (owner, on GitHub)
+- [ ] Final checks on `main`: 57 backend tests, 10 frontend tests, typecheck, build, live login
+- [ ] Owner answers on ADR 023 items 1 to 4 recorded
+- [ ] Stale Phase 1 `STATUS.md` fixed, Phase 2 STATUS closed, CHANGELOG `[v0.2]` section
+- [ ] Tag `v0.2` on the merge commit, pushed, verified
