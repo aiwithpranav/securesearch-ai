@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Phase 2B: Authentication backend (branch `feat/auth-backend`, awaiting owner review)
+- Tables and migration `0001`: departments, roles, users, user_roles, auth_tokens.
+- Login (Argon2id), lockout, IP rate limit, refresh-token rotation with reuse detection, logout, logout-all.
+- Forgot, reset and change password; reset and invite emails through Mailpit.
+- `/auth/me`; admin endpoints for users, roles and departments (role `system_admin`, checked from the database).
+- Demo seed script (`python -m app.scripts.seed_users`) and `scripts/setup_env.ps1`.
+- 57 backend tests. ADR 023. `greenlet` dependency (ADR 022).
+### Fixed
+- Alembic could not run (missing logging config and `prepend_sys_path`); database session no longer falls back to a missing sqlite driver.
+
+### Added (earlier)
 - Phase 2A: Backend Foundation
 - Docker Compose setup with Postgres (pgvector 0.8.0), Redis (7.4.2), and Mailpit (v1.22.0).
 - FastAPI backend modular monolith skeleton.
