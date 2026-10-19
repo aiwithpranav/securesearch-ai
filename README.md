@@ -67,7 +67,7 @@ docker compose exec backend python -m app.scripts.seed_users
 - API docs (try login there): [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 - Mailpit inbox (reset and invite emails): [http://localhost:8025](http://localhost:8025)
 
-Demo users (synthetic): `aisha@demo`, `rahul@demo`, `priya@demo`, `arjun@demo`, `meera@demo`, `vikram@demo`, `dev@demo` (admin), `nina@demo`. `gone@demo` is deactivated on purpose. All share the password stored as `SEED_USER_PASSWORD` in your local `.env`.
+Demo users (synthetic): `swara@demo`, `pranav@demo`, `dhanashree@demo`, `akshay@demo`, `sanjana@demo`, `shivam@demo`, `prashant@demo` (admin), `karunesh@demo`. `former@demo` is deactivated on purpose. All share the password stored as `SEED_USER_PASSWORD` in your local `.env`.
 
 Stop: `docker compose down` (data kept). `docker compose down -v` also deletes the database.
 

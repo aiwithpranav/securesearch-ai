@@ -21,8 +21,8 @@ describe("validateEmail", () => {
   });
   it("accepts normal and demo emails", () => {
     expect(validateEmail("name@company.com")).toBeNull();
-    expect(validateEmail("aisha@demo")).toBeNull();
-    expect(validateEmail("  aisha@demo  ")).toBeNull();
+    expect(validateEmail("swara@demo")).toBeNull();
+    expect(validateEmail("  swara@demo  ")).toBeNull();
   });
 });
 

@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import StringConstraints
 
 # Simple email shape check (something@something). We avoid strict validators on
-# purpose: the demo accounts use "aisha@demo", which has no ".com" part.
+# purpose: the demo accounts use "swara@demo", which has no ".com" part.
 Email = Annotated[
     str,
     StringConstraints(

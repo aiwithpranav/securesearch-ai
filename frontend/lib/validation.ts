@@ -19,7 +19,7 @@ export const MESSAGES = {
 export const MIN_PASSWORD_LENGTH = 12; // same rule as the server (ADR 023)
 export const MAX_PASSWORD_LENGTH = 128;
 
-// "something@something" is enough. Demo accounts look like aisha@demo (no ".com").
+// "something@something" is enough. Demo accounts look like swara@demo (no ".com").
 const EMAIL_SHAPE = /^[^@\s]+@[^@\s]+$/;
 
 export function validateEmail(value: string): string | null {
