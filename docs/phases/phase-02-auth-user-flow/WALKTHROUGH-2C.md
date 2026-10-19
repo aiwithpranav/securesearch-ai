@@ -130,7 +130,7 @@ Not verified by me (owner to check): Caps Lock hint, the browser's "Save passwor
 
 ### 5. How to run it
 Same as 2C-1: backend running and seeded, then `npm run dev` in `frontend/`, open http://localhost:3000. Keep the frontend on port 3000: the backend only accepts that exact address.
-To get a reset email: open http://localhost:3000/forgot-password, enter a demo email such as `aisha@demo`, then open Mailpit at http://localhost:8025 and click the link in the email.
+To get a reset email: open http://localhost:3000/forgot-password, enter a demo email such as `swara@demo`, then open Mailpit at http://localhost:8025 and click the link in the email.
 
 ### 6. How to test it
 ```powershell

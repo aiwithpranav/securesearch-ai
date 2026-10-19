@@ -14,7 +14,7 @@ ADR-018 fixes the approach (JWT access + rotating refresh, Argon2id, no roles in
 - **Lockout:** 5 wrong passwords per email (also for unknown emails) lock that email for 15 minutes (Redis). Plus 30 login attempts per minute per IP. Known trade-off: someone can lock a victim's login for 15 minutes; the real user can still use "Forgot password", which clears the lock.
 - **Reset and invite links:** `RESET` tokens, single use, 30 min (reset) / 72 h (invite). Link format `{FRONTEND_ORIGIN}/reset-password#token=...` (the part after `#` is never sent to servers or logs). A newer link cancels older ones.
 - **Password rule:** 12 to 128 characters. **OWNER CHECK:** the blueprint gives no number; 12 is a conservative choice.
-- **Email check:** shape check only (`x@y`), because demo users are `aisha@demo` (no `.com`).
+- **Email check:** shape check only (`x@y`), because demo users are `swara@demo` (no `.com`).
 - **Admin = role `system_admin`** (Dev). Meera (`security_admin`) and Nina (`auditor`) cannot manage users.
 - **CSRF:** SameSite=Lax cookie plus an `Origin` check on the cookie endpoints (`/auth/refresh`, `/auth/logout`).
 
