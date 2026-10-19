@@ -1,7 +1,12 @@
 # ADR 023: Authentication implementation details (Phase 2B)
 
 ## Status
-Accepted for implementation. Items marked **OWNER CHECK** need the owner's confirmation at Phase 2 sign-off.
+**Accepted.** The owner confirmed all items marked OWNER CHECK on 2026-10-19:
+- Extra columns (item 1): accepted.
+- `POST /users/{id}/roles` replaces the whole list (item 2): accepted.
+- Admin-initiated password reset (item 3): **not built now**; moved to `docs/BACKLOG.md` (needs a Change Request if wanted later).
+- Persona department mapping (item 4): accepted. The owner also renamed the demo users to team members with name-based emails (display data only).
+- Minimum password length 12: accepted.
 
 ## Context
 ADR-018 fixes the approach (JWT access + rotating refresh, Argon2id, no roles in the token). It does not fix the small details a working implementation needs. This ADR records them so they are not hidden in code. Nothing here changes a frozen rule.

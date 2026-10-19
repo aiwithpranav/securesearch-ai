@@ -6,23 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+Nothing yet.
+
+## [v0.2] - 2026-10-19
+Phase 2 (authentication and user flow) signed off by the owner. Tag created after the Phase 2 close PR.
 ### Added
 - `app/scripts/set_user_passwords.py`: sets individual demo passwords from a git-ignored local file (stdin, `email: password` lines). 8 parser tests (backend now 65 tests).
 - Demo user emails are name-based (for example `swara@demo`).
 
 ### Added (2C-2)
 - Phase 2C-2: forgot/reset password pages, profile (change password, sign out of all devices), shared header, welcome tour (3 steps, skippable, remembered per browser), role-based first-2-minutes guide, login notices. 10 unit tests.
-- Demo users now use team member names (emails unchanged).
+- Demo users now use team member names.
+- `docs/BACKLOG.md`, updated architecture overview, Phase 1 status corrected.
+### Changed
+- The admin users page (planned as 2C-3) moves to Phase 4.
 
 ### Added (2C-1)
-- Phase 2C-1: Login UI (branch `feat/login-ui`, awaiting owner review)
+- Phase 2C-1: Login UI
 - `/login` page (validation, shake, Caps Lock hint, Remember me, spinner, lockout and network messages), minimal `/home`, client-side guards.
 - Frontend API client with 15 s timeout, in-memory session store with single-flight refresh.
 - Vitest (dev-only, `5.0.3`) with 5 unit tests.
 - `docs/CHALLENGES.md`: running log of build problems (owner rule).
 
 ### Added (2B)
-- Phase 2B: Authentication backend (branch `feat/auth-backend`, awaiting owner review)
+- Phase 2B: Authentication backend
 - Tables and migration `0001`: departments, roles, users, user_roles, auth_tokens.
 - Login (Argon2id), lockout, IP rate limit, refresh-token rotation with reuse detection, logout, logout-all.
 - Forgot, reset and change password; reset and invite emails through Mailpit.
