@@ -43,7 +43,7 @@ USERS = [
     ("meera@demo", "Sanjana Aid", "Security", 3, "IN", "full_time", ["employee", "security_admin"], True),
     ("vikram@demo", "Shivam Suryawanshi", "Company-wide", 4, "IN", "full_time", ["employee", "executive"], True),
     ("dev@demo", "Prashant Ghewari", "Engineering", 2, "IN", "full_time", ["employee", "system_admin"], True),
-    ("nina@demo", "Neha Kulkarni", "Legal", 2, "IN", "full_time", ["employee", "auditor"], True),
+    ("nina@demo", "Karunesh Potdar", "Legal", 2, "IN", "full_time", ["employee", "auditor"], True),
     ("gone@demo", "Former Employee", "Sales", 0, "IN", "contractor", ["employee"], False),
 ]
 
