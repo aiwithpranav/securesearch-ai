@@ -36,14 +36,14 @@ ROLES = {
 # Blueprint persona departments Executive / IT / Compliance are not in the 8-department list,
 # so they map to Company-wide / Engineering / Legal (see phase-02 WALKTHROUGH).
 USERS = [
-    ("aisha@demo", "Aisha Khan", "Engineering", 1, "IN", "full_time", ["employee", "engineer"], True),
-    ("rahul@demo", "Rahul Mehta", "Finance", 2, "IN", "full_time", ["employee", "finance_analyst"], True),
-    ("priya@demo", "Priya Nair", "HR", 3, "IN", "full_time", ["employee", "hr_manager"], True),
-    ("arjun@demo", "Arjun Rao", "Sales", 1, "US", "full_time", ["employee", "sales_executive"], True),
-    ("meera@demo", "Meera Iyer", "Security", 3, "IN", "full_time", ["employee", "security_admin"], True),
-    ("vikram@demo", "Vikram Sethi", "Company-wide", 4, "IN", "full_time", ["employee", "executive"], True),
-    ("dev@demo", "Dev Patel", "Engineering", 2, "IN", "full_time", ["employee", "system_admin"], True),
-    ("nina@demo", "Nina Shah", "Legal", 2, "IN", "full_time", ["employee", "auditor"], True),
+    ("aisha@demo", "Swaranjali Jadhav", "Engineering", 1, "IN", "full_time", ["employee", "engineer"], True),
+    ("rahul@demo", "Pranav Mane", "Finance", 2, "IN", "full_time", ["employee", "finance_analyst"], True),
+    ("priya@demo", "Dhanashree Patil", "HR", 3, "IN", "full_time", ["employee", "hr_manager"], True),
+    ("arjun@demo", "Akshay Khade", "Sales", 1, "US", "full_time", ["employee", "sales_executive"], True),
+    ("meera@demo", "Sanjana Aid", "Security", 3, "IN", "full_time", ["employee", "security_admin"], True),
+    ("vikram@demo", "Shivam Suryawanshi", "Company-wide", 4, "IN", "full_time", ["employee", "executive"], True),
+    ("dev@demo", "Prashant Ghewari", "Engineering", 2, "IN", "full_time", ["employee", "system_admin"], True),
+    ("nina@demo", "Karunesh Potdar", "Legal", 2, "IN", "full_time", ["employee", "auditor"], True),
     ("gone@demo", "Former Employee", "Sales", 0, "IN", "contractor", ["employee"], False),
 ]
 
