@@ -12,7 +12,7 @@
 - [x] 17 new tests (82 backend tests in total), all pass
 - [x] Owner approval (2026-10-20)
 
-## 3B Pipeline and API (built, waiting for owner review)
+## 3B Pipeline and API (built, owner approved, merged)
 - [x] Migration `0002` and models (`alembic check` clean); `vector` extension enabled
 - [x] Upload validation (type, magic bytes, size, zip bomb, file names), storage, parse (PDF, DOCX, TXT, MD), chunk, embed, publish in one transaction
 - [x] Failed job leaves previous data intact; retry is safe (no duplicate chunks)
@@ -20,10 +20,17 @@
 - [x] 12 synthetic documents (canaries, one injection test) and broken-file fixtures
 - [x] Worker kill test on the real worker: all jobs finished once, no duplicates
 - [x] 86 new tests (168 backend tests in total), all pass
-- [ ] Owner manual checks and approval
+- [x] Owner approval (2026-10-20)
 
-## 3C Admin UI (not started)
-- [ ] Upload form, document list with status, re-index, failed alert
+## 3C Admin UI (built, waiting for owner review)
+- [x] Documents list with filters, paging, auto-refresh while processing, loading, empty and error states
+- [x] Upload page with browser checks and plain-English server errors, duplicate link
+- [x] Document page: edit, Re-index, Delete with confirm, processing history, versions
+- [x] Notification bell for administrators (failed alerts, mark as read)
+- [x] Non-admins: no menu entry, no bell, "no access" page, no data requested
+- [x] Jobs endpoint filter by document; 10 new frontend tests (20), 1 new backend test (169)
+- [x] Browser walkthrough of every flow; phone-width header fix
+- [ ] Owner manual checks and approval
 
 ## Phase 3 close
 - [ ] Owner approval, PR merged, tag `v0.3`

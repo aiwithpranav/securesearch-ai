@@ -1,6 +1,6 @@
 # Phase 3 Walkthrough
 
-Grows with each layer. Layer status: **3A built and merged**, **3B built (waiting for owner review)**, 3C not started.
+Grows with each layer. Layer status: **3A and 3B built and merged**, **3C built (waiting for owner review)**.
 
 ## Layer 3A: storage, worker and local embeddings
 
@@ -147,3 +147,82 @@ Not verified: very large real PDFs (hundreds of pages) for speed; many uploads a
 - Original files stay in storage after a soft delete until a cleanup job exists (backlog).
 - Admin can see metadata and counts only, by design (admin is not reader).
 - See `docs/CHALLENGES.md` entries 41 to 47.
+
+## Layer 3C: admin documents screens
+
+### 1. What we built
+Real screens for the document features from 3B, for administrators only:
+- **Documents list** (`/admin/documents`): a table with title, department, type, sensitivity, status, number of chunks and last update. Filters (status, department), pages of 20, loading placeholders, an empty state ("Upload your first document") and an error state with Retry and a support reference.
+- **Upload page** (`/admin/documents/upload`): choose or drop a file, set title, department, type, sensitivity and optional countries. Wrong files are explained at once (type, empty, over 50 MB); the server's answers (not supported, already uploaded, too many uploads) are shown in plain English.
+- **Document page** (`/admin/documents/<id>`): details and edit, status, **Re-index**, **Delete** (with a confirm step), processing history and versions.
+- **Notification bell** in the header (administrators only): number of unread alerts, "A document failed to process", the reason, a link to the document and "Mark as read".
+- A "You don't have access to this page" screen for everyone else, and no Documents link or bell for them.
+No screen shows document text, because the API never sends it (admin is not reader).
+
+### 2. How it works, step by step
+1. The header shows **Documents** and the bell only if your roles (from `/auth/me`) include `system_admin`. This is only for display: the API checks the role again on every request.
+2. The list calls `GET /documents`. If any document or job is still `QUEUED` or `PROCESSING`, the page quietly refreshes every 3 seconds, and stops when everything has finished.
+3. Upload sends a `multipart/form-data` request (`FormData`). The browser checks the file first; the server checks again and is the real gate. On success you land on the document page and watch the status change from Queued to Processing to Ready by itself.
+4. The document page loads the document, its versions and its jobs (`GET /ingestion/jobs?document_id=...`, a small filter added in this layer). Editing sends `PATCH`; Re-index sends `POST .../reindex` (disabled while a job is unfinished); Delete is a soft delete and returns you to the list.
+5. The bell asks for your notifications every 30 seconds. A failed job creates one notification per administrator (3B). Opening the bell lists them; "Mark as read" updates it.
+6. Status is never shown by colour alone: every badge has an icon and a word.
+
+Terms: **polling** = asking the server again every few seconds; **FormData** = the browser's way to send a file in a form.
+
+### 3. Important files
+| File | Job |
+|---|---|
+| `frontend/lib/documents.ts` | Types, upload checks, error messages, plain-English failure reasons, all API calls |
+| `frontend/lib/usePolling.ts` | "Run this every N seconds while needed", pauses in a hidden tab |
+| `frontend/lib/api.ts` | Now also sends files, reads the server's error code, longer time limit for uploads |
+| `frontend/app/(portal)/(app)/admin/layout.tsx` | "No access" for non-admins |
+| `frontend/app/(portal)/(app)/admin/_components/ui.tsx` | Status and sensitivity badges, skeleton, empty, error and no-access pieces |
+| `frontend/app/(portal)/(app)/admin/documents/DocumentsView.tsx` | The list |
+| `frontend/app/(portal)/(app)/admin/documents/upload/UploadForm.tsx` | The upload page |
+| `frontend/app/(portal)/(app)/admin/documents/[id]/DocumentDetail.tsx` | The document page |
+| `frontend/app/(portal)/(app)/NotificationBell.tsx`, `PortalHeader.tsx` | Bell and the role-based menu |
+| `backend/app/api/v1/documents.py` | Jobs endpoint got an optional `document_id` filter |
+
+### 4. Tools: why we chose them
+- We used **plain React and Tailwind** again; no new library. We did not add a table or form library because the screens are small and our own components are easy to read and make accessible.
+- We used **polling** (3 s while busy, 30 s for the bell). We did not choose WebSockets or SSE: the blueprint reserves SSE for the chat, and polling is simpler and easy to stop.
+- We used a **separate upload page** instead of a pop-up, because a page is easier to use with a keyboard and screen reader.
+- We used **native `<select>`, `<table>` with captions and `scope` headers** so keyboard and screen readers work without extra code.
+- Tests: **Vitest** for the pure logic (file checks, countries, sizes, busy detection, error messages). The screens themselves were checked by hand in the browser.
+
+### 5. How to run it
+Stack running as before, and the frontend on port 3000:
+```powershell
+cd D:\AI\RAG\Secure_Search_AI\frontend
+npm run dev
+```
+Open http://localhost:3000/login, sign in as `prashant@demo` (the administrator), then click **Documents** in the header. Demo files to upload are in `sample-data/synthetic/`. Stop the dev server with Ctrl+C.
+
+### 6. How to test it
+```powershell
+cd D:\AI\RAG\Secure_Search_AI\frontend
+npm test            # 20 unit tests
+npm run typecheck
+npm run build
+docker compose exec backend pytest -q    # 169 backend tests
+```
+
+### 7. Actual results (checked by me)
+In the browser pane against the live backend, with two temporary users (an administrator and a normal user) that I removed afterwards, together with the test documents and notifications:
+- Administrator: menu shows Home, Documents, Profile and the bell. The list showed all 13 documents, all Ready, with chunk counts and no document text.
+- Upload page: empty submit shows file and department errors; a `.exe`, a 51 MB file and an empty file are refused in the browser with the right message; a fake `.pdf` is refused by the server with its message; a valid text file uploads and the page moves to Processing and then Ready by itself with 1 chunk.
+- Duplicate upload: "A document with identical content already exists" with a link to the existing document.
+- Document page: edit (title, sensitivity, countries) saved; Re-index disabled while processing and the history grew to two jobs; Delete asked for confirmation and returned to the list.
+- A broken PDF showed Failed with the plain reason; within 30 seconds the bell showed "1 unread" with the alert and a link; Mark as read cleared it; Escape closed the panel.
+- Normal user: no Documents link, no bell, and the page says "You don't have access to this page"; no data was requested.
+- Phone width: the header overflowed at 360 px, which I found by measuring and fixed (the menu now wraps); the table scrolls inside its own box; no page-wide sideways scroll.
+- `npm test` 20 passed (10 new), `tsc` clean, `npm run build` OK, backend 169 tests pass (1 new).
+
+Not verified by me: the system file dialog and real drag-and-drop (I attached files with a script), keyboard-only use, screen readers, uploading a real 50 MB file, and the look in other browsers.
+
+### 8. Limitations and open issues
+- Upload shows a spinner only (no progress bar). A new alert can take up to 30 seconds to appear in the bell.
+- Admin gating in the page is client-side; the API is the real protection.
+- Version history shows version 1 only until Phase 8 (new versions).
+- No search, no answers, no reading of documents yet; documents are invisible to non-admins until Phase 4 adds access rules.
+- See `docs/CHALLENGES.md` entries 48 to 52.

@@ -315,8 +315,14 @@ async def reindex(db: AsyncSession, document_id: uuid.UUID, actor: User, request
 
 # ------------------------------------------------------------------ jobs
 
-async def list_jobs(db: AsyncSession, limit: int, offset: int, status: str | None) -> tuple[list[IngestionJob], int]:
-    where = [IngestionJob.status == status] if status else []
+async def list_jobs(
+    db: AsyncSession, limit: int, offset: int, status: str | None, document_id: uuid.UUID | None = None
+) -> tuple[list[IngestionJob], int]:
+    where = []
+    if status:
+        where.append(IngestionJob.status == status)
+    if document_id:
+        where.append(IngestionJob.document_id == document_id)
     total = await db.scalar(select(func.count()).select_from(IngestionJob).where(*where)) or 0
     rows = await db.scalars(
         select(IngestionJob).where(*where).order_by(IngestionJob.created_at.desc()).limit(limit).offset(offset)

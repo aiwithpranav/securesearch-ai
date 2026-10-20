@@ -18,6 +18,9 @@ The blueprint fixes the big picture (section 8.5: validate, store, parse, chunk,
 - **Worker recovery:** Redis keeps a job "unacknowledged" after the whole worker is killed. The visibility timeout is 900 s (longer than the 660 s job limit) and the worker re-sends every unfinished job when it starts. Both are safe because jobs are idempotent.
 - **Soft delete:** `deleted_at` is set and the chunks stop being active. The stored original stays until a cleanup job exists (backlog).
 
+## Addition in 3C
+`GET /ingestion/jobs` accepts an optional `document_id` filter so the document page can show its processing history. It is an optional query parameter on an existing endpoint (additive), so no Change Request was needed.
+
 ## Consequences
 - No endpoint, field or log can reveal document text in Phase 3 (admin is not reader). Tests scan the OpenAPI schema and the logs for this.
 - GIN (full-text) and HNSW (vector) indexes are not created yet; they belong to Phase 5. The `tsv` column already exists and is filled by Postgres.
