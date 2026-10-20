@@ -19,10 +19,16 @@
 - [x] Seed groups and rules for the 12 demo documents; persona matrix matches exactly, in tests and live (117 answers)
 - [x] Negative tests: bad principals, past expiry, duplicates, MANAGE holder limits, DENY MANAGE, no document text
 - [x] 22 new tests (283 backend tests in total)
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #11)
 
-## 4C UI (not started)
-- [ ] Users page, Groups page, Access section on the document page, "who can read" preview
+## 4C UI (built, waiting for owner review)
+- [x] Users page: invite, edit, roles, deactivate and reactivate (not for yourself)
+- [x] Groups page: create, members add and remove with confirmation
+- [x] Access section: rules list, add, edit, remove, Deny confirmation, MANAGE note, expiry, history, who-can-read preview
+- [x] Admin menu links (Users, Groups)
+- [x] Typecheck, 28 frontend tests, production build
+- [x] Real-browser checks with temporary users (removed afterwards); 360 px layout measured
+- [ ] Owner manual checks and approval
 
 ## Phase 4 close
 - [ ] Owner approval, PRs merged, tag `v0.4`

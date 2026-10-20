@@ -26,6 +26,7 @@ import {
 import { usePolling } from "@/lib/usePolling";
 import { FieldError, FormErrorBox } from "../../../../_auth/ui";
 import { ErrorState, SensitivityBadge, selectClass, StatusBadge, TableSkeleton } from "../../_components/ui";
+import { AccessSection } from "./AccessSection";
 
 const card = "rounded-2xl border border-line bg-surface p-6";
 const inputClass = "w-full rounded-lg border border-line bg-surface2 px-4 py-3 text-text";
@@ -250,10 +251,12 @@ export function DocumentDetail() {
         <p className="mt-3 text-sm text-muted">Re-index reads the stored file again and rebuilds the chunks. The current chunks stay in use until the new ones are complete.</p>
       </section>
 
+      <AccessSection documentId={id} />
+
       <section className={`${card} mt-8`} aria-labelledby="hist-title">
         <h2 id="hist-title" className="text-xl font-semibold">Processing history</h2>
         {jobs.length === 0 ? <p className="mt-4 text-muted">No jobs yet.</p> : (
-          <div className="mt-4 overflow-x-auto">
+          <div className="relative mt-4 overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
               <caption className="sr-only">Processing jobs, newest first</caption>
               <thead className="text-muted"><tr>

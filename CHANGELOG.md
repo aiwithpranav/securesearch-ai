@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 4C, branch `feat/access-4c`, awaiting owner review)
+- Admin Users page (invite, edit, roles, deactivate and reactivate), Groups page (create, members), and an Access section on the document page: rules add, edit, remove, Deny confirmation, expiry, rule history and the "who can read this" preview with plain-English reasons. Menu links Users and Groups.
+- 28 frontend tests. Fixed sideways scrolling at 360 px caused by screen-reader text outside scroll boxes (also in the Phase 3 history table). Challenges 61 to 64.
+
 ### Added (Phase 4B, branch `feat/access-4b`, awaiting owner review)
 - Groups API (admin only), access rule API (list, add, edit, delete) enforcing MANAGE, rule history saved in the same transaction, access preview with reason codes (CR-003).
 - `seed_access` script: 6 demo groups and rules for the 12 demo documents following the personas; the sales executive gets clearance 2.
