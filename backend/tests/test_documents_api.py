@@ -32,7 +32,10 @@ def test_every_document_route_needs_sign_in_and_the_admin_role(api, make_user):
     for email in ("aisha@demo", "nina@demo"):
         token, _ = api.signed_in(email)
         for method, path in routes:
-            assert api.request(method, path, token=token, json={} if method == "PATCH" else None).status_code == 403, (email, method, path)
+            # Editing metadata needs MANAGE on the document (Phase 4B): without it the answer is the same
+            # "Document not found" as for a missing document. Every other route needs the admin role.
+            expected = 404 if method == "PATCH" else 403
+            assert api.request(method, path, token=token, json={} if method == "PATCH" else None).status_code == expected, (email, method, path)
         assert api.upload(token, "a.txt", b"hello").status_code == 403
     assert api.upload(None, "a.txt", b"hello").status_code == 401
 
@@ -85,6 +88,8 @@ def test_openapi_has_no_field_that_could_carry_document_text(client):
 def test_no_route_returns_the_original_file_or_chunks(client):
     paths = client.get("/api/openapi.json").json()["paths"]
     for p in paths:
+        if p.endswith("/access-preview"):  # explains an ACCESS decision (codes and rules); carries no content (own test)
+            continue
         assert "chunk" not in p and "download" not in p and "preview" not in p, p
 
 

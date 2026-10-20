@@ -25,4 +25,7 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 19 | GIN full-text index and HNSW vector index on `document_chunks` | Belong to Phase 5. | Phase 5 | No |
 | 21 | Upload progress bar | Upload shows a spinner only; 50 MB files feel slow. | Later | No |
 | 22 | Faster alerts in the notification bell | The bell polls every 30 s; instant alerts need shorter polling or server-sent events. | Later | No |
+| 23 | Rename and delete groups | Not in the API contract; groups can only be created and filled. | Later | Yes |
+| 24 | Screen for non-admin MANAGE holders | The API honours MANAGE for non-admins, but they have no way to find their documents in the UI. | Phase 6 or later | No |
+| 25 | Audit view of group membership changes | They go to the security log only; `permission_change_events` covers document rules. | Phase 7 | No |
 | 20 | Heartbeat for running jobs | After a worker restart, a still-running duplicate could process a job twice; harmless (idempotent) but wasteful. | Phase 9 | No |

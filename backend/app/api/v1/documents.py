@@ -16,7 +16,7 @@ from app.ingest.errors import IngestError
 from app.ingest.validation import read_limited, validate_file
 from app.models import User
 from app.models import document as dm
-from app.schemas.documents import DocumentOut, DocumentPage, DocumentUpdate, JobOut, VersionOut
+from app.schemas.documents import DocumentOut, DocumentPage, JobOut, VersionOut
 from app.services import document_service as svc
 
 router = APIRouter(tags=["documents"], dependencies=[Depends(require_admin)])
@@ -84,15 +84,7 @@ async def get_document(document_id: uuid.UUID, db: AsyncSession = Depends(get_db
     return await svc.get_document(db, document_id)
 
 
-@router.patch("/documents/{document_id}", response_model=DocumentOut)
-async def update_document(
-    document_id: uuid.UUID,
-    body: DocumentUpdate,
-    request: Request,
-    actor: User = Depends(require_admin),
-    db: AsyncSession = Depends(get_db),
-) -> DocumentOut:
-    return await svc.update_document(db, document_id, body.model_dump(exclude_unset=True), actor, _rid(request))
+# PATCH /documents/{id} (edit metadata) lives in app/api/v1/access.py: it needs MANAGE on the document.
 
 
 @router.delete("/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT)

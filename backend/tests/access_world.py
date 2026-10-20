@@ -40,12 +40,13 @@ class World:
             self.pg.execute("insert into user_groups (user_id, group_id) values (%s,%s)", (uid, self.group_id(g)))
         return uid
 
-    def doc(self, sensitivity=1, status="READY", countries=None, deleted=False, dept="Engineering"):
+    def doc(self, sensitivity=1, status="READY", countries=None, deleted=False, dept="Engineering",
+            filename="t.txt", document_type="POLICY"):
         did = self.pg.execute(
             "insert into documents (title, original_filename, document_type, department_id, sensitivity_level, status,"
-            " allowed_countries, uploaded_by, deleted_at) values ('t','t.txt','POLICY',%s,%s,%s,%s,%s,"
+            " allowed_countries, uploaded_by, deleted_at) values (%s,%s,%s,%s,%s,%s,%s,%s,"
             " case when %s then now() else null end) returning id",
-            (self.dept_id(dept), sensitivity, status, countries, self.uploader, deleted),
+            (filename, filename, document_type, self.dept_id(dept), sensitivity, status, countries, self.uploader, deleted),
         ).fetchone()[0]
         return did
 
