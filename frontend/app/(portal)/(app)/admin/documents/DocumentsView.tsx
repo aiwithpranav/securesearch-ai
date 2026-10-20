@@ -122,7 +122,7 @@ export function DocumentsView() {
         ) : page ? (
           <>
             {error && <div className="mb-4"><ErrorState message={error.message} requestId={error.requestId} onRetry={() => void load()} /></div>}
-            <div className="overflow-x-auto rounded-2xl border border-line">
+            <div className="relative overflow-x-auto rounded-2xl border border-line">
               <table className="w-full min-w-[820px] text-left text-sm">
                 <caption className="sr-only">Documents</caption>
                 <thead className="bg-surface text-muted">

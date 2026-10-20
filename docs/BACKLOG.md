@@ -29,3 +29,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 24 | Screen for non-admin MANAGE holders | The API honours MANAGE for non-admins, but they have no way to find their documents in the UI. | Phase 6 or later | No |
 | 25 | Audit view of group membership changes | They go to the security log only; `permission_change_events` covers document rules. | Phase 7 | No |
 | 20 | Heartbeat for running jobs | After a worker restart, a still-running duplicate could process a job twice; harmless (idempotent) but wasteful. | Phase 9 | No |
+| 26 | Rule history stores ids only | The screen resolves names from current lists, so a renamed group shows its new name in old entries. Storing names in the snapshot needs a backend change. | Later | No |
+| 27 | Admin-initiated password reset and user hard delete | Out of 4C scope (owner decision); people reset their own passwords. | Later | No |

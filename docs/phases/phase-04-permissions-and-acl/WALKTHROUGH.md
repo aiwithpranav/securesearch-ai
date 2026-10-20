@@ -151,3 +151,41 @@ Not verified: the screens (4C); speed with thousands of documents.
 - No screens yet (4C). Groups cannot be renamed or deleted yet (not in the API contract; backlog).
 - Group membership changes are written to the security log, not to `permission_change_events` (that table is for document rules); a full audit view comes in Phase 7.
 - See `docs/CHALLENGES.md` entries 57 to 60.
+
+## Layer 4C: admin screens (users, groups, access)
+
+### 1. What we built
+Three admin screens, all on top of the 4B API (no backend change):
+- **Users** (`/admin/users`): list, invite a person, edit department, clearance, country, employment type and roles, deactivate and reactivate (not yourself). The system_admin checkbox is locked on your own row.
+- **Groups** (`/admin/groups`): create a group, see its members, add and remove people (removal asks to confirm).
+- **Access section** on each document page: the rules, add, edit (effect, permission, expiry), remove, the history of changes, and "who can read this?" for any person.
+
+### 2. How it works, step by step
+1. Every request goes through the same signed-in call as the rest of the portal; the server decides, the screen only asks.
+2. Adding a rule: pick the kind (person, role, group, department, everyone), then the name (everyone has no second choice), then effect, permission and optional expiry.
+3. A Deny asks once more ("a Deny always wins") before it is saved. "Can manage" shows a note that it does not allow reading.
+4. After any change the history and the preview are cleared and reloaded, so nothing stale stays on screen.
+5. The preview shows Read, Download and Manage separately, each with a plain-English reason, plus the rules that apply to that person.
+6. History snapshots store ids only, so the screen looks names up in the lists it already loaded.
+
+### 3. Important files
+- `frontend/lib/access.ts` (types, API calls, wording helpers) and `access.test.ts` (28 frontend tests in total with the existing ones).
+- `frontend/app/(portal)/(app)/admin/users/`, `admin/groups/`, `admin/documents/[id]/AccessSection.tsx`, menu in `PortalHeader.tsx`.
+
+### 4. Tools: why we chose them
+Same stack as before (Next.js, Tailwind, Vitest). A native `<dialog>` for the user form gives keyboard focus handling for free. Pure wording and diff logic lives in `access.ts` so it can be unit tested.
+
+### 5. How to run it
+`docker compose up -d`, then `cd frontend && npm run dev`, sign in as the admin and use the Users and Groups links in the menu; open any document to see Access.
+
+### 6. How to test it
+`cd frontend && npx tsc --noEmit && npm test && npm run build`.
+
+### 7. Actual results (checked by me)
+- Typecheck, 28 frontend tests and production build pass.
+- Real browser, temporary users (deleted afterwards): invite (validation, then success), edit roles, deactivate; create group, add and remove a member; add a Deny rule (confirm step), edit it, remove it; preview for a person; history with names. Layout measured at 360 px: no sideways scrolling on Users, Groups, Documents and the document page (after the fix in challenge 61).
+
+### 8. Limitations and open issues
+- Groups cannot be renamed or deleted; no admin-initiated password reset (owner decision).
+- Not checked: very long lists (the users list loads 100 people), screen reader testing beyond labels and roles.
+- See `docs/CHALLENGES.md` entries 61 to 64 and BACKLOG items 26 and 27.
