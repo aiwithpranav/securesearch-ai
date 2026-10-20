@@ -125,11 +125,12 @@ async def list_jobs(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     status_filter: str | None = Query(None, alias="status"),
+    document_id: uuid.UUID | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, object]:
     if status_filter is not None and status_filter not in dm.STATUSES:
         raise AppError(422, "Validation failed", f"Status must be one of: {', '.join(dm.STATUSES)}.")
-    jobs, total = await svc.list_jobs(db, limit, offset, status_filter)
+    jobs, total = await svc.list_jobs(db, limit, offset, status_filter, document_id)
     return {"items": [JobOut.model_validate(j) for j in jobs], "total": total, "limit": limit, "offset": offset}
 
 

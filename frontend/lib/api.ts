@@ -32,13 +32,24 @@ export class ApiError extends Error {
   title: string;
   requestId?: string;
   retryAfterSeconds?: number;
+  errorCode?: string; // fixed code from the server, for example "TOO_LARGE" (upload errors)
+  existingDocumentId?: string; // set on "already uploaded" (409)
 
-  constructor(status: number, title: string, detail: string, requestId?: string, retryAfterSeconds?: number) {
+  constructor(
+    status: number,
+    title: string,
+    detail: string,
+    requestId?: string,
+    retryAfterSeconds?: number,
+    extra: { errorCode?: string; existingDocumentId?: string } = {},
+  ) {
     super(detail);
     this.status = status;
     this.title = title;
     this.requestId = requestId;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.errorCode = extra.errorCode;
+    this.existingDocumentId = extra.existingDocumentId;
   }
 
   get isNetworkError(): boolean {
@@ -50,7 +61,9 @@ type Options = { method?: string; body?: unknown; token?: string | null };
 
 export async function api<T>(path: string, { method = "GET", body, token }: Options = {}): Promise<T> {
   const headers: Record<string, string> = {};
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  // For a file upload the browser sets the Content-Type itself (it must include the multipart boundary).
+  if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   let res: Response;
@@ -58,9 +71,10 @@ export async function api<T>(path: string, { method = "GET", body, token }: Opti
     res = await fetch(`${API_BASE}${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
       credentials: "include",
-      signal: AbortSignal.timeout(15_000), // a hung server must not leave the button disabled forever
+      // A hung server must not leave a button disabled forever. Uploads of big files get more time.
+      signal: AbortSignal.timeout(isForm ? 180_000 : 15_000),
     });
   } catch {
     throw new ApiError(0, "Network error", "Can't reach the server. Check your connection and try again.");
@@ -76,13 +90,17 @@ export async function api<T>(path: string, { method = "GET", body, token }: Opti
   }
 
   if (!res.ok) {
-    const p = (data ?? {}) as { title?: string; detail?: string; request_id?: string; retry_after_seconds?: number };
+    const p = (data ?? {}) as {
+      title?: string; detail?: unknown; request_id?: string; retry_after_seconds?: number;
+      error_code?: string; existing_document_id?: string;
+    };
     throw new ApiError(
       res.status,
       p.title ?? "Request failed",
-      p.detail ?? "Something went wrong. Please try again.",
+      typeof p.detail === "string" ? p.detail : "Something went wrong. Please try again.",
       p.request_id,
       p.retry_after_seconds,
+      { errorCode: p.error_code, existingDocumentId: p.existing_document_id },
     );
   }
   return data as T;

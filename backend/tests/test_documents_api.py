@@ -199,6 +199,17 @@ def test_versions_and_jobs_endpoints(api, admin, enqueued):
     assert api.request("GET", "/ingestion/jobs/00000000-0000-0000-0000-000000000000", token=admin).status_code == 404
 
 
+def test_jobs_can_be_filtered_by_document(api, admin, enqueued):
+    a = api.upload(admin, "a.txt", b"first document text").json()
+    b = api.upload(admin, "b.txt", b"second document text").json()
+    all_jobs = api.request("GET", "/ingestion/jobs", token=admin).json()
+    assert all_jobs["total"] == 2
+    only_a = api.request("GET", f"/ingestion/jobs?document_id={a['id']}", token=admin).json()
+    assert only_a["total"] == 1 and only_a["items"][0]["document_id"] == a["id"]
+    assert b["id"] != a["id"]
+    assert api.request("GET", "/ingestion/jobs?document_id=not-a-uuid", token=admin).status_code == 422
+
+
 def test_reindex_is_refused_while_a_job_is_unfinished(api, admin, enqueued):
     d = _upload(api, admin).json()
     r = api.request("POST", f"/documents/{d['id']}/reindex", token=admin)

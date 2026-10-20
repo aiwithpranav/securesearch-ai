@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 3C, branch `feat/documents-3c`, awaiting owner review)
+- Admin screens: documents list (filters, paging, auto-refresh while processing), upload page, document page (edit, re-index, delete, processing history, versions), notification bell for failed processing, "no access" page for non-admins.
+- `GET /ingestion/jobs?document_id=` filter; frontend API client sends files and reads error codes.
+- 10 new frontend tests (20) and 1 new backend test (169). Challenges 48 to 52.
+### Fixed
+- Signed-in header overflowed on a 360 px phone; it now wraps.
+
 ### Added (Phase 3B, branch `feat/documents-3b`, awaiting owner review)
 - Migration `0002`: documents, document_versions, document_chunks (vector(384), tsv), ingestion_jobs, notifications; enables the `vector` extension.
 - Upload validation (extension plus magic bytes, 50 MB limit, zip-bomb guard, clean file names), parsers for PDF, DOCX, TXT and MD, sentence-based chunker (about 450 tokens, 50 overlap, page and section aware).

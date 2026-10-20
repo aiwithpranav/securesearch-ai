@@ -8,8 +8,8 @@
 | Layer | Content | Status |
 |---|---|---|
 | **3A** Infrastructure | `storage` service (SeaweedFS), `worker` (Celery), local embedding model in the image, storage adapter, env doctor and setup script updates | Built, waiting for owner review |
-| **3B** Pipeline and API | Migration `0002` (documents, document_versions, document_chunks, ingestion_jobs, notifications), validate, store, parse, chunk, embed, index, atomic activate, admin API | Built, waiting for owner review |
-| **3C** Admin UI | `/admin/documents`: upload, status, re-index, failed-ingestion alert | Not started |
+| **3B** Pipeline and API | Migration `0002` (documents, document_versions, document_chunks, ingestion_jobs, notifications), validate, store, parse, chunk, embed, index, atomic activate, admin API | Built, merged |
+| **3C** Admin UI | `/admin/documents`: list, upload, document page (edit, re-index, delete, history), notification bell | Built, waiting for owner review |
 
 ## Security rules that apply in Phase 3
 - Only `system_admin` can upload or manage documents.
