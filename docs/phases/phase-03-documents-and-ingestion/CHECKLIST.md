@@ -22,7 +22,7 @@
 - [x] 86 new tests (168 backend tests in total), all pass
 - [x] Owner approval (2026-10-20)
 
-## 3C Admin UI (built, waiting for owner review)
+## 3C Admin UI (built, owner approved, merged)
 - [x] Documents list with filters, paging, auto-refresh while processing, loading, empty and error states
 - [x] Upload page with browser checks and plain-English server errors, duplicate link
 - [x] Document page: edit, Re-index, Delete with confirm, processing history, versions
@@ -30,7 +30,11 @@
 - [x] Non-admins: no menu entry, no bell, "no access" page, no data requested
 - [x] Jobs endpoint filter by document; 10 new frontend tests (20), 1 new backend test (169)
 - [x] Browser walkthrough of every flow; phone-width header fix
-- [ ] Owner manual checks and approval
+- [x] Owner approval (2026-10-20)
 
 ## Phase 3 close
-- [ ] Owner approval, PR merged, tag `v0.3`
+- [x] PRs #6, #7, #8 merged
+- [x] Final checks on `main` (169 backend, 20 frontend tests, build, live API, worker kill test, secret scan)
+- [x] Docs closed: STATUS, CHANGELOG `[v0.3]`, README, architecture, backlog, challenges
+- [ ] Close-out PR merged (owner)
+- [ ] Tag `v0.3` on the merge commit, pushed, verified (after the owner go)

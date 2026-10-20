@@ -23,4 +23,6 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 17 | Upload a NEW version of an existing document (version 2, 3...) | 3B only has re-index of version 1. | Phase 8 (FR-15 to FR-17) | No |
 | 18 | OCR for scanned PDFs | Scanned files fail with `NO_TEXT`; OCR is out of scope in the blueprint. | Owner decides | Yes |
 | 19 | GIN full-text index and HNSW vector index on `document_chunks` | Belong to Phase 5. | Phase 5 | No |
+| 21 | Upload progress bar | Upload shows a spinner only; 50 MB files feel slow. | Later | No |
+| 22 | Faster alerts in the notification bell | The bell polls every 30 s; instant alerts need shorter polling or server-sent events. | Later | No |
 | 20 | Heartbeat for running jobs | After a worker restart, a still-running duplicate could process a job twice; harmless (idempotent) but wasteful. | Phase 9 | No |
