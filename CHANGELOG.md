@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [v0.4] - 2026-10-20
+Phase 4 (permissions and ACL) complete: access tables and resolver (4A), groups, rules, history, preview and demo data API (4B), admin screens (4C). Details in the three Phase 4 sections below. 283 backend and 28 frontend tests.
+
 ### Added (Phase 4C, branch `feat/access-4c`, awaiting owner review)
 - Admin Users page (invite, edit, roles, deactivate and reactivate), Groups page (create, members), and an Access section on the document page: rules add, edit, remove, Deny confirmation, expiry, rule history and the "who can read this" preview with plain-English reasons. Menu links Users and Groups.
 - 28 frontend tests. Fixed sideways scrolling at 360 px caused by screen-reader text outside scroll boxes (also in the Phase 3 history table). Challenges 61 to 64.

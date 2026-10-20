@@ -28,7 +28,9 @@
 - [x] Admin menu links (Users, Groups)
 - [x] Typecheck, 28 frontend tests, production build
 - [x] Real-browser checks with temporary users (removed afterwards); 360 px layout measured
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #12)
 
 ## Phase 4 close
-- [ ] Owner approval, PRs merged, tag `v0.4`
+- [x] Owner approval, PRs merged (#10, #11, #12)
+- [x] Final checks on `main`: 283 backend tests, 28 frontend tests, typecheck, build
+- [ ] Tag `v0.4` (after the owner says go)

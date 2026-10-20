@@ -1,6 +1,6 @@
-# STATUS: Phase 4, Layer 4C (admin screens)
+# STATUS: Phase 4 complete (4A, 4B, 4C merged)
 
-Branch: `feat/access-4c` (local, not pushed). `main` has Phases 1 to 3 (tags `v0.1`, `v0.2`, `v0.3`) and layers 4A and 4B (PRs #10, #11).
+Branch: `docs/phase-4-close`. `main` has Phases 1 to 3 (tags `v0.1`, `v0.2`, `v0.3`) and all of Phase 4 (PRs #10, #11, #12). Tag `v0.4` comes after this docs PR is merged.
 
 ## Done
 - ADR 027 (access decision design); Phase 4 docs (BRIEF, PREREQUISITES, CHECKLIST, PROMPT-4, WALKTHROUGH).
@@ -11,12 +11,12 @@ Branch: `feat/access-4c` (local, not pushed). `main` has Phases 1 to 3 (tags `v0
 - 4C: Users page (invite, edit, roles, deactivate and reactivate), Groups page (create, members), Access section on the document page (rules add, edit, remove, Deny confirmation, expiry, history, who-can-read preview), menu links. 28 frontend tests; typecheck and build clean. Checked in the real browser with temporary users (removed afterwards) and measured at 360 px.
 
 ## In progress
-- Nothing. Waiting for owner review of 4C.
+- Nothing.
 
 ## Exact next action
-1. Owner checks the screens and approves 4C ("4C Approved").
-2. Claude pushes `feat/access-4c` and gives the PR link with click-by-click steps. The owner merges; Claude checks the remote.
-3. Phase 4 close: final checks on `main`, close-out docs PR, tag `v0.4` only after the owner says "go".
+1. Owner merges the close-out docs PR; Claude verifies the remote.
+2. Claude tags `v0.4` and pushes it, then verifies the tag on the remote.
+3. Claude writes the Phase 5 (hybrid retrieval) plan and waits for approval.
 
 ## Blockers
 - None.
@@ -35,4 +35,4 @@ Branch: `feat/access-4c` (local, not pushed). `main` has Phases 1 to 3 (tags `v0
 - Groups cannot be renamed or deleted (backlog).
 
 ## Resume prompt
-"Read docs/phases/phase-04-permissions-and-acl/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Layer 4C is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-04-permissions-and-acl/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Phase 4 is complete; v0.4 tag is next. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
