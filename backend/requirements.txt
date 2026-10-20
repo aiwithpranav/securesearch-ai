@@ -9,3 +9,15 @@ argon2-cffi==25.1.0
 PyJWT==2.15.1
 redis==8.1.0
 greenlet==3.5.6
+
+# --- Phase 3 (documents and ingestion) ---
+# torch is installed from the CPU-only index in the Dockerfile; it is listed here so the version is pinned in one place.
+torch==2.14.1
+celery==5.6.3
+boto3==1.43.108
+pypdf==6.19.0
+python-docx==1.2.0
+python-multipart==0.0.32
+sentence-transformers==6.1.0
+transformers==5.20.2
+huggingface_hub==1.33.0

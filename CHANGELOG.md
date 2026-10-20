@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-Nothing yet.
+### Added (Phase 3A, branch `feat/documents-3a`, awaiting owner review)
+- `storage` service (SeaweedFS 4.48, S3 API, private network) replacing the archived MinIO (CR-001, ADR 025).
+- `worker` service (Celery 5.6.3 over Redis) sharing the backend image; retry-safe job settings.
+- Storage adapter `app/storage` (boto3), object key builder, `storage_check` script.
+- Local embeddings (`BAAI/bge-small-en-v1.5`, 384 dimensions) baked into the image, offline at run time.
+- Env doctor checks the S3 settings; `setup_env.ps1` adds missing keys to an existing `.env`.
+- 17 new backend tests (82 total). ADR 024, ADR 025, CR-001, Phase 3 docs, challenges 35 to 40.
 
 ## [v0.2] - 2026-10-19
 Phase 2 (authentication and user flow) signed off by the owner. Tag created after the Phase 2 close PR.

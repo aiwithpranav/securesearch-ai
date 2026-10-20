@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`) and Phase 2 (authentication and user flow, tag `v0.2`). Next: Phase 3 (documents and ingestion), waiting for owner approval to start.
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`) and Phase 2 (authentication and user flow, tag `v0.2`). In progress: Phase 3 (documents and ingestion): layer 3A built and awaiting owner review; 3B and 3C not started.
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -11,6 +11,7 @@
 * **Landing Page (Phase 1):** Dark premium design, interactive demos, and high accessibility standards.
 * **Backend Foundation (Phase 2A):** Dockerized backend with FastAPI, Postgres (pgvector), Redis, and Mailpit. Includes structural validations, JSON logging, and error handling.
 
+* **Phase 3A infrastructure (implemented, awaiting owner review):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image. There is **no upload, search or document page yet**; those come in 3B and 3C. Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
 * **Auth backend (Phase 2B, implemented):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
 
 * **Login UI (Phase 2C, implemented):** `/login` (validation, shake, Caps Lock hint, Remember me, all error states), `/forgot-password`, `/reset-password`, `/home` (your details, first-2-minutes guide, welcome tour), `/profile` (change password, sign out of all devices). Search and documents are **not built yet**; guide steps for them say "Coming in Phase N". Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
@@ -51,11 +52,13 @@ Run all commands in PowerShell from the repository root.
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/setup_env.ps1
 ```
-Environment variable names (placeholders only, see `.env.example`): `APP_ENV`, `APP_SECRET_KEY`, `JWT_SECRET_KEY`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `REDIS_URL`, `SMTP_HOST`, `SMTP_PORT`, `FRONTEND_ORIGIN`, `SEED_USER_PASSWORD`. Never commit `.env`.
-2. Start the services:
+Environment variable names (placeholders only, see `.env.example`): `APP_ENV`, `APP_SECRET_KEY`, `JWT_SECRET_KEY`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `REDIS_URL`, `SMTP_HOST`, `SMTP_PORT`, `FRONTEND_ORIGIN`, `SEED_USER_PASSWORD`, and (Phase 3) `S3_ENDPOINT_URL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`. Never commit `.env`. If you already have a `.env`, the same command only adds the missing keys (no values shown).
+2. Start the services (the first build downloads PyTorch and the embedding model and takes several minutes; if it fails with a network error, run it again):
 ```powershell
 docker compose up --build -d
+docker compose ps
 ```
+`docker compose ps` should show 6 services, all `(healthy)`: postgres, redis, mailpit, storage, backend, worker.
 3. Create the tables, then the demo users:
 ```powershell
 docker compose exec backend alembic upgrade head
@@ -66,6 +69,7 @@ docker compose exec backend python -m app.scripts.seed_users
 - Ready: [http://localhost:8000/api/v1/ready](http://localhost:8000/api/v1/ready) should show postgres and redis `ok`
 - API docs (try login there): [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
 - Mailpit inbox (reset and invite emails): [http://localhost:8025](http://localhost:8025)
+- Object storage and worker (no web page, private network): `docker compose exec backend python -m app.scripts.storage_check` should print "Write, read and delete: OK".
 
 Demo users (synthetic): `swara@demo`, `pranav@demo`, `dhanashree@demo`, `akshay@demo`, `sanjana@demo`, `shivam@demo`, `prashant@demo` (admin), `karunesh@demo`. `former@demo` is deactivated on purpose. A fresh seed gives every demo user the shared `SEED_USER_PASSWORD` from your local `.env`. For name-based passwords, keep a local file `demo-credentials.local.txt` (git-ignored, lines like `email: password`) and run `Get-Content demo-credentials.local.txt | docker compose exec -T backend python -m app.scripts.set_user_passwords` from the repository root. These passwords are easy to guess on purpose: use them on a developer machine only, never on a real server.
 
@@ -75,12 +79,13 @@ Stop: `docker compose down` (data kept). `docker compose down -v` also deletes t
 ```powershell
 docker compose exec backend pytest -q
 ```
-Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 57 passed.
+Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 82 passed.
 
 ## Tech Stack
 * **Frontend:** Next.js `16.4.0`, React `19.3.0`, TailwindCSS `4.3.3`, Motion `^14.0.0`, TypeScript `~5.9.3`
 * **Backend:** FastAPI `0.143.0`, Python 3.12, Uvicorn `0.54.0`, SQLAlchemy `2.1.4`, Alembic `1.20.0`, Pydantic `2.14.0`
-* **Infrastructure:** Postgres 17 with pgvector `0.8.0`, Redis `7.4.2`, Mailpit `v1.22.0`
+* **Infrastructure:** Postgres 17 with pgvector `0.8.0`, Redis `7.4.2`, Mailpit `v1.22.0`, SeaweedFS `4.48` (S3 object storage, replaces archived MinIO, see CR-001)
+* **Background jobs and AI (Phase 3A):** Celery `5.6.3`, boto3 `1.43.108`, sentence-transformers `6.1.0` with `BAAI/bge-small-en-v1.5` (384-dimension local embeddings, MIT licence), CPU-only PyTorch `2.14.1`. All versions: [ADR 024](docs/adr/024-phase-3-pinned-versions.md).
 
 ## Folder Structure
 ```text

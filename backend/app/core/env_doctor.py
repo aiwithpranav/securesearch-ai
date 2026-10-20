@@ -1,5 +1,6 @@
 import sys
 import socket
+from urllib.parse import urlsplit
 from .config import settings
 
 def check_env():
@@ -10,7 +11,9 @@ def check_env():
         "APP_ENV", "APP_SECRET_KEY", "JWT_SECRET_KEY",
         "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB",
         "DATABASE_URL", "REDIS_URL", "SMTP_HOST", "SMTP_PORT",
-        "FRONTEND_ORIGIN"
+        "FRONTEND_ORIGIN",
+        # Phase 3: object storage for uploaded files
+        "S3_ENDPOINT_URL", "S3_ACCESS_KEY", "S3_SECRET_KEY", "S3_BUCKET",
     ]
     for var in variables_to_check:
         val = getattr(settings, var.lower(), "CHANGE_ME")
@@ -46,6 +49,15 @@ def check_env():
                 pass
         except Exception:
             errors.append("Postgres is unreachable. Ensure the service is running and DATABASE_URL is correct.")
+
+    # Check the object storage is reachable (same simple socket test)
+    if settings.s3_endpoint_url != "CHANGE_ME":
+        try:
+            parsed = urlsplit(settings.s3_endpoint_url)
+            with socket.create_connection((parsed.hostname, parsed.port or 80), timeout=3):
+                pass
+        except Exception:
+            errors.append("Object storage is unreachable. Ensure the storage service is running and S3_ENDPOINT_URL is correct.")
 
     if errors:
         for error in errors:

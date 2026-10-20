@@ -16,3 +16,7 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 10 | Playwright end-to-end tests for login, reset and profile flows | Browser flows were checked by hand so far. | Phase 9 | No |
 | 11 | Remove the Starlette `httpx` deprecation warning in backend tests | Harmless warning from Phase 2A. | Any time | No |
 | 12 | Self-hosted font with licence check | Landing page uses the system font stack. | Optional | No |
+| 13 | Run the storage container as a non-root user | It runs as root (needed to write its generated login file). Private network only. | Phase 9 | No |
+| 14 | Optional dev-only storage web UI on 127.0.0.1 | CR-001: there is no console; `storage_check` lists keys. A UI could expose original files, which conflicts with "admin is not reader", so only if the owner wants it. | Owner decides | No |
+| 15 | Lighter API image without PyTorch | Backend image is 2.7 GB (challenge 38). | Phase 9 | Yes (blueprint says same image) |
+| 16 | Clean up objects left in storage when a document is deleted or a job fails | Needed once documents exist. | Phase 3B | No |

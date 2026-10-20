@@ -15,6 +15,20 @@ class Settings(BaseSettings):
     smtp_port: str = "CHANGE_ME"
     frontend_origin: str = "http://localhost:3000"
 
+    # --- Object storage for uploaded files (Phase 3). Required, checked by the env doctor ---
+    s3_endpoint_url: str = "CHANGE_ME"
+    s3_access_key: str = "CHANGE_ME"
+    s3_secret_key: str = "CHANGE_ME"
+    s3_bucket: str = "CHANGE_ME"
+
+    # --- Phase 3 tuning knobs. Safe defaults. ---
+    s3_region: str = "us-east-1"  # SeaweedFS ignores it, but S3 signing needs some value
+    embedding_model_path: str = "/opt/models/bge-small-en-v1.5"  # baked into the image at build time
+    embedding_model_name: str = "BAAI/bge-small-en-v1.5"
+    embedding_model_revision: str = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"
+    embedding_dimensions: int = 384
+    embedding_batch_size: int = 16
+
     # --- Only needed by the demo-user seed script (Phase 2B) ---
     seed_user_password: str = ""
 
