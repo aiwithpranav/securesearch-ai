@@ -1,0 +1,5 @@
+Welcome to Northwind Demo Co. Your first week: meet your team, set up your laptop, read the security guide.
+
+Ask your manager for a buddy. Your buddy answers everyday questions.
+
+Complete the mandatory security awareness course within 14 days.

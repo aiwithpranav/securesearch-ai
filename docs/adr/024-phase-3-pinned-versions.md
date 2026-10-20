@@ -17,6 +17,8 @@ Phase 3 adds object storage, a background worker, file parsing and local embeddi
 | `sentence-transformers` | `6.1.0` | Released 2026-09-18 |
 | `celery` | `5.6.3` (with `kombu 5.6.2`) | Dry-run install showed **no conflict** with our pinned `redis 8.1.0` |
 | `boto3` | `1.43.108` | Released 2026-10-02 (newer 1.43.114 is under two weeks old) |
+| `pgvector` (Python) | `0.5.0` | Released 2026-07-06, MIT; vector column type for SQLAlchemy (added in 3B) |
+| `reportlab` (dev only) | `5.0.1` | Released 2026-08-20, BSD; creates the synthetic PDFs (added in 3B) |
 | `pypdf` | `6.19.0` | Released 2026-09-16 (6.21.1 is under two weeks old); used from 3B |
 | `python-docx` | `1.2.0` | Used from 3B |
 | `python-multipart` | `0.0.32` | FastAPI file uploads, used from 3B |

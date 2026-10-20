@@ -1,0 +1,7 @@
+Northwind Demo Co public holidays for 2026.
+
+1 January: New Year. 26 January: Republic Day. 1 May: Labour Day.
+
+15 August: Independence Day. 2 October: Gandhi Jayanti. 25 December: Winter closure begins.
+
+Floating holidays: every employee may pick two extra days per year.

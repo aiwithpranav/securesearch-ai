@@ -49,11 +49,14 @@ def _prepare_test_database() -> str:
 if BASE_URL and BASE_URL != "CHANGE_ME":
     TEST_DATABASE_URL = _prepare_test_database()
     os.environ["DATABASE_URL"] = TEST_DATABASE_URL
+    # Tests use their own storage bucket too, so they never touch uploaded dev files.
+    os.environ["S3_BUCKET"] = os.environ.get("S3_BUCKET", "securesearch-documents") + "-test"
 else:  # pragma: no cover
     TEST_DATABASE_URL = ""
 
 from app.core.config import settings  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
+from app.storage import get_storage  # noqa: E402
 
 from tests.constants import TEST_PASSWORD  # noqa: E402
 _TEST_HASH = hash_password(TEST_PASSWORD)  # hash once; Argon2 is deliberately slow
@@ -102,6 +105,10 @@ def clean_state(pg, redis_client):
     for key in redis_client.scan_iter("ss:*"):
         redis_client.delete(key)
     _mailpit("messages", "DELETE")
+    storage = get_storage()  # empty the test bucket
+    storage.ensure_bucket()
+    for key in storage.list_keys("", limit=1000):
+        storage.delete(key)
     yield
 
 
@@ -179,6 +186,13 @@ class Api:
             time.sleep(0.2)
         raise AssertionError(f"no email for {to} arrived in Mailpit")
 
+    def upload(self, token, filename, data, content_type="application/octet-stream", **fields):
+        """POST /documents/upload as multipart. Defaults are valid metadata; override with fields."""
+        meta = {"department_id": "1", "document_type": "POLICY", "sensitivity_level": "1"}
+        meta.update({k: str(v) for k, v in fields.items() if v is not None})
+        return self.request("POST", "/documents/upload", token=token,
+                            files={"file": (filename, data, content_type)}, data=meta)
+
     def clear_mail(self) -> None:
         _mailpit("messages", "DELETE")
 
@@ -189,3 +203,26 @@ class Api:
 @pytest.fixture
 def api(client):
     return Api(client)
+
+
+@pytest.fixture
+def enqueued(monkeypatch):
+    """Replaces 'send the job to the worker' with a list, so tests decide when a job runs.
+    (The real worker container uses the development database, not the test database.)"""
+    from app.services import document_service
+
+    jobs: list = []
+
+    async def fake_enqueue(job_id):
+        jobs.append(job_id)
+
+    monkeypatch.setattr(document_service, "_enqueue", fake_enqueue)
+    return jobs
+
+
+@pytest.fixture
+def admin(api, make_user):
+    """A signed-in system_admin. Returns the access token."""
+    make_user("admin@demo", roles=("employee", "system_admin"))
+    token, _ = api.signed_in("admin@demo")
+    return token
