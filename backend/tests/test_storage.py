@@ -14,7 +14,7 @@ from app.storage.keys import original_key
 def storage():
     s = S3Storage(
         settings.s3_endpoint_url, settings.s3_access_key, settings.s3_secret_key,
-        settings.s3_bucket + "-test", settings.s3_region,
+        settings.s3_bucket, settings.s3_region,  # conftest already points this at the "-test" bucket
     )
     s.ensure_bucket()
     prefix = f"t-{uuid.uuid4()}/"
@@ -62,7 +62,7 @@ def test_overwrite_same_key_replaces_content(storage):
 
 def test_wrong_secret_is_rejected_without_leaking_it():
     bad = S3Storage(settings.s3_endpoint_url, settings.s3_access_key, "wrong-secret-value-123",
-                    settings.s3_bucket + "-test", settings.s3_region)
+                    settings.s3_bucket, settings.s3_region)
     with pytest.raises(StorageError) as exc:
         bad.put_bytes("x", b"data")
     assert "wrong-secret-value-123" not in str(exc.value)

@@ -29,6 +29,19 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 384
     embedding_batch_size: int = 16
 
+    # --- Phase 3B upload and ingestion limits ---
+    max_upload_bytes: int = 50 * 1024 * 1024  # NFR-03: 50 MB
+    max_pdf_pages: int = 500
+    max_docx_uncompressed_bytes: int = 200 * 1024 * 1024  # zip-bomb guard
+    max_zip_ratio: int = 100  # one zip entry may not expand more than 100 times
+    max_zip_entries: int = 5000
+    max_extracted_chars: int = 5_000_000
+    chunk_target_tokens: int = 450
+    chunk_overlap_tokens: int = 50
+    chunk_max_tokens: int = 500  # the model reads 512 tokens at most
+    upload_limit_per_minute: int = 20
+    ingest_time_limit_seconds: int = 600
+
     # --- Only needed by the demo-user seed script (Phase 2B) ---
     seed_user_password: str = ""
 

@@ -33,7 +33,10 @@ celery_app.conf.update(
     result_serializer="json",
     result_expires=3600,
     broker_connection_retry_on_startup=True,
-    broker_transport_options={"visibility_timeout": 3600},
+    # If a worker dies, Redis hands its unfinished job to another worker after this many seconds.
+    # Must be longer than the longest job (ingest time limit 600 s + 60 s). The worker also re-sends
+    # unfinished jobs when it starts (see tasks.py), so recovery after a restart is much faster.
+    broker_transport_options={"visibility_timeout": 900},
     timezone="UTC",
     enable_utc=True,
 )

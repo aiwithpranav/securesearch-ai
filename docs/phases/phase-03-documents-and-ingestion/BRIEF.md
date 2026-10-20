@@ -8,7 +8,7 @@
 | Layer | Content | Status |
 |---|---|---|
 | **3A** Infrastructure | `storage` service (SeaweedFS), `worker` (Celery), local embedding model in the image, storage adapter, env doctor and setup script updates | Built, waiting for owner review |
-| **3B** Pipeline and API | Migration `0002` (documents, document_versions, document_chunks, ingestion_jobs, notifications), validate, store, parse, chunk, embed, index, atomic activate, admin API | Not started |
+| **3B** Pipeline and API | Migration `0002` (documents, document_versions, document_chunks, ingestion_jobs, notifications), validate, store, parse, chunk, embed, index, atomic activate, admin API | Built, waiting for owner review |
 | **3C** Admin UI | `/admin/documents`: upload, status, re-index, failed-ingestion alert | Not started |
 
 ## Security rules that apply in Phase 3
@@ -27,7 +27,7 @@ Blueprint: 7 to 10 days. Plan: 3A about 2, 3B about 4, 3C about 2.
 ## Open design decisions (confirmed by the owner's "start" on 2026-10-20)
 1. Embedding model baked into the image at build time (offline at run time).
 2. CPU-only PyTorch.
-3. `documents.status` values: `UPLOADED`, `PROCESSING`, `PUBLISHED`, `FAILED` (blueprint 10.3 uses `PUBLISHED`).
+3. Status values: `QUEUED`, `PROCESSING`, `READY`, `FAILED` (blueprint user story US-15; Phase 4 SQL will use `READY`; see ADR 026).
 4. `DELETE /documents/{id}` is a soft delete (`deleted_at`).
 5. Worker and backend share one image (blueprint 8.6).
 6. Storage: SeaweedFS instead of MinIO (CR-001).

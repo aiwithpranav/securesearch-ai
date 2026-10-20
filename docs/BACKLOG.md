@@ -19,4 +19,8 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 13 | Run the storage container as a non-root user | It runs as root (needed to write its generated login file). Private network only. | Phase 9 | No |
 | 14 | Optional dev-only storage web UI on 127.0.0.1 | CR-001: there is no console; `storage_check` lists keys. A UI could expose original files, which conflicts with "admin is not reader", so only if the owner wants it. | Owner decides | No |
 | 15 | Lighter API image without PyTorch | Backend image is 2.7 GB (challenge 38). | Phase 9 | Yes (blueprint says same image) |
-| 16 | Clean up objects left in storage when a document is deleted or a job fails | Needed once documents exist. | Phase 3B | No |
+| 16 | Clean up original files in storage after a document is deleted | Soft delete keeps the stored original (ADR 026). Needs a safe cleanup job. | Phase 9 | No |
+| 17 | Upload a NEW version of an existing document (version 2, 3...) | 3B only has re-index of version 1. | Phase 8 (FR-15 to FR-17) | No |
+| 18 | OCR for scanned PDFs | Scanned files fail with `NO_TEXT`; OCR is out of scope in the blueprint. | Owner decides | Yes |
+| 19 | GIN full-text index and HNSW vector index on `document_chunks` | Belong to Phase 5. | Phase 5 | No |
+| 20 | Heartbeat for running jobs | After a worker restart, a still-running duplicate could process a job twice; harmless (idempotent) but wasteful. | Phase 9 | No |

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 3B, branch `feat/documents-3b`, awaiting owner review)
+- Migration `0002`: documents, document_versions, document_chunks (vector(384), tsv), ingestion_jobs, notifications; enables the `vector` extension.
+- Upload validation (extension plus magic bytes, 50 MB limit, zip-bomb guard, clean file names), parsers for PDF, DOCX, TXT and MD, sentence-based chunker (about 450 tokens, 50 overlap, page and section aware).
+- Ingestion pipeline and Celery task: idempotent, publishes in one transaction, fixed error codes, retries, admin notifications on failure, start-up re-send of unfinished jobs.
+- Admin API: upload, list, get, edit, soft delete, versions, re-index, ingestion jobs; notifications API (CR-002).
+- Synthetic documents (`app/scripts/synthetic_docs.py`, `load_synthetic_docs.py`, `sample-data/synthetic/`).
+- 86 new tests (168 total). ADR 026, CR-002, challenges 41 to 47.
+
 ### Added (Phase 3A, branch `feat/documents-3a`, awaiting owner review)
 - `storage` service (SeaweedFS 4.48, S3 API, private network) replacing the archived MinIO (CR-001, ADR 025).
 - `worker` service (Celery 5.6.3 over Redis) sharing the backend image; retry-safe job settings.
