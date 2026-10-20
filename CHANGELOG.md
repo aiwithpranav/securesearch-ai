@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-Nothing yet.
+### Added (Phase 4A, branch `feat/access-4a`, awaiting owner review)
+- Migration `0003`: groups, user_groups, document_acl, permission_change_events, with database constraints.
+- Access resolver (`app/access/resolver.py`): READ rules A to E in SQL, DOWNLOAD, MANAGE, explanations; deny by default, deny beats allow, admin is not reader.
+- 92 new tests (261 total): table-driven rules, independent Python oracle in 8 random worlds, mutation check (8 deliberate mistakes all caught). ADR 027, Phase 4 docs.
 
 ## [v0.3] - 2026-10-20
 Phase 3 (documents and ingestion) signed off by the owner. Tag created after the Phase 3 close-out PR.

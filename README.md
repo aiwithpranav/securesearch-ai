@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`) and Phase 2 (authentication and user flow, tag `v0.2`). Phase 3 (documents and ingestion) is complete and being closed (tag `v0.3` after the owner go). Next: Phase 4 (permissions and ACL), waiting for owner approval.
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`). In progress: Phase 4 (permissions and ACL): layer 4A built and awaiting owner review; 4B and 4C not started.
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -13,6 +13,7 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
+* **Phase 4A access rules engine (implemented, awaiting owner review):** the database tables for groups and document access rules, and one resolver that decides who may read, download or manage a document (deny by default, deny beats allow, admin is not reader, nothing cached). There is **no screen or API for the rules yet** (4B, 4C), so every document is still invisible to everybody except as metadata for administrators. Details: [Phase 4 walkthrough](docs/phases/phase-04-permissions-and-acl/WALKTHROUGH.md).
 * **Phase 3C admin screens (implemented):** administrators get a Documents menu: a list with status and filters, an upload page, a document page (edit, re-index, delete, processing history) and a notification bell for failed processing. Normal users see none of it. There is **no search or answer yet**. Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md). Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
 * **Auth backend (Phase 2B, implemented):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
 
@@ -83,7 +84,7 @@ Stop: `docker compose down` (data kept). `docker compose down -v` also deletes t
 ```powershell
 docker compose exec backend pytest -q
 ```
-Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 169 passed. Frontend (from `frontend/`): `npm test` runs 20 unit tests.
+Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 261 passed. Frontend (from `frontend/`): `npm test` runs 20 unit tests.
 
 ## Tech Stack
 * **Frontend:** Next.js `16.4.0`, React `19.3.0`, TailwindCSS `4.3.3`, Motion `^14.0.0`, TypeScript `~5.9.3`
@@ -109,7 +110,7 @@ Tests use their own database (`<POSTGRES_DB>_test`) and need the services above 
 ## Roadmap
 Phases follow the blueprint (v1.2). Done: Phases 1, 2 and 3.
 * **Phase 3 (done):** Documents and ingestion (upload, parse, chunk, embed, admin screens)
-* **Phase 4:** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
+* **Phase 4 (in progress):** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
 * **Phase 5:** Hybrid retrieval (full-text + vector search, rerank)
 * **Phase 6:** Answers and citations (LLM, refusals, chat UI)
 * **Phase 7:** Audit and evaluation
