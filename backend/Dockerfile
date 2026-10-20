@@ -1,7 +1,10 @@
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    EMBEDDING_MODEL_PATH=/opt/models/bge-small-en-v1.5 \
+    HF_HUB_OFFLINE=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
@@ -15,7 +18,15 @@ WORKDIR /app
 RUN chown appuser:appuser /app
 
 COPY requirements.txt requirements-dev.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+
+# CPU-only PyTorch first. The default Linux wheel pulls about 2 GB of CUDA libraries we do not need.
+RUN pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install -r requirements.txt -r requirements-dev.txt
+
+# Bake the embedding model into the image at BUILD time (this is the only step that needs internet).
+# At run time the containers are offline (HF_HUB_OFFLINE=1): no document text ever leaves the machine.
+# The revision is pinned to an exact commit of BAAI/bge-small-en-v1.5 (MIT licence, 384 dimensions).
+RUN HF_HUB_OFFLINE=0 python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='BAAI/bge-small-en-v1.5', revision='5c38ec7c405ec4b44b94cc5a9bb96e735b38267a', local_dir='/opt/models/bge-small-en-v1.5', allow_patterns=['*.json', '*.txt', 'model.safetensors', '1_Pooling/*'])"
 
 USER appuser
 

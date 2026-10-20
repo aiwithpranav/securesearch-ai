@@ -1,6 +1,6 @@
-# STATUS: Phase 2 (authentication and user flow): CLOSING
+# STATUS: Phase 2 (authentication and user flow): CLOSED
 
-All Phase 2 work is merged to `main` (PRs #1 to #4). This close-out PR adds the final documentation. The tag `v0.2` is created on the merge commit of this PR, after the owner says "go".
+All Phase 2 work is merged to `main` (PRs #1 to #5) and tagged **`v0.2`** on merge commit `41e06af` (pushed and verified on 2026-10-19). The rest of this file is the state at close-out. Current work: `docs/phases/phase-03-documents-and-ingestion/STATUS.md`.
 
 ## Done
 - **2A** backend foundation: Docker Compose (Postgres + pgvector, Redis, Mailpit, backend), env doctor, JSON logs, request IDs, Problem Details, health and ready.

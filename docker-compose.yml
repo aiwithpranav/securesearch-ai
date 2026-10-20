@@ -40,20 +40,52 @@ services:
       timeout: 5s
       retries: 5
 
+  # S3-compatible object storage for the original uploaded files (Phase 3).
+  # SeaweedFS replaces MinIO (see docs/change-requests/CR-001-object-storage.md).
+  # Private network only: no ports are published to the host.
+  storage:
+    image: chrislusf/seaweedfs:4.48
+    entrypoint: ["/bin/sh", "-c"]
+    # The S3 login file is written at start-up from the two S3_* secrets, so no secret lives in Git.
+    command:
+      - |
+        mkdir -p /tmp/s3
+        cat > /tmp/s3/s3.json <<EOF
+        {"identities":[{"name":"app","credentials":[{"accessKey":"$$S3_ACCESS_KEY","secretKey":"$$S3_SECRET_KEY"}],"actions":["Admin","Read","Write","List","Tagging"]}]}
+        EOF
+        exec weed server -dir=/data -master.volumeSizeLimitMB=256 -volume.max=30 -s3 -s3.config=/tmp/s3/s3.json -ip=storage
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+    volumes:
+      - storage_data:/data
+    networks:
+      - private
+    healthcheck:
+      # The services listen on the container's own address (-ip=storage), not on localhost.
+      test: ["CMD-SHELL", "wget -qO- http://storage:9333/cluster/status >/dev/null && nc -z storage 8333"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   backend:
     build:
       context: ./backend
+    image: securesearch-backend:dev
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      storage:
         condition: service_healthy
     networks:
       - private
       - public
     ports:
       - "127.0.0.1:8000:8000"
-    environment:
+    environment: &backend_env
       - APP_ENV=${APP_ENV}
       - APP_SECRET_KEY=${APP_SECRET_KEY}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
@@ -66,6 +98,10 @@ services:
       - SMTP_PORT=${SMTP_PORT}
       - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
       - SEED_USER_PASSWORD=${SEED_USER_PASSWORD:-}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_BUCKET=${S3_BUCKET}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 10s
@@ -79,8 +115,27 @@ services:
         - action: rebuild
           path: ./backend/requirements.txt
 
+  # Background worker (Phase 3). Same image as the backend (blueprint 8.6), private network only.
+  # It has no internet access: the embedding model is already inside the image.
+  worker:
+    image: securesearch-backend:dev
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - private
+    environment: *backend_env
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.worker.celery_app inspect ping -d celery@$$HOSTNAME --timeout 5"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 volumes:
   postgres_data:
+  storage_data:
 
 networks:
   private:
