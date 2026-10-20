@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 4B, branch `feat/access-4b`, awaiting owner review)
+- Groups API (admin only), access rule API (list, add, edit, delete) enforcing MANAGE, rule history saved in the same transaction, access preview with reason codes (CR-003).
+- `seed_access` script: 6 demo groups and rules for the 12 demo documents following the personas; the sales executive gets clearance 2.
+- `PATCH /documents/{id}` now needs MANAGE on the document (admin role no longer enough by itself, but admins always manage).
+- 22 new tests (283 total). Challenges 57 to 60.
+
 ### Added (Phase 4A, branch `feat/access-4a`, awaiting owner review)
 - Migration `0003`: groups, user_groups, document_acl, permission_change_events, with database constraints.
 - Access resolver (`app/access/resolver.py`): READ rules A to E in SQL, DOWNLOAD, MANAGE, explanations; deny by default, deny beats allow, admin is not reader.

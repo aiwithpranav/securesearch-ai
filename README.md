@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`). In progress: Phase 4 (permissions and ACL): layer 4A built and awaiting owner review; 4B and 4C not started.
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`). In progress: Phase 4 (permissions and ACL): layers 4A merged and 4B built (awaiting owner review); 4C (screens) not started.
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -13,7 +13,8 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
-* **Phase 4A access rules engine (implemented, awaiting owner review):** the database tables for groups and document access rules, and one resolver that decides who may read, download or manage a document (deny by default, deny beats allow, admin is not reader, nothing cached). There is **no screen or API for the rules yet** (4B, 4C), so every document is still invisible to everybody except as metadata for administrators. Details: [Phase 4 walkthrough](docs/phases/phase-04-permissions-and-acl/WALKTHROUGH.md).
+* **Phase 4B rules API (implemented, awaiting owner review):** administrators create groups and put people in them, add ALLOW or DENY rules to a document, see the history of rule changes, and ask the access preview why a person can or cannot read a document. Demo groups and rules for the 12 demo documents: `docker compose exec backend python -m app.scripts.seed_access`. There are **no screens for this yet** (4C) and nobody can read document content yet (search is Phase 5).
+* **Phase 4A access rules engine (implemented):** the database tables for groups and document access rules, and one resolver that decides who may read, download or manage a document (deny by default, deny beats allow, admin is not reader, nothing cached). There is **no screen or API for the rules yet** (4B, 4C), so every document is still invisible to everybody except as metadata for administrators. Details: [Phase 4 walkthrough](docs/phases/phase-04-permissions-and-acl/WALKTHROUGH.md).
 * **Phase 3C admin screens (implemented):** administrators get a Documents menu: a list with status and filters, an upload page, a document page (edit, re-index, delete, processing history) and a notification bell for failed processing. Normal users see none of it. There is **no search or answer yet**. Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md). Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
 * **Auth backend (Phase 2B, implemented):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
 
@@ -67,6 +68,7 @@ docker compose ps
 docker compose exec backend alembic upgrade head
 docker compose exec backend python -m app.scripts.seed_users
 docker compose exec backend python -m app.scripts.load_synthetic_docs   # optional: 12 made-up demo documents
+docker compose exec backend python -m app.scripts.seed_access            # optional: demo groups and access rules (after the two above)
 ```
 4. Verify:
 - Health: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) should show `{"status":"ok"}`
@@ -84,7 +86,7 @@ Stop: `docker compose down` (data kept). `docker compose down -v` also deletes t
 ```powershell
 docker compose exec backend pytest -q
 ```
-Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 261 passed. Frontend (from `frontend/`): `npm test` runs 20 unit tests.
+Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 283 passed. Frontend (from `frontend/`): `npm test` runs 20 unit tests.
 
 ## Tech Stack
 * **Frontend:** Next.js `16.4.0`, React `19.3.0`, TailwindCSS `4.3.3`, Motion `^14.0.0`, TypeScript `~5.9.3`

@@ -7,8 +7,8 @@
 ## Layers (each needs the owner's approval)
 | Layer | Content | Status |
 |---|---|---|
-| **4A** Core | Migration `0003` (groups, user_groups, document_acl, permission_change_events), the access resolver (rules A to E, MANAGE, DOWNLOAD), table-driven, oracle and mutation tests, ADR 027 | Built, waiting for owner review |
-| **4B** API | Groups API, ACL API, rule history, access preview, seed groups and rules for the demo documents, CR-003 | Not started |
+| **4A** Core | Migration `0003` (groups, user_groups, document_acl, permission_change_events), the access resolver (rules A to E, MANAGE, DOWNLOAD), table-driven, oracle and mutation tests, ADR 027 | Built, merged |
+| **4B** API | Groups API, ACL API, rule history, access preview, seed groups and rules for the demo documents, CR-003 | Built, waiting for owner review |
 | **4C** UI | Users page, Groups page, Access section on the document page, "who can read" preview | Not started |
 
 ## Security rules that apply

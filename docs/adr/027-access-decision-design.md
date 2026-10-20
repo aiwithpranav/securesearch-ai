@@ -17,6 +17,11 @@ Blueprint section 9.2 gives the five access rules (A to E) and section 9.4 the t
 - **History:** `permission_change_events` keeps the full rule list before and after every change (never document text). It is written by the API layer in 4B in the same transaction as the change.
 - **Explanations:** `decision_steps` runs the same rule pieces one by one and returns a stable code (`NO_ALLOW_RULE`, `DENIED_BY_RULE`, `CLEARANCE_TOO_LOW`...). It is for administrators (access preview, 4B); users only ever see the uniform refusal in Phase 6.
 
+## Addition in 4B
+- Routes that need MANAGE on a document answer **404 "Document not found"** to anyone who lacks it (the same answer as for a missing document), so existence is not revealed. Groups remain system_admin only (403 for others).
+- `PATCH /documents/{id}` (metadata edit) now needs MANAGE on the document instead of the admin role; the other Phase 3 document routes stay admin-only.
+- A rule and its history row are saved in one transaction.
+
 ## How it is proven
 - Table-driven tests for every rule, every principal type, deny-beats-allow for all 25 combinations, expiry, clearance edges, country lists, document and user state, revocation (group, department, rule, user, document), MANAGE and DOWNLOAD.
 - A second, independent Python "oracle" follows the same rules and is compared with the SQL in 8 random worlds (294 user, document and permission combinations per world, 2,352 in total): allow-list, single check and explanation must all agree with it.
