@@ -1,6 +1,6 @@
 # Phase 3 Walkthrough
 
-Grows with each layer. Layer status: **3A and 3B built and merged**, **3C built (waiting for owner review)**.
+Grows with each layer. Layer status: **3A, 3B and 3C built, approved and merged**. Phase 3 is closing (tag `v0.3` after the owner go).
 
 ## Layer 3A: storage, worker and local embeddings
 

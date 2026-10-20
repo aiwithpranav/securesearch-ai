@@ -1,6 +1,13 @@
-# STATUS: Phase 3, Layer 3C (admin documents screens)
+# STATUS: Phase 3 (documents and ingestion): CLOSING
 
-Branch: `feat/documents-3c` (local, not pushed). `main` has Phases 1 and 2 (tags `v0.1`, `v0.2`) and layers 3A and 3B (PRs #6, #7).
+All Phase 3 work is merged to `main` (PRs #6, #7, #8). This close-out PR adds the final documentation. The tag `v0.3` is created on the merge commit of this PR, after the owner says go.
+
+## Final checks run by Claude on `main` (2026-10-20)
+- 169 backend tests pass; `alembic check` clean (head `0002`); 6 services healthy.
+- 20 frontend tests pass; `tsc` clean; `npm run build` OK.
+- Live API: the administrator lists 13 documents, all READY; a normal user gets 403 on every document route; no token gets 401; health and ready are 200.
+- **Worker kill test on `main`:** 13 re-index jobs queued and the worker killed while one job was PROCESSING and 11 were QUEUED; after the restart all jobs finished once: 13 documents READY, one active chunk set each, no leftovers, no duplicate chunks, no FAILED jobs. (Two earlier attempts finished before the kill landed, because the small demo files are processed very fast; a cold worker was needed to catch a job mid-flight.)
+- Secret scan of the tracked tree: clean.
 
 ## Done
 - CR-001 (SeaweedFS replaces archived MinIO), ADR 024 (versions), ADR 025 (storage).
@@ -11,12 +18,12 @@ Branch: `feat/documents-3c` (local, not pushed). `main` has Phases 1 and 2 (tags
 - 3C: documents list, upload page, document page (edit, re-index, delete, history, versions), notification bell, admin-only gating, jobs filter by document. Checks: 20 frontend tests, `tsc`, build, 169 backend tests, full browser walkthrough (see WALKTHROUGH, layer 3C), phone-width header fix.
 
 ## In progress
-- Nothing. Waiting for owner review of 3C.
+- Nothing.
 
 ## Exact next action
-1. Owner runs the manual checks from the 3C report and replies "Approved" or lists fixes.
-2. After approval: push `feat/documents-3c`, owner merges the PR.
-3. Phase 3 close: final checks on `main`, docs close, owner says "go", tag `v0.3`, then the Phase 4 plan (permissions and ACL).
+1. Owner merges the Phase 3 close-out PR and says go.
+2. Claude creates tag `v0.3` on the merge commit, pushes it and verifies the remote.
+3. Claude writes the Phase 4 plan (permissions and ACL) and waits for approval. No Phase 4 work before that.
 
 ## Blockers
 - None.

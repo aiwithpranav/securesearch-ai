@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`) and Phase 2 (authentication and user flow, tag `v0.2`). In progress: Phase 3 (documents and ingestion): layers 3A and 3B merged, 3C (admin screens) built and awaiting owner review.
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`) and Phase 2 (authentication and user flow, tag `v0.2`). Phase 3 (documents and ingestion) is complete and being closed (tag `v0.3` after the owner go). Next: Phase 4 (permissions and ACL), waiting for owner approval.
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -13,7 +13,7 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
-* **Phase 3C admin screens (implemented, awaiting owner review):** administrators get a Documents menu: a list with status and filters, an upload page, a document page (edit, re-index, delete, processing history) and a notification bell for failed processing. Normal users see none of it. There is **no search or answer yet**. Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md). Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
+* **Phase 3C admin screens (implemented):** administrators get a Documents menu: a list with status and filters, an upload page, a document page (edit, re-index, delete, processing history) and a notification bell for failed processing. Normal users see none of it. There is **no search or answer yet**. Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md). Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
 * **Auth backend (Phase 2B, implemented):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
 
 * **Login UI (Phase 2C, implemented):** `/login` (validation, shake, Caps Lock hint, Remember me, all error states), `/forgot-password`, `/reset-password`, `/home` (your details, first-2-minutes guide, welcome tour), `/profile` (change password, sign out of all devices). Search and documents are **not built yet**; guide steps for them say "Coming in Phase N". Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
@@ -107,8 +107,8 @@ Tests use their own database (`<POSTGRES_DB>_test`) and need the services above 
 ```
 
 ## Roadmap
-Phases follow the blueprint (v1.2). Done: Phase 1 and Phase 2.
-* **Phase 3:** Documents and ingestion (upload, parse, chunk, embed)
+Phases follow the blueprint (v1.2). Done: Phases 1, 2 and 3.
+* **Phase 3 (done):** Documents and ingestion (upload, parse, chunk, embed, admin screens)
 * **Phase 4:** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
 * **Phase 5:** Hybrid retrieval (full-text + vector search, rerank)
 * **Phase 6:** Answers and citations (LLM, refusals, chat UI)
