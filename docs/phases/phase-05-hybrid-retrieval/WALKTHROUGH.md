@@ -45,3 +45,40 @@ The engine that finds the best passages ("chunks") for a question, for one perso
 - `ts_rank` is not BM25. Quotes and search operators are ignored.
 - The threshold 0.03 is provisional (tiny question set).
 - See `docs/CHALLENGES.md` entries 65 to 70.
+
+## Layer 5B: the search API
+
+### 1. What we built
+`POST /api/v1/search`: a signed-in person sends a question and gets the best matching passages from the documents they may read. No screen yet (5C). Decisions taken: mode optional (server default hybrid), 30 searches per minute per person, score details only for `system_admin`, no search history yet (Phase 6), models loaded when the API starts.
+
+### 2. How it works, step by step
+1. The caller must be signed in (same checks as every route: token, active account).
+2. The question is trimmed and checked: 1 to 500 characters, otherwise 422 with a plain message. `mode` must be `keyword`, `vector` or `hybrid` or left out.
+3. Rate limit: 30 per minute per person (Redis); more gives 429 with `Retry-After`.
+4. The search runs in a worker thread (so the API stays responsive), at most 2 at a time; the rest wait in line.
+5. The engine of 5A does the work: allow-list first, then both searches inside it, fusion, rerank.
+6. One log line is written with ids only: user id, mode, result count, time. The question text is never logged or stored.
+7. The answer carries `Cache-Control: no-store`. Ordinary people get the final score; a `system_admin` also gets every score signal (keyword rank, vector rank, RRF, rerank) to tune and debug.
+
+### 3. Important files
+`backend/app/api/v1/search.py` (route, warm-up), `backend/app/schemas/search.py` (request and response), `backend/app/main.py` (router and start-up warm-up), `backend/app/core/config.py` (limits), `backend/tests/test_search_api.py`.
+
+### 4. Tools: why we chose them
+Existing building blocks only: FastAPI, the Redis rate limiter used for login and upload, the structured security log. `asyncio.to_thread` keeps CPU-heavy model work off the event loop.
+
+### 5. How to run it
+Rebuild and start (`docker compose build backend && docker compose up -d`), sign in, then call `POST /api/v1/search` with a bearer token (try it in the API docs page at `/api/docs`).
+
+### 6. How to test it
+`docker compose exec backend python -m pytest -q` (355 tests; 20 are new for 5B).
+
+### 7. Actual results (checked by me)
+- 355 backend tests pass; `alembic check` clean.
+- Tests cover: 401 without or with a bad token and for deactivated users; allowed text returned and forbidden text never present; the three modes; default mode; admin is not reader but sees scores for what the rules allow; revoking a rule changes the next search; odd questions (quotes, operators, SQL, long, non-English) never crash; 8 kinds of bad request give 422; the rate limit is per person and sends `Retry-After`; the question text never appears in logs while one search event does; only the search route can return chunk text.
+- Mutation check: 6 deliberate mistakes caught.
+- Live with real models: 6 searches at once all succeeded; the slowest took 9.4 s, while health checks stayed at most 13 ms; first search after a cold start about 8 s (now warmed at start-up).
+
+### 8. Limitations and open issues
+- Under many simultaneous searches latency rises (CPU only); fine for one or two users.
+- No search history yet (Phase 6). No screen yet (5C).
+- See `docs/CHALLENGES.md` entries 71 to 73.

@@ -7,8 +7,8 @@
 ## Layers (each needs the owner's approval)
 | Layer | Content | Status |
 |---|---|---|
-| **5A** Engine | Migration `0004` (GIN and HNSW indexes), retrieval module (allow-list, keyword, vector, RRF, reranker), reranker baked into the image, tests with the Phase 4 oracle, ADR 028 | Built, waiting for owner review |
-| **5B** API | `POST /search` with `mode`, rate limit, validation, no query text in logs, an `explain` of scores | Not started |
+| **5A** Engine | Migration `0004` (GIN and HNSW indexes), retrieval module (allow-list, keyword, vector, RRF, reranker), reranker baked into the image, tests with the Phase 4 oracle, ADR 028 | Merged (PR #14) |
+| **5B** API | `POST /search` with `mode`, rate limit, validation, no query text in logs, score details for admin | Built, waiting for owner review |
 | **5C** UI | Search screen for employees showing result chunks | Not started |
 
 ## Security rules that apply

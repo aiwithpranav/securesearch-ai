@@ -51,6 +51,7 @@ if BASE_URL and BASE_URL != "CHANGE_ME":
     os.environ["DATABASE_URL"] = TEST_DATABASE_URL
     # Tests use their own storage bucket too, so they never touch uploaded dev files.
     os.environ["S3_BUCKET"] = os.environ.get("S3_BUCKET", "securesearch-documents") + "-test"
+    os.environ["SEARCH_WARMUP"] = "false"  # tests load models only when a test needs them
 else:  # pragma: no cover
     TEST_DATABASE_URL = ""
 

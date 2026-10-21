@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     reranker_model_path: str = "/opt/models/bge-reranker-base"  # baked into the image at build time
     reranker_model_name: str = "BAAI/bge-reranker-base"
     reranker_model_revision: str = "2cfc18c9415c912f9d8155881c133215df768a70"
+    search_limit_per_minute: int = 30  # NFR-03: per signed-in user
+    search_concurrency: int = 2  # searches running at once (models use the CPU); others wait in line
+    search_warmup: bool = True  # load both models in the background when the API starts
 
     # --- Phase 3B upload and ingestion limits ---
     max_upload_bytes: int = 50 * 1024 * 1024  # NFR-03: 50 MB

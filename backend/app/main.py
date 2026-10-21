@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 
@@ -6,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.v1 import access, auth, documents, health, notifications, users
+from app.api.v1 import access, auth, documents, health, notifications, search, users
 from app.core.config import settings
 from app.core.env_doctor import check_env
 from app.core.errors import (
@@ -26,6 +27,8 @@ from app.db.session import engine
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Run env doctor at startup
     check_env()
+    if settings.search_warmup:
+        app.state.warmup = asyncio.create_task(asyncio.to_thread(search.warm_up))  # loads the models in the background
     yield
     # Close connections cleanly on shutdown
     await close_redis()
@@ -60,3 +63,4 @@ app.include_router(documents.router, prefix="/api/v1")
 app.include_router(access.groups_router, prefix="/api/v1")
 app.include_router(access.manage_router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
+app.include_router(search.router, prefix="/api/v1")
