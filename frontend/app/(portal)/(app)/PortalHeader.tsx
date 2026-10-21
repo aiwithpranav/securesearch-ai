@@ -17,6 +17,7 @@ export function PortalHeader() {
   const isAdmin = user?.roles.includes("system_admin") ?? false;
   const links = [
     { href: "/home", label: "Home" },
+    { href: "/search", label: "Search" },
     ...(isAdmin
       ? [
           { href: "/admin/documents", label: "Documents" },
