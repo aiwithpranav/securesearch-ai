@@ -1,6 +1,6 @@
-# STATUS: Phase 5, Layer 5C (search screen)
+# STATUS: Phase 5 complete (5A, 5B, 5C merged)
 
-Branch: `feat/search-ui-5c` (local, not pushed). `main` has Phases 1 to 4 (tags `v0.1` to `v0.4`) and layers 5A and 5B.
+Branch: `docs/phase-5-close`. `main` has Phases 1 to 4 (tags `v0.1` to `v0.4`) and all of Phase 5 (PRs #14, #15, #16). Tag `v0.5` comes after this docs PR is merged.
 
 ## Done
 - Phase 5 plan approved with 5 decisions; ADR 028; Phase 5 docs.
@@ -10,12 +10,12 @@ Branch: `feat/search-ui-5c` (local, not pushed). `main` has Phases 1 to 4 (tags 
 - 5C: the `/search` screen (question box, results with relevance bar, weak-match note, empty, error and rate-limit states, administrator score details), menu link, Home and tour wording. 41 frontend tests; checked in the real browser with temporary people (removed afterwards) and at 360 px.
 
 ## In progress
-- Nothing. Waiting for owner review of 5C.
+- Nothing.
 
 ## Exact next action
-1. Owner approves 5C ("5C Approved").
-2. Claude pushes `feat/search-ui-5c` and gives the PR link with click-by-click steps. The owner merges; Claude checks the remote.
-3. Phase 5 close: final checks on `main`, close-out docs PR, tag `v0.5` only after the owner says "go". Then the Phase 6 plan.
+1. Owner merges the close-out docs PR; Claude verifies the remote.
+2. Claude tags `v0.5` (after the owner says go), pushes it and verifies the tag on the remote.
+3. Claude writes the Phase 6 (answers and citations) plan and waits for approval. Phase 6 needs an OpenAI API key and a spend limit: see the blueprint prerequisites.
 
 ## Blockers
 - None.
@@ -33,4 +33,4 @@ Branch: `feat/search-ui-5c` (local, not pushed). `main` has Phases 1 to 4 (tags 
 - Reranker latency about 0.5 to 2 s per search, up to 9 s with 6 at once (target P95 under 5 s).
 
 ## Resume prompt
-"Read docs/phases/phase-05-hybrid-retrieval/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Layer 5C is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-05-hybrid-retrieval/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Phase 5 is complete; the v0.5 tag is next. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."

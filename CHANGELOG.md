@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [v0.5] - 2026-10-21
+Phase 5 (hybrid retrieval) complete: search engine with indexes, allow-list first, RRF and local reranker (5A), `POST /search` (5B), search screen (5C). Details in the three Phase 5 sections below. 355 backend and 41 frontend tests.
+
 ### Added (Phase 5C, branch `feat/search-ui-5c`, awaiting owner review)
 - Search screen `/search` for everyone: question box, results with document, page or section, passage and a relevance bar with words, weak-match note, no-results, error and rate-limit messages, administrator score details. Menu link, Home and tour wording updated. The question is never put in the web address.
 - 41 frontend tests (13 new). Challenges 74 to 76.
