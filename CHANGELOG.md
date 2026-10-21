@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 6A, branch `feat/answers-6a`, awaiting owner review)
+- Answer engine (`app/llm`, `app/answers`): GPT-4o mini behind one interface, prompt that marks passages as untrusted data, validator (JSON shape, citations only to given passages, no links or HTML), confidence gate, second access check, one uniform refusal. ADR 030.
+- The OpenAI key is optional, read from `.env` only, never logged, and given to the backend container only.
+- 83 new tests (438 total), 11 mutation checks, a live check with the real model on the demo documents. Challenges 81 to 85.
+
 ### Changed (design refresh, branch `feat/design-refresh`, awaiting owner review)
 - New look everywhere through the theme tokens: violet-black base and purple accent (contrast checked). Soft 150 ms hover and focus transitions on controls.
 - Animated dots sphere on the landing hero and the sign-in, forgot-password and reset-password pages: dots fly in from both sides, then it turns slowly. Still picture for reduced motion, fewer dots on phones. No background animation after sign-in.

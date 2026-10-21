@@ -34,3 +34,4 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 28 | Reranker speed | About 0.5 to 2 s per search on CPU for 20 candidates, up to 9 s when 6 people search at once. Lower the candidate count or cache if Phase 7 shows the P95 over 5 s. | Phase 7 | No |
 | 29 | Refusal threshold | 0.03 is provisional (tiny question set); tune on the 60+ questions. | Phase 7 | Yes |
 | 30 | Hydration mismatch with reduced motion on the landing page | Phase 1 components call `useReducedMotion()` while rendering. Fix by reading the preference after mount. | Later | No |
+| 31 | Docker image layers | Changing `requirements.txt` re-installs everything and re-downloads the models (about 15 minutes). Split the model downloads from the pip install. | Phase 9 | No |

@@ -43,6 +43,15 @@ class Settings(BaseSettings):
     search_concurrency: int = 2  # searches running at once (models use the CPU); others wait in line
     search_warmup: bool = True  # load both models in the background when the API starts
 
+    # --- Phase 6 answers. The API key is optional: without it /ask answers 503 and everything else works. ---
+    openai_api_key: str = ""  # set by the owner in .env only; never logged, never returned, never committed
+    llm_model: str = "gpt-4o-mini"
+    llm_base_url: str = "https://api.openai.com/v1"
+    llm_timeout_seconds: int = 30
+    llm_max_output_tokens: int = 500  # also the cost cap per answer
+    answer_context_chunks: int = 6  # passages the model may read (blueprint: keep 5 to 8)
+    answer_min_score: float = 0.03  # provisional refusal threshold on the reranker score (ADR 028); tuned in Phase 7
+
     # --- Phase 3B upload and ingestion limits ---
     max_upload_bytes: int = 50 * 1024 * 1024  # NFR-03: 50 MB
     max_pdf_pages: int = 500
