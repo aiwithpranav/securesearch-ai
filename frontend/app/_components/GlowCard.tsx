@@ -77,14 +77,14 @@ export function GlowCard({ children, className = "", as = "div" }: { children: R
         <div 
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(circle 200px at ${cursorPos.x}px ${cursorPos.y}px, rgba(59, 130, 246, 0.15) 0%, transparent 100%)`,
+            background: `radial-gradient(circle 200px at ${cursorPos.x}px ${cursorPos.y}px, rgba(139, 92, 246, 0.18) 0%, transparent 100%)`,
           }}
         />
       </div>
       
       {/* Border glow */}
       <div
-        className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] border border-blue-500 dark:border-blue-400 opacity-0 transition-opacity duration-200 [@media(hover:hover)]:group-hover:opacity-100 group-data-[active=true]:opacity-100"
+        className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] border border-accent2 opacity-0 transition-opacity duration-200 [@media(hover:hover)]:group-hover:opacity-100 group-data-[active=true]:opacity-100"
       />
     </Component>
   );

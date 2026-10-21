@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Answers from your company's documents, with sources, and only from what you have permission to read.",
   openGraph: { title: SITE_NAME, description: "Search everything you're allowed to see. Nothing you're not.", type: "website" },
 };
-export const viewport: Viewport = { themeColor: "#070B14", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: "#0B0A12", colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

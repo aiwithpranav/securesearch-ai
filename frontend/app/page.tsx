@@ -6,6 +6,7 @@ import { HowItWorks } from "./_components/HowItWorks";
 import { HeroDemo } from "./_components/HeroDemo";
 import { AnimatedButton } from "./_components/AnimatedButton";
 import { InteractiveDemo } from "./_components/InteractiveDemo";
+import { DotsSphere } from "./_components/DotsSphere";
 
 const btnPrimary = "inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 font-medium text-bg hover:bg-accent2";
 const btnGhost = "inline-flex items-center justify-center rounded-lg border border-line px-5 py-3 font-medium text-text hover:border-accent2";
@@ -79,7 +80,10 @@ export default function Home() {
           In development. This page describes the planned product; examples use sample data.
         </div>
 
-        <section className="py-20 sm:py-28">
+        <section className="relative overflow-hidden py-20 sm:py-28">
+          <DotsSphere />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-r from-bg/85 via-bg/25 to-transparent" />
+          <div className="relative z-10">
           <Reveal>
             <div className={`${wrap} grid items-center gap-12 lg:grid-cols-2`}>
               <div>
@@ -98,6 +102,7 @@ export default function Home() {
               />
             </div>
           </Reveal>
+          </div>
         </section>
 
         <Section id="problem" title="AI search is fast. It can also be a leak." intro="Ordinary AI search may pull confidential text into an answer for someone who must not see it. Questions like these are where it goes wrong:">
