@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed (design refresh, branch `feat/design-refresh`, awaiting owner review)
+- New look everywhere through the theme tokens: violet-black base and purple accent (contrast checked). Soft 150 ms hover and focus transitions on controls.
+- Animated dots sphere on the landing hero and the sign-in, forgot-password and reset-password pages: dots fly in from both sides, then it turns slowly. Still picture for reduced motion, fewer dots on phones. No background animation after sign-in.
+- No change to text, API, database, permissions or search. 7 new frontend tests (48 total); backend 355 tests unchanged. ADR 029, challenges 77 to 80.
+
 
 ## [v0.5] - 2026-10-21
 Phase 5 (hybrid retrieval) complete: search engine with indexes, allow-list first, RRF and local reranker (5A), `POST /search` (5B), search screen (5C). Details in the three Phase 5 sections below. 355 backend and 41 frontend tests.
