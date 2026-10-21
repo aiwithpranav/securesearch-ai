@@ -125,6 +125,11 @@ class DocumentChunk(Base):
         Index("ix_document_chunks_document_active", "document_id", "is_active"),
         Index("ix_document_chunks_job", "ingestion_job_id"),
         UniqueConstraint("ingestion_job_id", "chunk_index", name="uq_document_chunks_job_index"),
+        Index("ix_document_chunks_tsv", "tsv", postgresql_using="gin"),
+        Index(
+            "ix_document_chunks_embedding_hnsw", "embedding", postgresql_using="hnsw",
+            postgresql_with={"m": 16, "ef_construction": 64}, postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -145,7 +150,7 @@ class DocumentChunk(Base):
     token_count: Mapped[int] = mapped_column(Integer, nullable=False)
     embedding: Mapped[Any] = mapped_column(Vector(384), nullable=False)
     embedding_model: Mapped[str] = mapped_column(Text, nullable=False)
-    # Full-text search column, filled by Postgres itself. Its GIN index comes in Phase 5.
+    # Full-text search column, filled by Postgres itself (GIN index ix_document_chunks_tsv).
     tsv: Mapped[Any] = mapped_column(TSVECTOR, Computed("to_tsvector('english', content)", persisted=True))
 
 
