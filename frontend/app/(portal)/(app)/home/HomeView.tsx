@@ -12,10 +12,10 @@ type Step = { text: string; later?: string; href?: string };
 // Admin = upload, set access, check status. Steps that need later phases say so honestly.
 const EMPLOYEE_STEPS: Step[] = [
   { text: "Sign in (done: you are here)." },
-  { text: "Search in your own words.", href: "/search" },
-  { text: "Get a written answer with sources.", later: "Phase 6" },
-  { text: "Open a source to check the original text.", later: "Phase 6" },
-  { text: "Rate the answer with a thumbs up or down.", later: "Phase 6" },
+  { text: "Ask a question in your own words.", href: "/search" },
+  { text: "Read the answer and its sources." },
+  { text: "Open a source to check the original text." },
+  { text: "Rate the answer with a thumbs up or down." },
 ];
 const ADMIN_STEPS: Step[] = [
   { text: "Upload a document.", later: "Phase 3" },
@@ -39,7 +39,7 @@ function Steps({ title, steps }: { title: string; steps: Step[] }) {
   );
 }
 
-// Home shell. Search is here (Phase 5); answers with citations arrive in Phase 6.
+// Home shell. Questions, answers with sources and ratings live on the Ask page.
 export function HomeView() {
   const { user } = useSession();
   if (!user) return null;
@@ -50,7 +50,7 @@ export function HomeView() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Welcome, {user.full_name}</h1>
-          <p className="mt-2 text-muted">You are signed in. <Link href="/search" className="text-accent2 hover:underline">Search the documents you may read</Link>.</p>
+          <p className="mt-2 text-muted">You are signed in. <Link href="/search" className="text-accent2 hover:underline">Ask a question about the documents you may read</Link>.</p>
         </div>
         <button
           type="button"

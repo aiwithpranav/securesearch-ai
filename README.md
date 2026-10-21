@@ -13,7 +13,8 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
-* **Phase 6B answer API (implemented, awaiting owner review):** ask a question and get a short cited answer or one uniform refusal, see the passage behind a citation, keep a private search history and give thumbs up or down. There is **no answer screen yet** (6C).
+* **Phase 6C Ask screen (implemented, awaiting owner review):** sign in and use **Ask** in the menu: get a short answer with sources, open the passage behind a source, rate the answer, and see your recent questions. Live answers need an OpenAI key in your local `.env`.
+* **Phase 6B answer API (done, merged):** ask a question and get a short cited answer or one uniform refusal, see the passage behind a citation, keep a private search history and give thumbs up or down. 
 * **Phase 6A answer engine (done, merged):** turns a question into a short answer with citations written only from documents the person may read, or one uniform refusal. Needs an OpenAI key in `.env` for live answers (optional). 
 * **Design refresh (implemented, awaiting owner review):** new purple palette across the whole app and an animated dots sphere on the landing page and sign-in pages. After sign-in the app stays calm and stable. No behaviour changed.
 * **Phase 5C search screen (done, merged):** sign in and use **Search** in the menu: type a question, see the best passages from the documents you may read with a relevance bar. Written answers with sources are Phase 6.

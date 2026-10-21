@@ -49,9 +49,10 @@ export function previewText(content: string, max = SHORT): { short: string; trun
   return { short: (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…", truncated: true };
 }
 
-/** "Page 3 · Alerts", or empty text when the passage has neither. */
-export function whereText(hit: Pick<SearchHit, "page_number" | "section">): string {
-  const parts = [hit.page_number ? `Page ${hit.page_number}` : null, hit.section?.trim() || null].filter(Boolean);
+/** "Page 3 · Alerts", or empty text when the passage has neither. Accepts search hits (page_number) and citations (page). */
+export function whereText(hit: { page_number?: number | null; page?: number | null; section?: string | null }): string {
+  const page = hit.page_number ?? hit.page;
+  const parts = [page ? `Page ${page}` : null, hit.section?.trim() || null].filter(Boolean);
   return parts.join(" · ");
 }
 

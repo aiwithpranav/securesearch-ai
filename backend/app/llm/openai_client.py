@@ -37,13 +37,16 @@ class OpenAiClient:
             "response_format": {"type": "json_object"},
         }
         headers = {"Authorization": f"Bearer {self._api_key}", "Content-Type": "application/json"}
-        response: httpx.Response | None = None
+        response: httpx.Response | None = None  # (stays None only if the loop ends by an error, which raises)
         for attempt in range(2):  # one retry for a busy or briefly failing service
             try:
                 response = self._http.post(self._url, json=payload, headers=headers)
             except httpx.TimeoutException:
                 raise LlmError("timeout") from None
             except httpx.HTTPError:
+                if attempt == 0:  # a dropped or refused connection is often momentary: one more try
+                    time.sleep(0.5)
+                    continue
                 raise LlmError("unavailable") from None
             if response.status_code in _RETRY_STATUS and attempt == 0:
                 wait = response.headers.get("retry-after", "1")

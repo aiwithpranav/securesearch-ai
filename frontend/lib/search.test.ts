@@ -50,6 +50,7 @@ describe("whereText", () => {
     expect(whereText({ page_number: null, section: "Alerts" })).toBe("Alerts");
     expect(whereText({ page_number: 2, section: " " })).toBe("Page 2");
     expect(whereText({ page_number: null, section: null })).toBe("");
+    expect(whereText({ page: 4, section: "Alerts" })).toBe("Page 4 · Alerts"); // citations and passages say page
   });
 });
 

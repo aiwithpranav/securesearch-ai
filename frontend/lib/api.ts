@@ -89,19 +89,24 @@ export async function api<T>(path: string, { method = "GET", body, token }: Opti
     // body was empty or not JSON
   }
 
-  if (!res.ok) {
-    const p = (data ?? {}) as {
-      title?: string; detail?: unknown; request_id?: string; retry_after_seconds?: number;
-      error_code?: string; existing_document_id?: string;
-    };
-    throw new ApiError(
-      res.status,
-      p.title ?? "Request failed",
-      typeof p.detail === "string" ? p.detail : "Something went wrong. Please try again.",
-      p.request_id,
-      p.retry_after_seconds,
-      { errorCode: p.error_code, existingDocumentId: p.existing_document_id },
-    );
-  }
+  if (!res.ok) throw errorFromProblem(res.status, data);
   return data as T;
 }
+
+/** Turns a Problem Details body into an ApiError (shared by the JSON helper and the streaming helper). */
+export function errorFromProblem(status: number, data: unknown): ApiError {
+  const p = (data ?? {}) as {
+    title?: string; detail?: unknown; request_id?: string; retry_after_seconds?: number;
+    error_code?: string; existing_document_id?: string;
+  };
+  return new ApiError(
+    status,
+    p.title ?? "Request failed",
+    typeof p.detail === "string" ? p.detail : "Something went wrong. Please try again.",
+    p.request_id,
+    p.retry_after_seconds,
+    { errorCode: p.error_code, existingDocumentId: p.existing_document_id },
+  );
+}
+
+export { API_BASE };

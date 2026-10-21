@@ -78,7 +78,21 @@ def test_a_service_that_stays_busy_fails_after_one_retry(monkeypatch, status, co
     assert len(calls) == 2  # never a retry storm (cost and rate limits)
 
 
-def test_timeouts_and_network_errors_are_short_code_words():
+def test_a_dropped_connection_is_retried_once_then_succeeds(monkeypatch):
+    monkeypatch.setattr("app.llm.openai_client.time.sleep", lambda s: None)
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        if len(calls) == 1:
+            raise httpx.RemoteProtocolError("server disconnected")
+        return ok_response()
+
+    assert client_for(handler).complete("s", "u", 10).text and len(calls) == 2
+
+
+def test_timeouts_and_network_errors_are_short_code_words(monkeypatch):
+    monkeypatch.setattr("app.llm.openai_client.time.sleep", lambda s: None)
     def slow(request):
         raise httpx.ReadTimeout("slow")
 
