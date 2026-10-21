@@ -9,7 +9,7 @@
 |---|---|---|
 | **6A** Engine | LLM adapter (GPT-4o mini and a fake), prompt, answer pipeline, citation validator, refusal policy, ADR 030 | Merged (PR #19) |
 | **6B** API | `POST /chat` with the blueprint response shape, `/chat/stream`, evidence preview, rate limit, 503 without a key, search history, feedback | Merged (PR #20) |
-| **6C** UI | Answer with citations on the search screen, evidence panel, thumbs, history | Built, waiting for owner review |
+| **6C** UI | Answer with citations on the search screen, evidence panel, thumbs, history | Merged (PR #21) |
 
 ## Security rules that apply
 - The model is not a security layer: it only sees passages the resolver allowed, marked as data, and has no tools.
