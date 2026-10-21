@@ -6,9 +6,9 @@ import { useSession } from "../_auth/AuthProvider";
 
 // Blueprint 19.1: a 3-step skippable tour: ask, check sources, rate.
 const STEPS = [
-  { title: "Ask in your own words", text: "Type a question the way you would ask a colleague. Use Search in the menu to find passages in the documents you may read. Written answers with sources arrive in a later phase." },
-  { title: "Check the sources", text: "Every answer will name the document and section it came from. Open the source to read the original text yourself." },
-  { title: "Rate the answer", text: "Tell us with a thumbs up or down whether the answer helped. Your rating helps improve what the team finds." },
+  { title: "Ask in your own words", text: "Type a question the way you would ask a colleague. Use Ask in the menu: you get a short answer written only from documents you may read." },
+  { title: "Check the sources", text: "Every answer names the document and section it came from. Press View passage to read the original text yourself." },
+  { title: "Rate the answer", text: "Tell us with Yes or No whether the answer helped. Your rating helps improve what the team finds." },
 ];
 
 /** Opens by itself the first time a person arrives, and again when they ask for it. */

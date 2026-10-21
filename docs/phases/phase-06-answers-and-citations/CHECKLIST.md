@@ -18,10 +18,15 @@
 - [x] Search history (private, paged, deletable) and feedback; migration `0005`
 - [x] No question or answer text in logs
 - [x] 45 new tests (483 total), 12 mutations (10 caught, 2 equivalent), live check through the API
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #20)
 
-## 6C UI (not started)
-- [ ] Answer, citations, evidence panel, thumbs, history
+## 6C UI (built, waiting for owner review)
+- [x] Ask and Find modes; progress stages; answer with S1 badges and sources
+- [x] Evidence panel (side panel and bottom sheet), Esc, focus return, re-checked on the server
+- [x] Thumbs with optional comment; recent questions with Ask again and Remove
+- [x] Uniform no-answer message with Show matching passages; 503 and 429 messages
+- [x] 59 frontend tests, 18 real-browser checks with the real model, 360 px measured
+- [ ] Owner manual checks and approval
 
 ## Phase 6 close
 - [ ] Owner approval, PRs merged, tag `v0.6`

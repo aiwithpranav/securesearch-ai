@@ -8,7 +8,7 @@
 // Important: the server rotates the refresh cookie on every use, and treats a second
 // use of the old cookie as theft. So we must NEVER call /auth/refresh twice at the same
 // time. refreshSession() is "single-flight": concurrent callers share one request.
-import { api, ApiError, type TokenResponse, type User } from "./api";
+import { api, API_BASE, ApiError, errorFromProblem, type TokenResponse, type User } from "./api";
 
 export type SessionState = { status: "loading" | "signed-out" | "signed-in"; user: User | null };
 
@@ -126,4 +126,33 @@ export async function authedApi<T>(path: string, opts: { method?: string; body?:
     }
     throw e;
   }
+}
+
+/** Like authedApi, but returns the raw Response (used for Server-Sent Events). Non-OK answers become an ApiError. */
+export async function authedFetch(path: string, init: { method?: string; body?: unknown; signal?: AbortSignal } = {}): Promise<Response> {
+  if (!accessToken || Date.now() > expiresAtMs - 30_000) {
+    if (!(await refreshSession())) throw new ApiError(401, "Session expired", "Please sign in again.");
+  }
+  const run = () =>
+    fetch(`${API_BASE}${path}`, {
+      method: init.method ?? "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      credentials: "include",
+      signal: init.signal,
+    });
+  let res: Response;
+  try {
+    res = await run();
+    if (res.status === 401 && (await refreshSession())) res = await run();
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+    throw new ApiError(0, "Network error", "Can't reach the server. Check your connection and try again.");
+  }
+  if (!res.ok) {
+    let data: unknown = null;
+    try { data = await res.json(); } catch { /* empty or not JSON */ }
+    throw errorFromProblem(res.status, data);
+  }
+  return res;
 }

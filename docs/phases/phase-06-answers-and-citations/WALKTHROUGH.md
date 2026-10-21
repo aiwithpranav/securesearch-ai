@@ -79,3 +79,40 @@ Existing building blocks only: FastAPI, the Redis rate limiter, the structured s
 - No screen yet (6C). History has no automatic expiry (a retention period can be added later).
 - Answers take about 2 to 7 s; with many people at once they queue (2 at a time).
 - See `docs/CHALLENGES.md` entries 86 to 90.
+
+## Layer 6C: the Ask screen (frontend)
+
+### 1. What we built
+The page `/search` (menu link **Ask**) now has two modes: **Ask a question** (a short cited answer, the default) and **Find passages** (the Phase 5 search). It adds an evidence panel for the passage behind a citation, thumbs up or down, and a list of your recent questions. Backend unchanged except one small robustness fix (see section 7). Decisions taken: Ask is the default; history shows the question only and "Ask again" writes a fresh answer; evidence is a side panel on a laptop and a bottom sheet on a phone; thumbs only on answers; the progress view uses the streaming route.
+
+### 2. How it works, step by step
+1. The person types a question (up to 500 characters, with a counter) and presses **Ask** (or **Search** in Find mode). An empty question shows a message and sends nothing. The question never goes into the web address.
+2. **Progress** appears while waiting: "Searching 4 documents you can read", "Writing the answer from your sources", with a tick when a stage is done. Only the newest request may update the screen.
+3. **Answer card:** the answer, small S1, S2 badges where the answer cites a source, then **Sources**: document, section or page, a snippet and **View passage**.
+4. **Evidence panel:** opens with the whole passage (title, place, updated date). It fetches the passage again from the server, which re-checks READ; if it is no longer allowed the panel says "This passage is no longer available." Esc or Close shuts it and focus returns to the button that opened it.
+5. **Thumbs:** Yes or No (pressed state shown), then an optional comment; rating again replaces the rating.
+6. **No answer:** one plain message (the same for every reason), plus **Show matching passages** which switches to Find mode. Nothing says why, so it cannot reveal restricted documents.
+7. **Errors:** answers off (no key, provider down) shows "Answers are not available right now. You can still search." with **Find passages instead**; too many questions shows how many seconds to wait; network problems have plain words and Try again.
+8. **Recent questions:** your last 10, with status and age, **Ask again** and **Remove** (asks to confirm). Only the question is kept, never the answer.
+
+### 3. Important files
+`frontend/lib/chat.ts` and `chat.test.ts` (API calls, the event-stream reader, wording helpers), `frontend/lib/session.ts` (`authedFetch` for streaming) and `lib/api.ts` (shared error parsing), `frontend/app/(portal)/(app)/search/` (`SearchView.tsx`, `AnswerCard.tsx`, `EvidencePanel.tsx`, `HistoryList.tsx`), menu, Home and tour wording.
+
+### 4. Tools: why we chose them
+Same stack as the other screens. The event stream is read with the browser's own `fetch` and a small tested parser, so no new library is needed.
+
+### 5. How to run it
+`docker compose up -d`, `cd frontend && npm run dev`, sign in, click **Ask** in the menu. Live answers need your key in `.env`.
+
+### 6. How to test it
+`cd frontend && npx tsc --noEmit && npm test && npm run build` (59 frontend tests); backend `docker compose exec backend python -m pytest -q` (484).
+
+### 7. Actual results (checked by me)
+- Typecheck, 59 frontend tests, production build; backend 484 tests and `alembic check` clean.
+- Real browser, temporary people (deleted afterwards), real model, 18 checks all passed: both modes; progress stages; a leave answer with a Leave policy source; the evidence panel (opens with the passage, focus moves to Close, Esc closes and returns focus); thumbs; recent questions appear, survive a reload, ask again, remove with confirmation; the salary question (not readable by the person) shows the uniform message, no salary text, and Show matching passages works; Find mode still works; 503 and 429 (simulated server answers) show the right messages; no sideways scrolling at 360 px with the answer and the bottom sheet.
+- Finding: twice during the run the provider call failed once with a dropped connection and the screen correctly showed the friendly 503. The model client now retries a dropped connection once (new test), like it already did for busy or failing responses.
+
+### 8. Limitations and open issues
+- Not verified: screen readers beyond labels, roles and live regions; very long answers (capped at 1,500 characters by the server).
+- Answers take 2 to 7 seconds; when many people ask at once they queue (2 at a time).
+- See `docs/CHALLENGES.md` entries 91 to 94.
