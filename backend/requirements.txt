@@ -22,3 +22,6 @@ sentence-transformers==6.1.0
 transformers==5.20.2
 huggingface_hub==1.33.0
 pgvector==0.5.0
+
+# --- Phase 6 (answers): calls the hosted language model ---
+httpx==0.28.1

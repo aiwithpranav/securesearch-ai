@@ -1,3 +1,22 @@
+# Settings shared by the backend and the worker. The OpenAI key goes to the backend ONLY (the worker never calls the model).
+x-app-env: &app_env
+    APP_ENV: "${APP_ENV}"
+    APP_SECRET_KEY: "${APP_SECRET_KEY}"
+    JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
+    POSTGRES_USER: "${POSTGRES_USER}"
+    POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    POSTGRES_DB: "${POSTGRES_DB}"
+    DATABASE_URL: "${DATABASE_URL}"
+    REDIS_URL: "${REDIS_URL}"
+    SMTP_HOST: "${SMTP_HOST}"
+    SMTP_PORT: "${SMTP_PORT}"
+    FRONTEND_ORIGIN: "${FRONTEND_ORIGIN}"
+    SEED_USER_PASSWORD: "${SEED_USER_PASSWORD:-}"
+    S3_ENDPOINT_URL: "${S3_ENDPOINT_URL}"
+    S3_ACCESS_KEY: "${S3_ACCESS_KEY}"
+    S3_SECRET_KEY: "${S3_SECRET_KEY}"
+    S3_BUCKET: "${S3_BUCKET}"
+
 services:
   postgres:
     image: pgvector/pgvector:0.8.0-pg17
@@ -85,23 +104,9 @@ services:
       - public
     ports:
       - "127.0.0.1:8000:8000"
-    environment: &backend_env
-      - APP_ENV=${APP_ENV}
-      - APP_SECRET_KEY=${APP_SECRET_KEY}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
-      - SEED_USER_PASSWORD=${SEED_USER_PASSWORD:-}
-      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
-      - S3_SECRET_KEY=${S3_SECRET_KEY}
-      - S3_BUCKET=${S3_BUCKET}
+    environment:
+      <<: *app_env
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"  # optional: without it /ask answers 503 and all else works
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 10s
@@ -125,7 +130,7 @@ services:
         condition: service_healthy
     networks:
       - private
-    environment: *backend_env
+    environment: *app_env
     healthcheck:
       test: ["CMD-SHELL", "celery -A app.worker.celery_app inspect ping -d celery@$$HOSTNAME --timeout 5"]
       interval: 20s

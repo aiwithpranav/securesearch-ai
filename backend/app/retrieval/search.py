@@ -12,6 +12,7 @@ Three modes share the SAME allow-list: keyword, vector, hybrid (setting RETRIEVA
 import re
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from sqlalchemy import ColumnElement, and_, func, select, text
 from sqlalchemy.orm import Session
@@ -37,6 +38,7 @@ class Hit:
     content: str
     score: float  # final ordering score: rerank score (0..1) when reranked, else RRF, ts_rank or 1 - distance
     scores: dict[str, float] = field(default_factory=dict)  # every signal that was computed, for explanations
+    document_updated_at: datetime | None = None
 
 
 def _allowed(user_id: uuid.UUID) -> ColumnElement[bool]:
@@ -89,13 +91,13 @@ def _load_hits(session: Session, user_id: uuid.UUID, chunk_ids: list[uuid.UUID])
     stmt = (
         select(
             DocumentChunk.id, DocumentChunk.document_id, Document.title, DocumentChunk.page_number,
-            DocumentChunk.section, DocumentChunk.content,
+            DocumentChunk.section, DocumentChunk.content, Document.updated_at,
         )
         .join(Document, Document.id == DocumentChunk.document_id)
         .where(DocumentChunk.id.in_(chunk_ids), _allowed(user_id))
     )
     return {
-        r.id: Hit(r.id, r.document_id, r.title, r.page_number, r.section, r.content, 0.0)
+        r.id: Hit(r.id, r.document_id, r.title, r.page_number, r.section, r.content, 0.0, document_updated_at=r.updated_at)
         for r in session.execute(stmt)
     }
 
