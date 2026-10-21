@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`) and Phase 4 (permissions and ACL, tag `v0.4`). In progress: Phase 5 (hybrid retrieval): layers 5A and 5B merged, 5C (search screen) built and awaiting owner review.
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`) and Phase 4 (permissions and ACL, tag `v0.4`) and Phase 5 (hybrid retrieval, tag `v0.5`). Next: Phase 6 (answers and citations).
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -13,7 +13,7 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
-* **Phase 5C search screen (implemented, awaiting owner review):** sign in and use **Search** in the menu: type a question, see the best passages from the documents you may read with a relevance bar. Written answers with sources are Phase 6.
+* **Phase 5C search screen (done, merged):** sign in and use **Search** in the menu: type a question, see the best passages from the documents you may read with a relevance bar. Written answers with sources are Phase 6.
 * **Phase 5B search API (done, merged):** `POST /api/v1/search` returns the best passages for a question from the documents the caller may read (rate limited; the question text is never logged). 
 * **Phase 5A search engine (done, merged):** finds the best passages for a question using full-text and meaning-based (vector) search, merges them and reorders them with a local reranker model, always only inside the documents the person may read. Details: [Phase 5 walkthrough](docs/phases/phase-05-hybrid-retrieval/WALKTHROUGH.md).
 * **Phase 4C admin screens (done, merged):** administrators manage people (invite, edit, roles, deactivate), groups and members, and the access rules of each document (allow or deny a person, role, group, department or everyone, with optional expiry), see the history of rule changes and ask "who can read this?" with a plain-English reason. Nobody can read document content yet (search is Phase 5).
@@ -117,7 +117,7 @@ Tests use their own database (`<POSTGRES_DB>_test`) and need the services above 
 Phases follow the blueprint (v1.2). Done: Phases 1, 2 and 3.
 * **Phase 3 (done):** Documents and ingestion (upload, parse, chunk, embed, admin screens)
 * **Phase 4 (done, `v0.4`):** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
-* **Phase 5 (in progress, 5A and 5B merged, 5C built):** Hybrid retrieval (full-text + vector search, rerank)
+* **Phase 5 (done, `v0.5`):** Hybrid retrieval (full-text + vector search, rerank)
 * **Phase 6:** Answers and citations (LLM, refusals, chat UI)
 * **Phase 7:** Audit and evaluation
 * **Phase 8:** Incremental sync and one real connector

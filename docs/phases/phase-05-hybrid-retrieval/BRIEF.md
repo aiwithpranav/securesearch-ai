@@ -9,7 +9,7 @@
 |---|---|---|
 | **5A** Engine | Migration `0004` (GIN and HNSW indexes), retrieval module (allow-list, keyword, vector, RRF, reranker), reranker baked into the image, tests with the Phase 4 oracle, ADR 028 | Merged (PR #14) |
 | **5B** API | `POST /search` with `mode`, rate limit, validation, no query text in logs, score details for admin | Merged (PR #15) |
-| **5C** UI | Search screen for employees showing result chunks | Built, waiting for owner review |
+| **5C** UI | Search screen for employees showing result chunks | Merged (PR #16) |
 
 ## Security rules that apply
 - Allow-list first; both searches only inside it; final text loaded with the allow-list applied again.

@@ -23,7 +23,9 @@
 - [x] Administrator score details; ordinary people get none
 - [x] Menu link, Home and tour wording; question never in the web address
 - [x] 41 frontend tests, real-browser checks with temporary people, 360 px measured
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #16)
 
 ## Phase 5 close
-- [ ] Owner approval, PRs merged, tag `v0.5`
+- [x] Owner approval, PRs merged (#14, #15, #16)
+- [x] Final checks on `main`: 355 backend tests, 41 frontend tests, typecheck, build, `alembic check`
+- [ ] Tag `v0.5` (after the owner says go)
