@@ -82,3 +82,39 @@ Rebuild and start (`docker compose build backend && docker compose up -d`), sign
 - Under many simultaneous searches latency rises (CPU only); fine for one or two users.
 - No search history yet (Phase 6). No screen yet (5C).
 - See `docs/CHALLENGES.md` entries 71 to 73.
+
+## Layer 5C: the search screen
+
+### 1. What we built
+The page `/search` for every signed-in person (menu link "Search", also linked from Home and the welcome tour). Decisions taken: Search for everyone; relevance shown as a bar with words and a percent; the question never goes into the web address; no mode choice on screen (server default); no highlighting (Phase 6).
+
+### 2. How it works, step by step
+1. The person types a question (up to 500 characters, with a counter) and presses Enter or Search. An empty question shows a message under the box and nothing is sent.
+2. While waiting, the screen says "Searching... this can take a few seconds" with placeholder cards. Only the newest search may update the screen; the button is disabled while searching.
+3. Each result shows the document title, page or section when known, the passage text (long passages are cut with "Show more"), and a relevance bar with the words "Strong match", "Possible match" or "Weak match" (colour is never the only signal).
+4. A line above the results says how many passages and documents and how long it took. If even the best passage is a very weak match (below the provisional 0.03), a note says the documents you may read probably do not cover the question.
+5. Nothing found: "No results" with a plain explanation (a document may exist that you cannot see). Too many searches: "Try again in N seconds". Network or server problems: plain words and a Try again button.
+6. Administrators also get a "Score details" fold-out per result (keyword rank, meaning rank, combined score, reranker score). Ordinary people never receive these numbers from the server.
+
+### 3. Important files
+`frontend/lib/search.ts` (API call and pure helpers) and `search.test.ts`; `frontend/app/(portal)/(app)/search/` (`page.tsx`, `SearchView.tsx`); menu link in `PortalHeader.tsx`; wording in `home/HomeView.tsx` and `WelcomeTour.tsx`.
+
+### 4. Tools: why we chose them
+Same stack as the other screens. The search call reuses the signed-in API helper, so a short-lived token is refreshed automatically. Pure helpers (validation, percent, preview cut, error wording) are unit tested.
+
+### 5. How to run it
+`docker compose up -d`, `cd frontend && npm run dev`, sign in, click Search in the menu.
+
+### 6. How to test it
+`cd frontend && npx tsc --noEmit && npm test && npm run build` (41 frontend tests).
+
+### 7. Actual results (checked by me)
+- Typecheck, 41 tests, production build pass. Backend unchanged (355 tests).
+- Real browser with two temporary people (deleted afterwards): the employee sees Search and no admin links; empty question shows the message; a leave question finds the Leave policy first (Strong match 100%) in 0.6 s; a salary question shows no text from the salary document (the employee may not read it); a nonsense question shows the weak-match note; at the limit the screen says "Try again in 42 seconds" with a Try again button; the administrator sees score details, the employee sees none.
+- Measured at 360 px: no sideways scrolling, with results and with the error box.
+
+### 8. Limitations and open issues
+- "Show more" was only unit tested (the demo passages are short).
+- Search can take 0.5 to 2 s, and longer if many people search at once.
+- Not verified: screen reader testing beyond labels and live-region announcements.
+- See `docs/CHALLENGES.md` entries 74 to 76.

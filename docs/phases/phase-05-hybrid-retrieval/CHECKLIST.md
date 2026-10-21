@@ -9,16 +9,21 @@
 - [x] ADR 028, docs, challenges 65 to 70
 - [x] Owner manual checks and approval (merged, PR #14)
 
-## 5B API (built, waiting for owner review)
+## 5B API (done, merged)
 - [x] `POST /search` with optional mode, validation (422), rate limit (429 with Retry-After), no-store
 - [x] No question text in logs; one search event with ids only
 - [x] Score details for system_admin only; admin is not reader
 - [x] Start-up warm-up of the models
 - [x] 20 new tests (355 total), 6 mutations caught, live concurrency check
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #15)
 
-## 5C UI (not started)
-- [ ] Search screen
+## 5C UI (built, waiting for owner review)
+- [x] Search screen: question box with counter, results, relevance bar with words, show more
+- [x] States: loading, no results, weak matches, error, rate limit (seconds to wait)
+- [x] Administrator score details; ordinary people get none
+- [x] Menu link, Home and tour wording; question never in the web address
+- [x] 41 frontend tests, real-browser checks with temporary people, 360 px measured
+- [ ] Owner manual checks and approval
 
 ## Phase 5 close
 - [ ] Owner approval, PRs merged, tag `v0.5`

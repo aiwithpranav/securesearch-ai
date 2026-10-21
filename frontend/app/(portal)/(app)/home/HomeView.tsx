@@ -1,18 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { OPEN_TOUR_EVENT } from "@/lib/tour";
 import { useSession } from "../../_auth/AuthProvider";
 
 const card = "rounded-2xl border border-line bg-surface p-6";
 
-type Step = { text: string; later?: string };
+type Step = { text: string; later?: string; href?: string };
 
 // Blueprint section 20.3: Employee = sign in, ask, read, open source, rate.
 // Admin = upload, set access, check status. Steps that need later phases say so honestly.
 const EMPLOYEE_STEPS: Step[] = [
   { text: "Sign in (done: you are here)." },
-  { text: "Ask a question in your own words.", later: "Phase 6" },
-  { text: "Read the answer.", later: "Phase 6" },
+  { text: "Search in your own words.", href: "/search" },
+  { text: "Get a written answer with sources.", later: "Phase 6" },
   { text: "Open a source to check the original text.", later: "Phase 6" },
   { text: "Rate the answer with a thumbs up or down.", later: "Phase 6" },
 ];
@@ -29,7 +30,7 @@ function Steps({ title, steps }: { title: string; steps: Step[] }) {
       <ol className="mt-4 list-decimal space-y-2 pl-5">
         {steps.map((s) => (
           <li key={s.text}>
-            {s.text}
+            {s.href ? <Link href={s.href} className="text-accent2 hover:underline">{s.text}</Link> : s.text}
             {s.later && <span className="ml-2 rounded-full border border-line px-2 py-0.5 text-xs text-muted">Coming in {s.later}</span>}
           </li>
         ))}
@@ -38,7 +39,7 @@ function Steps({ title, steps }: { title: string; steps: Step[] }) {
   );
 }
 
-// Home shell. Search arrives in Phase 6.
+// Home shell. Search is here (Phase 5); answers with citations arrive in Phase 6.
 export function HomeView() {
   const { user } = useSession();
   if (!user) return null;
@@ -49,7 +50,7 @@ export function HomeView() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Welcome, {user.full_name}</h1>
-          <p className="mt-2 text-muted">You are signed in. Search will appear here in a later phase.</p>
+          <p className="mt-2 text-muted">You are signed in. <Link href="/search" className="text-accent2 hover:underline">Search the documents you may read</Link>.</p>
         </div>
         <button
           type="button"
