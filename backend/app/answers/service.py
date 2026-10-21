@@ -13,11 +13,13 @@ import logging
 import re
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.access.resolver import can
+from app.access.resolver import can, readable_ids_stmt
 from app.answers.prompt import SYSTEM_PROMPT, build_user_message, source_id
 from app.answers.validator import parse, validate
 from app.core.config import settings
@@ -76,13 +78,25 @@ def _still_allowed(session: Session, user_id: uuid.UUID, hits: list[Hit]) -> boo
     return all(can(session, user_id, doc_id) for doc_id in {h.document_id for h in hits})
 
 
-def answer_question(session: Session, user_id: uuid.UUID, question: str, llm: LlmClient | None = None) -> AnswerResult:
+Progress = Callable[[str, str, str], None]  # (stage id, label, "running" or "done"); labels never hold document text
+
+
+def answer_question(
+    session: Session, user_id: uuid.UUID, question: str, llm: LlmClient | None = None, progress: Progress | None = None
+) -> AnswerResult:
     started = time.perf_counter()
     question = clean_query(question)
     if not question:
         raise ValueError("empty question")
-
+    note = progress or (lambda *_: None)
+    if progress is not None:  # the person's OWN readable count, shown in the progress view
+        readable = session.scalar(select(func.count()).select_from(readable_ids_stmt(user_id).subquery())) or 0
+        search_label = f"Searching {readable} {'document' if readable == 1 else 'documents'} you can read"
+    else:
+        search_label = "Searching the documents you can read"
+    note("search", search_label, "running")
     hits = retrieve(session, user_id, question, mode="hybrid", rerank=True, final_k=settings.answer_context_chunks)
+    note("search", search_label, "done")
     if not hits:
         return _refuse(REFUSED_NO_ACCESS_EVIDENCE, "NO_HITS", started)
     if not _still_allowed(session, user_id, hits):
@@ -93,6 +107,7 @@ def answer_question(session: Session, user_id: uuid.UUID, question: str, llm: Ll
     hits = [h for h in hits if h.score >= settings.answer_min_score]  # drop passages that are only noise
 
     client = llm or get_llm()
+    note("answer", "Writing the answer from your sources", "running")
     user_message = build_user_message(question, hits)
     allowed_ids = {source_id(i) for i in range(len(hits))}
     calls = in_tokens = out_tokens = 0
@@ -116,6 +131,8 @@ def answer_question(session: Session, user_id: uuid.UUID, question: str, llm: Ll
         if verdict.ok:
             break
         parsed = None
+    note("answer", "Writing the answer from your sources", "done")
+    note("verify", "Checking the sources", "done")
     tokens = (in_tokens, out_tokens)
     if parsed is None:
         logger.warning("answer_blocked reason=%s", verdict_reason, extra={"fields": {"user_id": str(user_id), "llm_calls": calls}})

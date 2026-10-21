@@ -7,8 +7,8 @@
 ## Layers (each needs the owner's approval)
 | Layer | Content | Status |
 |---|---|---|
-| **6A** Engine | LLM adapter (GPT-4o mini and a fake), prompt, answer pipeline, citation validator, refusal policy, ADR 030 | Built, waiting for owner review |
-| **6B** API | `POST /ask` with the blueprint response shape, rate limit, 503 without a key, search history, feedback | Not started |
+| **6A** Engine | LLM adapter (GPT-4o mini and a fake), prompt, answer pipeline, citation validator, refusal policy, ADR 030 | Merged (PR #19) |
+| **6B** API | `POST /chat` with the blueprint response shape, `/chat/stream`, evidence preview, rate limit, 503 without a key, search history, feedback | Built, waiting for owner review |
 | **6C** UI | Answer with citations on the search screen, evidence panel, thumbs, history | Not started |
 
 ## Security rules that apply

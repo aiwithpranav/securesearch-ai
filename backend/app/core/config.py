@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     llm_timeout_seconds: int = 30
     llm_max_output_tokens: int = 500  # also the cost cap per answer
     answer_context_chunks: int = 6  # passages the model may read (blueprint: keep 5 to 8)
+    chat_limit_per_minute: int = 10  # per person; every answer costs money at the provider
+    preview_limit_per_minute: int = 60
+    history_page_max: int = 50
     answer_min_score: float = 0.03  # provisional refusal threshold on the reranker score (ADR 028); tuned in Phase 7
 
     # --- Phase 3B upload and ingestion limits ---

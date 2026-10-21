@@ -39,3 +39,43 @@ The engine that turns a question into a short written answer with citations, or 
 - The first live run refused everything because the model leaves out inline markers (challenge 85); fixed by making markers optional.
 - Provider outages and rate limits surface as a short error that 6B turns into a clear message.
 - See `docs/CHALLENGES.md` entries 81 to 85.
+
+## Layer 6B: the answer API
+
+### 1. What we built
+The HTTP routes for answers: `POST /chat`, `POST /chat/stream` (progress as Server-Sent Events), `POST /chat/feedback`, `GET /chunks/{id}/preview` (the passage behind a citation), `GET /me/search-history` and `DELETE /me/search-history/{id}`. They follow the blueprint contract; no change request was needed. There is no screen yet (6C). Decisions taken: the history keeps the question but not the answer; 10 answers per minute per person; stage events only (no word-by-word answer); the preview shows the full passage but only to a person who may read it; one friendly 503 message when answers are unavailable.
+
+### 2. How it works, step by step
+1. **Signed in** (token, active account), then **rate limit** (10 answers a minute per person, shared by `/chat` and `/chat/stream`; `Retry-After` on 429).
+2. **Validation:** the question is trimmed and must be 1 to 500 characters (422 otherwise).
+3. **Model available?** No key, or a model failure, gives one 503: "Answers are not available right now. You can still search." Search is not affected.
+4. **Engine (6A)** runs in a worker thread, at most 2 at a time, with the allow-list first, the confidence gate, the model, and validation.
+5. **Response** in the blueprint shape: `status`, `answer`, `citations`, `request_id`, plus `refusal` (the one uniform text, only on refusals) and `history_id` so the screen can send feedback. Refusals carry no answer and no citations.
+6. **History:** one row for the person: the question, the outcome and the cited passage ids. The answer text is never stored, so an answer cannot outlive the permission it was built on.
+7. **Stream:** the same work, but small `stage` messages first (searching N documents you can read, writing the answer, checking the sources) and one final `result` message with the same shape as `/chat`. Stage labels contain no document text, and no answer text is sent before validation.
+8. **Preview:** READ is checked again every time. No rule, a deny rule, a deleted or unfinished document, an old passage and an unknown id all give the same 404, even to an administrator.
+9. **Feedback:** thumbs up or down (and an optional comment up to 500 characters) on your own answer; rating again replaces the rating. **History** is newest first, paged (at most 50), and only yours; you can delete an item and its feedback goes with it.
+10. **Log:** one `chat` line with ids, status, a reason code, token counts and time. Never the question or the answer.
+
+### 3. Important files
+`backend/app/api/v1/chat.py`, `backend/app/schemas/chat.py`, `backend/app/models/chat.py`, migration `0005_chat_tables.py` (tables `search_history` and `chat_feedback`), progress callbacks in `backend/app/answers/service.py`. Tests: `backend/tests/test_chat_api.py`. Decision record: `docs/adr/030-grounded-answers.md` (6B addendum).
+
+### 4. Tools: why we chose them
+Existing building blocks only: FastAPI, the Redis rate limiter, the structured security log, the 6A engine. Server-Sent Events are plain HTTP, so no new server or library is needed.
+
+### 5. How to run it
+`docker compose build backend && docker compose up -d`, then `docker compose exec backend alembic upgrade head`. Try it in the API docs page at `/api/docs` (sign in first), or from the 6C screen later. A live answer needs your key in `.env`.
+
+### 6. How to test it
+`docker compose exec backend python -m pytest -q` (483 tests; 45 are new for 6B).
+
+### 7. Actual results (checked by me)
+- 483 backend tests pass; `alembic check` clean after migration `0005`.
+- API tests: 401 on every route and for deactivated people; the agreed answer shape; forbidden text and ids never appear in any response or in the model prompt; a restricted topic and a missing topic give identical responses; revoking a rule changes the next answer; no key or a failing model gives a clean 503 and saves nothing; 7 kinds of bad question give 422; the rate limit is per person; history is private, paged, capped and deletable; feedback only on your own answers; the preview gives one identical 404 for every not-allowed case; the stream sends stages in order, then one result; the question and the answer never appear in logs; random worlds against the Phase 4 oracle over HTTP.
+- Mutation check: 12 deliberate mistakes; 10 caught and 2 are equivalent (the engine already guarantees a refusal has no answer or citations, so the route's second guard cannot be seen from outside).
+- Live, real model through the running API with a temporary person (deleted afterwards): a leave question answered with a Leave policy citation in 5 s; the evidence preview, feedback, history and delete worked; the restricted salary question got the uniform refusal; the stream showed all stages and then the result.
+
+### 8. Limitations and open issues
+- No screen yet (6C). History has no automatic expiry (a retention period can be added later).
+- Answers take about 2 to 7 s; with many people at once they queue (2 at a time).
+- See `docs/CHALLENGES.md` entries 86 to 90.

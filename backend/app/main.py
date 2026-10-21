@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.v1 import access, auth, documents, health, notifications, search, users
+from app.api.v1 import access, auth, chat, documents, health, notifications, search, users
 from app.core.config import settings
 from app.core.env_doctor import check_env
 from app.core.errors import (
@@ -64,3 +64,4 @@ app.include_router(access.groups_router, prefix="/api/v1")
 app.include_router(access.manage_router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
+app.include_router(chat.router, prefix="/api/v1")
