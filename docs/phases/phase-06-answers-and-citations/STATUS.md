@@ -1,6 +1,6 @@
-# STATUS: Phase 6, Layer 6C (Ask screen)
+# STATUS: Phase 6 complete (6A, 6B, 6C merged)
 
-Branch: `feat/answers-ui-6c` (local, not pushed). `main` has Phases 1 to 5 (tags `v0.1` to `v0.5`), the design refresh (PR #18) and layers 6A and 6B.
+Branch: `docs/phase-6-close`. `main` has Phases 1 to 5 (tags `v0.1` to `v0.5`), the design refresh (PR #18) and all of Phase 6 (PRs #19, #20, #21). Tag `v0.6` comes after this docs PR is merged and the owner says go.
 
 ## Done
 - Phase 6 plan approved; ADR 030; Phase 6 docs.
@@ -11,12 +11,12 @@ Branch: `feat/answers-ui-6c` (local, not pushed). `main` has Phases 1 to 5 (tags
 - 6C: Ask screen (Ask and Find modes, progress, answer with sources, evidence panel, thumbs, recent questions, error states), menu, Home and tour wording; 59 frontend tests; 18 real-browser checks with the real model; 360 px measured. One backend fix: the model client retries a dropped connection once (484 backend tests).
 
 ## In progress
-- Nothing. Waiting for owner review of 6C.
+- Nothing.
 
 ## Exact next action
-1. Owner approves 6C ("6C Approved").
-2. Claude pushes `feat/answers-ui-6c` and gives the PR link with click-by-click steps. The owner merges; Claude checks the remote.
-3. Phase 6 close: final checks on `main`, close-out docs PR, tag `v0.6` only after the owner says "go". Then the Phase 7 plan.
+1. Owner checks the Ask screen by hand (tomorrow), merges the close-out docs PR and says "go" for the tag.
+2. Claude verifies the remote, tags `v0.6`, pushes it and verifies the tag on the remote.
+3. Claude writes the Phase 7 (audit and evaluation) plan and waits for approval.
 
 ## Blockers
 - None.
@@ -36,4 +36,4 @@ Branch: `feat/answers-ui-6c` (local, not pushed). `main` has Phases 1 to 5 (tags
 - Answer quality on a larger question set is measured in Phase 7.
 
 ## Resume prompt
-"Read docs/phases/phase-06-answers-and-citations/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Layer 6C is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-06-answers-and-citations/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Phase 6 is complete; the v0.6 tag is next. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."

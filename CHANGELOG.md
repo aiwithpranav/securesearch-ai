@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [v0.6] - 2026-10-22
+Phase 6 (answers and citations) complete: answer engine with validated citations and uniform refusals (6A), answer API with evidence preview, history and feedback (6B), the Ask screen (6C). Details in the three Phase 6 sections below. 484 backend and 59 frontend tests.
+
 ### Added (Phase 6C, branch `feat/answers-ui-6c`, awaiting owner review)
 - Ask screen: ask a question and get a short answer with sources, or find passages; progress stages; evidence panel for the passage behind a citation; thumbs up or down with an optional comment; your recent questions with Ask again and Remove; plain messages for no answer, answers off and too many questions. Menu link is now **Ask**.
 - The model client retries a dropped connection once. 59 frontend tests, 484 backend tests. Challenges 91 to 94.

@@ -26,7 +26,9 @@
 - [x] Thumbs with optional comment; recent questions with Ask again and Remove
 - [x] Uniform no-answer message with Show matching passages; 503 and 429 messages
 - [x] 59 frontend tests, 18 real-browser checks with the real model, 360 px measured
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #21)
 
 ## Phase 6 close
-- [ ] Owner approval, PRs merged, tag `v0.6`
+- [x] Owner approval, PRs merged (#19, #20, #21)
+- [x] Final checks on `main`: 484 backend tests, 59 frontend tests, typecheck, build, `alembic check`
+- [ ] Tag `v0.6` (after the owner says go)

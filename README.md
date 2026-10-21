@@ -1,7 +1,7 @@
 # SecureSearch AI
 *Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`) and Phase 4 (permissions and ACL, tag `v0.4`) and Phase 5 (hybrid retrieval, tag `v0.5`). Next: Phase 6 (answers and citations).
+> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`) and Phase 4 (permissions and ACL, tag `v0.4`) Phase 5 (hybrid retrieval, tag `v0.5`) and Phase 6 (answers and citations, tag `v0.6`). Next: Phase 7 (audit and evaluation).
 
 ## Problem & Solution
 **Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
@@ -13,7 +13,7 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
-* **Phase 6C Ask screen (implemented, awaiting owner review):** sign in and use **Ask** in the menu: get a short answer with sources, open the passage behind a source, rate the answer, and see your recent questions. Live answers need an OpenAI key in your local `.env`.
+* **Phase 6C Ask screen (done, merged):** sign in and use **Ask** in the menu: get a short answer with sources, open the passage behind a source, rate the answer, and see your recent questions. Live answers need an OpenAI key in your local `.env`.
 * **Phase 6B answer API (done, merged):** ask a question and get a short cited answer or one uniform refusal, see the passage behind a citation, keep a private search history and give thumbs up or down. 
 * **Phase 6A answer engine (done, merged):** turns a question into a short answer with citations written only from documents the person may read, or one uniform refusal. Needs an OpenAI key in `.env` for live answers (optional). 
 * **Design refresh (implemented, awaiting owner review):** new purple palette across the whole app and an animated dots sphere on the landing page and sign-in pages. After sign-in the app stays calm and stable. No behaviour changed.
@@ -122,7 +122,7 @@ Phases follow the blueprint (v1.2). Done: Phases 1, 2 and 3.
 * **Phase 3 (done):** Documents and ingestion (upload, parse, chunk, embed, admin screens)
 * **Phase 4 (done, `v0.4`):** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
 * **Phase 5 (done, `v0.5`):** Hybrid retrieval (full-text + vector search, rerank)
-* **Phase 6:** Answers and citations (LLM, refusals, chat UI)
+* **Phase 6 (done, `v0.6`):** Answers and citations (LLM, refusals, chat UI)
 * **Phase 7:** Audit and evaluation
 * **Phase 8:** Incremental sync and one real connector
 * **Phase 9:** Hardening and launch
