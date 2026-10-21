@@ -29,6 +29,17 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 384
     embedding_batch_size: int = 16
 
+    # --- Phase 5 retrieval knobs (blueprint: allow-list, full-text 30, vector 30, RRF k=60, rerank 20, keep 5 to 8) ---
+    retrieval_mode: str = "hybrid"  # keyword | vector | hybrid
+    retrieval_fts_limit: int = 30
+    retrieval_vector_limit: int = 30
+    retrieval_rrf_k: int = 60
+    retrieval_rerank_candidates: int = 20
+    retrieval_final_k: int = 8
+    reranker_model_path: str = "/opt/models/bge-reranker-base"  # baked into the image at build time
+    reranker_model_name: str = "BAAI/bge-reranker-base"
+    reranker_model_revision: str = "2cfc18c9415c912f9d8155881c133215df768a70"
+
     # --- Phase 3B upload and ingestion limits ---
     max_upload_bytes: int = 50 * 1024 * 1024  # NFR-03: 50 MB
     max_pdf_pages: int = 500

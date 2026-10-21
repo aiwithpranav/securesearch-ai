@@ -31,3 +31,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 20 | Heartbeat for running jobs | After a worker restart, a still-running duplicate could process a job twice; harmless (idempotent) but wasteful. | Phase 9 | No |
 | 26 | Rule history stores ids only | The screen resolves names from current lists, so a renamed group shows its new name in old entries. Storing names in the snapshot needs a backend change. | Later | No |
 | 27 | Admin-initiated password reset and user hard delete | Out of 4C scope (owner decision); people reset their own passwords. | Later | No |
+| 28 | Reranker speed | About 2 s per search on CPU for 20 candidates. Lower the candidate count or cache if Phase 7 shows the P95 over 5 s. | Phase 7 | No |
+| 29 | Refusal threshold | 0.03 is provisional (tiny question set); tune on the 60+ questions. | Phase 7 | Yes |

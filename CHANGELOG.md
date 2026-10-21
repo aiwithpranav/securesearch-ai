@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 5A, branch `feat/retrieval-5a`, awaiting owner review)
+- Migration `0004`: GIN index on the full-text column and HNSW index on the vectors.
+- Retrieval engine (`app/retrieval`): allow-list first, keyword (any word) and vector search inside it, RRF fusion (k=60), cross-encoder reranker (`BAAI/bge-reranker-base`, baked into the image), three modes, final allow-list guard. ADR 028.
+- 52 new tests (335 total): random worlds against the Phase 4 oracle, 5 mutation checks. `app/scripts/retrieval_check.py` measures Recall@5 and MRR on the demo data. Challenges 65 to 70.
+
 
 ## [v0.4] - 2026-10-20
 Phase 4 (permissions and ACL) complete: access tables and resolver (4A), groups, rules, history, preview and demo data API (4B), admin screens (4C). Details in the three Phase 4 sections below. 283 backend and 28 frontend tests.
