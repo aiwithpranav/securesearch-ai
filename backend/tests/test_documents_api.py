@@ -90,6 +90,8 @@ def test_no_route_returns_the_original_file_or_chunks(client):
     for p in paths:
         if p.endswith("/access-preview"):  # explains an ACCESS decision (codes and rules); carries no content (own test)
             continue
+        if p == "/api/v1/chunks/{chunk_id}/preview":  # the evidence panel (Phase 6B): re-checks READ every time (own tests)
+            continue
         assert "chunk" not in p and "download" not in p and "preview" not in p, p
 
 

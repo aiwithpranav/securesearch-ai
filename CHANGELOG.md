@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 6B, branch `feat/chat-api-6b`, awaiting owner review)
+- Answer API: `POST /chat` (blueprint shape), `POST /chat/stream` (progress events then one result), `POST /chat/feedback`, `GET /chunks/{id}/preview` (re-checks READ), `GET /me/search-history`, `DELETE /me/search-history/{id}`. Migration `0005` (tables `search_history`, `chat_feedback`).
+- Private, deletable history (question and cited ids, never the answer); 10 answers per minute per person; one friendly 503 when answers are unavailable; no question or answer text in logs.
+- 45 new tests (483 total), 12 mutation checks, live check with the real model. Challenges 86 to 90.
+
 ### Added (Phase 6A, branch `feat/answers-6a`, awaiting owner review)
 - Answer engine (`app/llm`, `app/answers`): GPT-4o mini behind one interface, prompt that marks passages as untrusted data, validator (JSON shape, citations only to given passages, no links or HTML), confidence gate, second access check, one uniform refusal. ADR 030.
 - The OpenAI key is optional, read from `.env` only, never logged, and given to the backend container only.

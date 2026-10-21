@@ -16,6 +16,14 @@ Blueprint sections 9 and 9.5, FR-10 to FR-12 and ADR 016: answers come only from
 - **One refusal text for every reason:** "Could not find enough accessible source material to answer this question." Statuses follow the blueprint (`ANSWERED`, `REFUSED_NO_ACCESS_EVIDENCE`, `REFUSED_LOW_CONFIDENCE`); the reason (a code word) goes to the log, never to the person. A restricted topic and a missing topic give the same status and text.
 - **Citations returned:** source id, chunk id, document id and title, section, page, a snippet of at most 240 characters and the document's updated time. Only the passages the answer actually cites.
 
+## Addition in 6B
+- Routes follow the blueprint contract: `POST /chat`, `POST /chat/stream`, `POST /chat/feedback`, `GET /chunks/{id}/preview`, `GET /me/search-history`, `DELETE /me/search-history/{id}`. Additive response fields: `history_id` (so feedback can name an answer) and `refusal` (the one uniform text).
+- Signed in is enough to ask; 10 answers per minute per person; no key or a model failure gives one 503 ("Answers are not available right now. You can still search.") and nothing is saved.
+- **History** (`search_history`) belongs to the person: question, outcome and cited passage ids, never the answer text, so an answer cannot outlive the permission it was built on. They can delete items; feedback (`chat_feedback`, one rating per answer) is deleted with them. The audit log for security staff is separate (Phase 7). The blueprint's feedback table points at an audit row; here it points at the history item, because the audit tables do not exist yet.
+- **Preview** re-checks READ on every call; every not-allowed case, including an administrator without a rule, gives the same 404.
+- **Stream:** stage events only (search with the person's own readable-document count, writing the answer, checking the sources), then one result. No answer text before validation.
+- The question and the answer are never logged; one `chat` event holds ids, status, a reason code, token counts and time.
+
 ## How it is proven
 - 83 new tests with a fake model (no key, no cost): validator rules; prompt defusing; the OpenAI client over a fake network (request shape, key never in repr or errors, retry once, short error codes); the pipeline (forbidden text never in the prompt, uniform refusals, model not called for weak or empty evidence, second wall, injected document and question, malformed replies); random worlds against the Phase 4 oracle (the model, the answer and the citations only ever hold oracle-allowed documents).
 - Mutation check: 11 deliberate mistakes (invalid ids allowed, links allowed, no citation required, no length limit, tags not defused, untrusted-data rule dropped, weak evidence not refused, second wall removed, all passages cited, extra retry) are all caught.
