@@ -17,6 +17,13 @@ Blueprint sections 9 (retrieval pipe) and 23 (why hybrid) require: authorize fir
 - **Query hygiene:** whitespace collapsed, capped at 500 characters; empty or stop-word-only queries return nothing and never raise.
 - **Refusal threshold:** a provisional reranker threshold of **0.03** is recorded from the demo data (off-topic best score at most 0.016, on-topic questions at least 0.044). Phase 6 uses it for refusals and Phase 7 tunes it on the larger question set.
 
+## Addition in 5B
+- `POST /search` needs only a signed-in, active user; the allow-list decides the content. Admin has no special search right. Mode is optional (server default); question 1 to 500 characters.
+- 30 searches per minute per person (Redis); `Retry-After` on 429. Responses are `no-store`.
+- The question text is never logged or stored. One `search` event is logged with user id, mode, result count and time.
+- Score details (rank per list, RRF, rerank) are returned to `system_admin` only; other people get the final score.
+- The search runs in a worker thread, at most 2 at a time. Both models load in the background at API start-up.
+
 ## How it is proven
 - 52 tests in `tests/test_retrieval.py`: RRF maths; each mode finds what it should; odd input (quotes, operators, SQL, 5,000 characters) never crashes; every kind of blocking rule (no rule, DENY, clearance, country, expiry, deleted, not ready, inactive chunk, inactive user, admin without rule) hides the best match in every mode, and the reranker never even sees it; lifting one gate at a time reveals exactly that document; revocation applies on the very next search; the vector search still fills the result when 60 closer chunks are forbidden.
 - Random worlds (6 seeds) compared with the independent Python oracle from Phase 4: in every mode only oracle-allowed documents are returned, and keyword mode returns all of them.

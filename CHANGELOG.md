@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 5B, branch `feat/search-api-5b`, awaiting owner review)
+- `POST /api/v1/search`: question in, best permitted passages out; modes keyword, vector, hybrid; validation, rate limit 30 per minute per person, no-store, no question text in logs, score details for administrators only; models warmed at start-up.
+- 20 new tests (355 total), 6 mutation checks. Challenges 71 to 73.
+
 ### Added (Phase 5A, branch `feat/retrieval-5a`, awaiting owner review)
 - Migration `0004`: GIN index on the full-text column and HNSW index on the vectors.
 - Retrieval engine (`app/retrieval`): allow-list first, keyword (any word) and vector search inside it, RRF fusion (k=60), cross-encoder reranker (`BAAI/bge-reranker-base`, baked into the image), three modes, final allow-list guard. ADR 028.
