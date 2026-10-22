@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     search_concurrency: int = 2  # searches running at once (models use the CPU); others wait in line
     search_warmup: bool = True  # load both models in the background when the API starts
 
+    # --- Phase 8C sync. The GitHub token is optional and goes to the WORKER only (it runs the sync); read-only, owner's .env only. ---
+    github_token: str = ""
+    github_api_url: str = "https://api.github.com"  # from the environment only, never from a source's saved settings
+
     # --- Phase 6 answers. The API key is optional: without it /ask answers 503 and everything else works. ---
     openai_api_key: str = ""  # set by the owner in .env only; never logged, never returned, never committed
     llm_model: str = "gpt-4o-mini"

@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added (Phase 8B, branch `feat/sync-8b`, awaiting owner review)
+### Added (Phase 8C, branch `feat/github-8c`, awaiting owner review)
+- GitHub connector: imports a folder of `.md`, `.txt`, `.pdf` and `.docx`; who may read comes from `.securesearch/access.json` (teams, longest folder rule wins) and `users.json`, and by default from the repository's real collaborators. Read-only token, worker only. `demo-docs/` with six invented documents. ADR 035.
+- **Sources** screen (Manage menu): add a GitHub source, Sync now, automatic sync on or off, interval, last run and recent runs in plain words.
+- 45 backend tests (697 total), 16 mutation checks all caught, 22 frontend tests (123 total). Challenges 123 to 127.
+
+### Changed (Phase 8C)
+- The worker joins the public network for outgoing connections (no port is published) and receives `GITHUB_TOKEN`; the backend never does.
+
+### Added (Phase 8B, merged)
 - Sync engine: connector interface, per-item diff (new, unchanged, changed file = new version, permission-only change = rules only, removed = soft delete, returned = restore), teams and members that follow the source, guards against a broken or empty source, one run per source, scheduler (the worker now runs Celery beat) and `/sync/sources`, `/sync/runs` routes (system administrator). CR-004, migration `0008`, ADR 034.
 - 46 backend tests (652 total), 18 mutation checks all caught, real worker and scheduler check. Challenges 118 to 122.
 

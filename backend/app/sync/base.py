@@ -11,6 +11,14 @@ from typing import Any, Protocol
 FORBIDDEN_CONFIG_WORDS = ("token", "secret", "password", "passwd", "apikey", "api_key", "credential", "authorization")
 
 
+class SourceError(Exception):
+    """A connector failed in a way that has a fixed code word (never a message that could hold a secret or text)."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
 @dataclass(frozen=True)
 class SourceItem:
     external_id: str  # stable id inside the source (for example a file path); never changes when the file changes

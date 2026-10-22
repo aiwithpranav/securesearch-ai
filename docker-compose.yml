@@ -1,4 +1,5 @@
 # Settings shared by the backend and the worker. The OpenAI key goes to the backend ONLY (the worker never calls the model).
+# The GitHub token goes to the worker ONLY (it runs the sync); the backend never calls GitHub.
 x-app-env: &app_env
     APP_ENV: "${APP_ENV}"
     APP_SECRET_KEY: "${APP_SECRET_KEY}"
@@ -130,7 +131,10 @@ services:
         condition: service_healthy
     networks:
       - private
-    environment: *app_env
+      - public  # outgoing connections only (the GitHub connector); no port is published
+    environment:
+      <<: *app_env
+      GITHUB_TOKEN: "${GITHUB_TOKEN:-}"  # read-only; optional: without it a GitHub source fails with TOKEN_MISSING and all else works
     healthcheck:
       test: ["CMD-SHELL", "celery -A app.worker.celery_app inspect ping -d celery@$$HOSTNAME --timeout 5"]
       interval: 20s

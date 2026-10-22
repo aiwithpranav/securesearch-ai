@@ -15,6 +15,7 @@ export function manageLinks(roles: string[]): MenuLink[] {
       { href: "/admin/documents", label: "Documents" },
       { href: "/admin/users", label: "Users" },
       { href: "/admin/groups", label: "Groups" },
+      { href: "/admin/sources", label: "Sources" },
     );
   }
   if (canSeeGaps(roles)) links.push({ href: "/gaps", label: "Knowledge gaps" });

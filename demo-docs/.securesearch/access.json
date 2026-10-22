@@ -1,0 +1,44 @@
+{
+  "teams": {
+    "all-staff": [
+      "aiwithpranav",
+      "demo-swara",
+      "demo-dhanashree",
+      "demo-pranav",
+      "demo-akshay"
+    ],
+    "engineering": [
+      "aiwithpranav",
+      "demo-swara"
+    ],
+    "hr": [
+      "aiwithpranav",
+      "demo-dhanashree"
+    ],
+    "finance": [
+      "aiwithpranav",
+      "demo-pranav"
+    ],
+    "sales": [
+      "aiwithpranav",
+      "demo-akshay"
+    ]
+  },
+  "access": {
+    "": [
+      "all-staff"
+    ],
+    "engineering/": [
+      "engineering"
+    ],
+    "hr/": [
+      "hr"
+    ],
+    "finance/": [
+      "finance"
+    ],
+    "sales/": [
+      "sales"
+    ]
+  }
+}

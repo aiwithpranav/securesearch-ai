@@ -8,7 +8,7 @@ describe("manageLinks", () => {
     expect(manageLinks(["employee"])).toEqual([]);
   });
   it("gives the system administrator the management screens but not the audit trail", () => {
-    expect(labels(["employee", "system_admin"])).toEqual(["Overview", "Documents", "Users", "Groups", "Knowledge gaps", "Evaluation"]);
+    expect(labels(["employee", "system_admin"])).toEqual(["Overview", "Documents", "Users", "Groups", "Sources", "Knowledge gaps", "Evaluation"]);
     expect(canSeeAudit(["system_admin"])).toBe(false);
   });
   it("gives the security administrator the audit trail and the gaps, not user management", () => {

@@ -1,33 +1,33 @@
-# STATUS: Phase 8, Layer 8B (sync engine)
+# STATUS: Phase 8, Layer 8C (GitHub connector and Sources screen)
 
-Branch: `feat/sync-8b` (local, not pushed). `main` has Phases 1 to 7 (tag `v0.7`), the Next.js 16.4.2 upgrade and layer 8A (PR #28).
+Branch: `feat/github-8c` (local, not pushed). `main` has Phases 1 to 7 (tag `v0.7`) and layers 8A (PR #28) and 8B (PR #29).
 
 ## Done
-- Phase 8 plan approved; 8A merged.
-- 8B: CR-004, migration `0008`, the engine, the scheduler, the API, ADR 034; 46 new tests (652 total), 18 mutations all caught, real worker and scheduler check.
+- 8C: the GitHub connector, the token wiring (worker only), the Sources screen, the `demo-docs/` folder, ADR 035.
+- 45 new backend tests (697 total), 16 mutations all caught, 22 new frontend tests (123 total), real-browser check with the real worker, 360 px.
 
 ## In progress
-- Nothing. Waiting for owner review of 8B.
+- Nothing. Waiting for owner review of 8C.
 
 ## Exact next action
-1. Owner approves 8B ("8B Approved"). There is nothing to click yet; the owner can read the walkthrough, or ask Claude to show a run in a terminal.
-2. Claude pushes `feat/sync-8b`, gives the PR link with click-by-click steps and checks the remote after the merge.
-3. Claude writes the 8C plan (GitHub connector, Sources screen) and lists what the owner must prepare (a private repository with synthetic files and a read-only token in `.env`).
+1. Owner checks the Sources screen ("8C Approved").
+2. Claude pushes `feat/github-8c`, gives the PR link with click-by-click steps and checks the remote after the merge.
+3. Live check with the real repository: the owner makes a 7-day read-only token (steps in PREREQUISITES), Claude runs one sync of `demo-docs/` on `main`, shows what was imported and who can read what, and the owner deletes the token.
+4. Phase 8 close: close-out docs, tag `v0.8` after the owner says go, then the Phase 9 plan.
 
 ## Blockers
-- None.
+- None. The live check needs the owner's token.
 
 ## Decisions this session
-- The sync only ever writes ALLOW READ rules for teams it created (prefix `<kind>:<source name>:`). Everything else is left alone.
-- An empty or mostly-empty listing stops the run (a broken source must not wipe the index).
-- Settings may not contain secrets; tokens stay in `.env`.
+- Same repository (`securesearch-ai`), folder `demo-docs/` (owner: "same repo"). The repository is made public when the project is finished; the demo documents are invented.
+- Collaborator check on by default; it fails closed (`PERMISSIONS_UNAVAILABLE`) when GitHub will not list collaborators.
+- The worker joins the public network for outgoing connections (only the worker holds the token).
 
 ## Prerequisites
-- Docker running. Nothing for 8B. For 8C: a GitHub repository and a read-only token.
+- Docker running. For the live check: a 7-day read-only token (PREREQUISITES).
 
 ## Open issues
-- A file is always read from the source to compare its SHA-256 (backlog 40).
-- Old passages stay (backlog 38). Evaluation runs write real audit rows (backlog 36).
+- Live check not done yet. Every run reads every file again (backlog 40). Old passages stay (backlog 38).
 
 ## Resume prompt
-"Read docs/phases/phase-08-incremental-sync/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:AIRAGSecure_Search_AI. Layer 8B is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-08-incremental-sync/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\\AI\\RAG\\Secure_Search_AI. Layer 8C is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
