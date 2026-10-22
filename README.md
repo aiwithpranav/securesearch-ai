@@ -13,6 +13,7 @@
 
 * **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
 * **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
+* **Phase 7A audit trail (implemented, awaiting owner review):** every search and answer is recorded (who asked what, ids only, never the answer text) in a log the database itself will not let anyone change; security staff can read and export it. The system administrator cannot. There are **no audit screens yet** (7C).
 * **Phase 6C Ask screen (done, merged):** sign in and use **Ask** in the menu: get a short answer with sources, open the passage behind a source, rate the answer, and see your recent questions. Live answers need an OpenAI key in your local `.env`.
 * **Phase 6B answer API (done, merged):** ask a question and get a short cited answer or one uniform refusal, see the passage behind a citation, keep a private search history and give thumbs up or down. 
 * **Phase 6A answer engine (done, merged):** turns a question into a short answer with citations written only from documents the person may read, or one uniform refusal. Needs an OpenAI key in `.env` for live answers (optional). 
