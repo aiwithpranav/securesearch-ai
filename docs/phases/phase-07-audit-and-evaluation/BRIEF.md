@@ -7,8 +7,8 @@
 ## Layers (each needs the owner's approval)
 | Layer | Content | Status |
 |---|---|---|
-| **7A** Audit | Migration `0006`, append-only audit tables, audit routes and CSV export, security events saved, ADR 031 | Built, waiting for owner review |
-| **7B** Evaluation | About 48 synthetic documents with canary strings, 60+ cases, canary scanner, runner, metrics, mode comparison, report, threshold tuning | Not started |
+| **7A** Audit | Migration `0006`, append-only audit tables, audit routes and CSV export, security events saved, ADR 031 | Merged (PR #23) |
+| **7B** Evaluation | About 48 synthetic documents with canary strings, 60+ cases, canary scanner, runner, metrics, mode comparison, report, threshold tuning | Built, waiting for owner review |
 | **7C** Dashboards | Audit screen, admin overview, knowledge gaps, evaluation dashboard, employee home | Not started |
 
 ## Security rules that apply

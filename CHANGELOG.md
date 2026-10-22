@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 7B, branch `feat/eval-7b`, awaiting owner review)
+- Evaluation: 36 extra synthetic documents (48 total, a unique canary in every one of sensitivity 2 or higher), 62 cases (authorized, unauthorized with prompt injection, missing, keyword, paraphrase, 14 scenarios), a canary scanner over answers, search results, the model prompt, audit rows and logs, an independent oracle, a runner with metrics and a keyword / vector / hybrid / hybrid + reranker comparison, saved runs (migration `0007`), `POST /evaluation/runs` and friends (system administrator), `load_eval_corpus` and `run_eval` scripts. `docs/evaluation-report.md`, ADR 032.
+- Real-stack result: 62 of 62 cases, 0 leaks, Recall@5 1.00, MRR 1.00, citation correctness 1.00, refusal accuracy 1.00, P95 search 2.0 s.
+
+### Changed (Phase 7B)
+- Refusal threshold raised from 0.03 to 0.30 (measured on 48 answer-or-refuse cases). Refusal accuracy rose from 0.886 to 1.00; paraphrased questions are answered 4 of 8 times.
+- 46 new tests (572 total), 14 mutation checks (13 caught, 1 equivalent). Challenges 100 to 106.
+
 ### Added (Phase 7A, branch `feat/audit-7a`, awaiting owner review)
 - Append-only audit trail (migration `0006`): one row for every search and answer (who, question, how many documents they could read, retrieved and cited passage ids, outcome, speed), answer facts without the answer text, and security events with ids only. The database refuses changes and deletes.
 - "No audit, no answer": if the trail cannot be written the person gets nothing.
