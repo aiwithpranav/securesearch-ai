@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Security
+- Next.js 16.4.0 to 16.4.2 (fixes a known vulnerability). Tests, type check and build pass.
 
 ## [v0.7] - 2026-10-22
 Phase 7 (audit and evaluation) complete: append-only audit trail (7A), evaluation with canary scanner and 0 leaks on 62 cases (7B), dashboards and screens (7C). 592 backend and 96 frontend tests.
