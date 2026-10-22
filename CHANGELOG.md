@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 7A, branch `feat/audit-7a`, awaiting owner review)
+- Append-only audit trail (migration `0006`): one row for every search and answer (who, question, how many documents they could read, retrieved and cited passage ids, outcome, speed), answer facts without the answer text, and security events with ids only. The database refuses changes and deletes.
+- "No audit, no answer": if the trail cannot be written the person gets nothing.
+- `GET /audit/queries`, `/audit/answers`, `/audit/access-events`, `/audit/export` (formula-safe CSV) for `security_admin` and `auditor` only; the `system_admin` cannot read the audit. ADR 031.
+- 42 new tests (526 total), 14 mutation checks. Challenges 95 to 99.
+
 
 ## [v0.6] - 2026-10-22
 Phase 6 (answers and citations) complete: answer engine with validated citations and uniform refusals (6A), answer API with evidence preview, history and feedback (6B), the Ask screen (6C). Details in the three Phase 6 sections below. 484 backend and 59 frontend tests.

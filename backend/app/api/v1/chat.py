@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.access.resolver import acan
 from app.answers.service import ANSWERED, REFUSAL_TEXT, AnswerResult, answer_question
 from app.api.deps import get_current_user
+from app.audit.service import add_answer_row, add_query_row
 from app.api.v1.search import _search_gate
 from app.core import rate_limit
 from app.core.config import settings
@@ -66,14 +67,36 @@ def _work(user_id: uuid.UUID, question: str, llm: LlmClient, progress=None) -> A
         return answer_question(session, user_id, question, llm=llm, progress=progress)
 
 
-async def _save_history(db: AsyncSession, user: User, question: str, result: AnswerResult) -> uuid.UUID:
+CHAT_FILTERS = {"mode": "hybrid", "rerank": True}
+
+
+async def _save_history(db: AsyncSession, user: User, question: str, result: AnswerResult, request_id: str | None) -> uuid.UUID:
+    """The person's own history AND the audit rows, in ONE transaction. If any of it fails, nothing is returned
+    ("no audit, no answer")."""
     row = SearchHistory(
         user_id=user.id, question=question, status=result.status,
         citation_chunk_ids=[c.chunk_id for c in result.citations],
     )
     db.add(row)
+    query_row = add_query_row(
+        db, user_id=user.id, kind="CHAT", query_text=question, filters=CHAT_FILTERS, allowed_doc_count=result.allowed_doc_count,
+        chunk_ids=result.retrieved_chunk_ids, status=result.status, latency_ms=result.took_ms, request_id=request_id,
+    )
+    await db.flush()
+    add_answer_row(db, query_row, result)
     await db.commit()
     return row.id
+
+
+async def _audit_unavailable(db: AsyncSession, user: User, question: str, exc: LlmError, started: float, request_id: str | None) -> None:
+    """A question the model could not answer is still audited (status UNAVAILABLE), but no history item is made."""
+    facts = getattr(exc, "audit", {})
+    add_query_row(
+        db, user_id=user.id, kind="CHAT", query_text=question, filters=CHAT_FILTERS,
+        allowed_doc_count=int(facts.get("allowed_doc_count", 0)), chunk_ids=list(facts.get("retrieved_chunk_ids", [])),
+        status="UNAVAILABLE", latency_ms=int((time.perf_counter() - started) * 1000), request_id=request_id,
+    )
+    await db.commit()
 
 
 def _response(result: AnswerResult, request_id: str | None, history_id: uuid.UUID) -> ChatResponse:
@@ -108,15 +131,18 @@ async def chat(
 ) -> ChatResponse:
     await _limit("chat", user, settings.chat_limit_per_minute)
     llm = _client()
+    request_id = getattr(request.state, "request_id", None)
+    started = time.perf_counter()
     try:
         async with _search_gate():  # the models use the CPU: only a few at once
             result = await asyncio.to_thread(_work, user.id, body.question, llm)
-    except LlmError:
+    except LlmError as exc:
+        await _audit_unavailable(db, user, body.question, exc, started, request_id)
         raise _unavailable() from None
     _log(request, user, result)
-    history_id = await _save_history(db, user, body.question, result)
+    history_id = await _save_history(db, user, body.question, result, request_id)
     response.headers["Cache-Control"] = "no-store"
-    return _response(result, getattr(request.state, "request_id", None), history_id)
+    return _response(result, request_id, history_id)
 
 
 def _sse(event: str, data: dict) -> bytes:  # type: ignore[type-arg]
@@ -144,10 +170,14 @@ async def chat_stream(
             async with _search_gate():
                 result = await asyncio.to_thread(_work, user.id, body.question, llm, progress)
             _log(request, user, result)
-            history_id = await _save_history(db, user, body.question, result)
+            history_id = await _save_history(db, user, body.question, result, getattr(request.state, "request_id", None))
             payload = _response(result, getattr(request.state, "request_id", None), history_id).model_dump(mode="json")
             await queue.put(("result", payload))
-        except LlmError:
+        except LlmError as exc:
+            try:
+                await _audit_unavailable(db, user, body.question, exc, started, getattr(request.state, "request_id", None))
+            except Exception:  # noqa: BLE001  (a failed audit must not turn into a leak; the person just gets the error)
+                pass
             await queue.put(("error", {"status": 503, "title": "Answers unavailable", "detail": _unavailable().args[0]}))
         except Exception:  # noqa: BLE001  (never leak details into the stream)
             await queue.put(("error", {"status": 500, "title": "Something went wrong", "detail": "The answer could not be completed."}))

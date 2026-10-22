@@ -16,10 +16,9 @@ import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.access.resolver import can, readable_ids_stmt
+from app.access.resolver import can, count_readable
 from app.answers.prompt import SYSTEM_PROMPT, build_user_message, source_id
 from app.answers.validator import parse, validate
 from app.core.config import settings
@@ -55,6 +54,8 @@ class AnswerResult:
     citations: list[Citation] = field(default_factory=list)
     # For logs and tests only (code words and numbers, never text). The API does not return these.
     reason: str = ""
+    retrieved_chunk_ids: list[uuid.UUID] = field(default_factory=list)  # every passage retrieved (for the audit log)
+    allowed_doc_count: int = 0  # documents this person may read (for the audit log)
     llm_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
@@ -84,18 +85,36 @@ Progress = Callable[[str, str, str], None]  # (stage id, label, "running" or "do
 def answer_question(
     session: Session, user_id: uuid.UUID, question: str, llm: LlmClient | None = None, progress: Progress | None = None
 ) -> AnswerResult:
+    """The result also carries what the audit log needs (retrieved passage ids, how many documents the person may read).
+    If the model fails, the LlmError that is raised carries the same facts in `.audit` so the failure can be audited too."""
+    audit: dict[str, object] = {"retrieved_chunk_ids": [], "allowed_doc_count": 0}
+    try:
+        result = _answer(session, user_id, question, llm, progress, audit)
+    except LlmError as exc:
+        exc.audit = audit  # type: ignore[attr-defined]
+        raise
+    result.retrieved_chunk_ids = audit["retrieved_chunk_ids"]  # type: ignore[assignment]
+    result.allowed_doc_count = audit["allowed_doc_count"]  # type: ignore[assignment]
+    return result
+
+
+def _answer(
+    session: Session, user_id: uuid.UUID, question: str, llm: LlmClient | None, progress: Progress | None, audit: dict[str, object]
+) -> AnswerResult:
     started = time.perf_counter()
     question = clean_query(question)
     if not question:
         raise ValueError("empty question")
     note = progress or (lambda *_: None)
+    readable = count_readable(session, user_id)
+    audit["allowed_doc_count"] = readable
     if progress is not None:  # the person's OWN readable count, shown in the progress view
-        readable = session.scalar(select(func.count()).select_from(readable_ids_stmt(user_id).subquery())) or 0
         search_label = f"Searching {readable} {'document' if readable == 1 else 'documents'} you can read"
     else:
         search_label = "Searching the documents you can read"
     note("search", search_label, "running")
     hits = retrieve(session, user_id, question, mode="hybrid", rerank=True, final_k=settings.answer_context_chunks)
+    audit["retrieved_chunk_ids"] = [h.chunk_id for h in hits]
     note("search", search_label, "done")
     if not hits:
         return _refuse(REFUSED_NO_ACCESS_EVIDENCE, "NO_HITS", started)

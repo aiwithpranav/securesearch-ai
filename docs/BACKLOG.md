@@ -35,3 +35,4 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 29 | Refusal threshold | 0.03 is provisional (tiny question set); tune on the 60+ questions. | Phase 7 | Yes |
 | 30 | Hydration mismatch with reduced motion on the landing page | Phase 1 components call `useReducedMotion()` while rendering. Fix by reading the preference after mount. | Later | No |
 | 31 | Docker image layers | Changing `requirements.txt` re-installs everything and re-downloads the models (about 15 minutes). Split the model downloads from the pip install. | Phase 9 | No |
+| 32 | Audit retention | The audit trail is kept forever. Add a retention period and an archive step. | Phase 9 | No |

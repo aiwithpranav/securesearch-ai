@@ -38,3 +38,6 @@ def security_event(event: str, request_id: str | None = None, **fields: object) 
     logging.getLogger("security").info(
         event, extra={"event": event, "request_id": request_id, "fields": fields}
     )
+    from app.audit.service import persist_access_event  # imported here: the audit module needs the database
+
+    persist_access_event(event, request_id, fields)

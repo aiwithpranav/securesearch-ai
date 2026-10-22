@@ -130,6 +130,11 @@ def _read_conditions(user_id: uuid.UUID) -> list[ColumnElement[bool]]:
     ]
 
 
+def count_readable(session, user_id: uuid.UUID) -> int:  # type: ignore[no-untyped-def]
+    """How many documents this person may READ (for the audit log and the progress view)."""
+    return session.scalar(select(func.count()).select_from(readable_ids_stmt(user_id).subquery())) or 0
+
+
 def readable_ids_stmt(user_id: uuid.UUID) -> Select:  # type: ignore[type-arg]
     """SELECT of the ids of every document this user may READ (chunks of other documents never leave the database)."""
     return select(Document.id).where(*_read_conditions(user_id))

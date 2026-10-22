@@ -3,6 +3,7 @@
 Security design (ADR 030): the model is not a security layer. It only receives passages the access resolver already
 allowed. Passages and the question are marked as DATA, they cannot close the data block, and the model has no tools,
 so even a successful trick can only change the wording of an answer, which is then checked by the validator."""
+import hashlib
 import re
 
 from app.retrieval.search import Hit
@@ -18,6 +19,9 @@ Rules:
 
 Example of a good reply: {"can_answer": true, "answer": "Employees get 24 days of leave a year [S1]. Up to 5 unused days carry over [S2].", "citations": ["S1", "S2"]}
 Example when the sources do not help: {"can_answer": false, "answer": "", "citations": []}"""
+
+# Short fingerprint of the system prompt, written to the audit log so a change of prompt is visible later.
+PROMPT_VERSION = hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest()[:8]
 
 # Any tag-like text that could close or fake our data blocks is defused (the opening bracket becomes a look-alike).
 _TAGS = re.compile(r"<(\s*/?\s*)(sources?|question)\b", re.IGNORECASE)
