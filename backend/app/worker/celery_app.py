@@ -39,4 +39,6 @@ celery_app.conf.update(
     broker_transport_options={"visibility_timeout": 900},
     timezone="UTC",
     enable_utc=True,
+    # The scheduler (the worker runs with -B) wakes up every minute; sources decide themselves whether they are due.
+    beat_schedule={"sync-tick": {"task": "sync.tick", "schedule": 60.0}},
 )

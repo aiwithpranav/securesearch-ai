@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added (Phase 8A, branch `feat/sync-8a`, awaiting owner review)
+### Added (Phase 8B, branch `feat/sync-8b`, awaiting owner review)
+- Sync engine: connector interface, per-item diff (new, unchanged, changed file = new version, permission-only change = rules only, removed = soft delete, returned = restore), teams and members that follow the source, guards against a broken or empty source, one run per source, scheduler (the worker now runs Celery beat) and `/sync/sources`, `/sync/runs` routes (system administrator). CR-004, migration `0008`, ADR 034.
+- 46 backend tests (652 total), 18 mutation checks all caught, real worker and scheduler check. Challenges 118 to 122.
+
+### Changed (Phase 8B)
+- The group screens refuse to edit a team that a sync source manages.
+
+### Added (Phase 8A, merged)
 - New versions: `POST /documents/{id}/versions` (same content as the newest version does nothing; the old version keeps answering until the new one is complete; rules untouched), restore of a deleted document (`POST /documents/{id}/restore`, `GET /documents?deleted=true`).
 - Screens: "Upload a new version" and the version in use on the document page, Active and Deleted tabs with Restore on the list.
 - ADR 033, Phase 8 docs. 14 backend tests (606 total), 5 frontend tests (101 total), 11 mutation checks all caught. Challenges 114 to 117.

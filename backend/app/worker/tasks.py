@@ -1,17 +1,19 @@
-"""Background tasks: two small system tasks (3A) and the document ingestion task (3B)."""
+"""Background tasks: two small system tasks (3A), the document ingestion task (3B) and the sync tasks (8B)."""
+import asyncio
 import logging
 import uuid
 
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_ready
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 
 from app.core.config import settings
 from app.db.sync import SyncSession
-from app.models import IngestionJob
+from app.models import IngestionJob, SyncRun
 from app.embeddings import embed_documents, model_label
 from app.ingest.errors import IngestError
 from app.ingest.pipeline import MAX_ATTEMPTS, fail_job, run_ingestion
+from app.sync.engine import execute_run, fail_run, tick
 from app.worker.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -49,9 +51,29 @@ def requeue_unfinished_jobs(sender=None, **kwargs) -> None:  # type: ignore[no-u
             ).all()
         for job_id in ids:
             ingest_document.apply_async(args=[str(job_id)])
+        with SyncSession.begin() as s:  # a sync run that was going when the worker stopped did not finish
+            s.execute(update(SyncRun).where(SyncRun.status == "RUNNING").values(status="FAILED", finished_at=func.now(), error_code="INTERRUPTED"))
         logger.info("worker.requeued_unfinished_jobs", extra={"fields": {"count": len(ids)}})
     except Exception as exc:  # never stop the worker from starting
         logger.error("worker.requeue_failed type=%s", type(exc).__name__)
+
+
+@celery_app.task(name="sync.execute_run", bind=True, soft_time_limit=1800, time_limit=1860)
+def sync_execute_run(self, run_id: str) -> str:  # type: ignore[no-untyped-def]
+    """Runs one sync (see app/sync/engine.py). It is safe to run twice: a run that is no longer RUNNING is ignored."""
+    rid = uuid.UUID(run_id)
+    try:
+        asyncio.run(execute_run(rid))
+    except SoftTimeLimitExceeded:
+        asyncio.run(fail_run(rid, "TIMEOUT"))
+        return "FAILED"
+    return "OK"
+
+
+@celery_app.task(name="sync.tick")
+def sync_tick() -> int:
+    """Every minute: starts a run for each source that is due."""
+    return asyncio.run(tick())
 
 
 @celery_app.task(name="system.ping")

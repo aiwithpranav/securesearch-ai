@@ -7,8 +7,8 @@
 ## Layers (each needs the owner's approval)
 | Layer | Content | Status |
 |---|---|---|
-| **8A** Versions | Upload a new version, same content is skipped, restore a deleted document, version date on passages, admin screens | Built, waiting for owner review |
-| **8B** Sync engine | Source interface, diff (new, changed, unchanged, deleted), permission-only update, scheduled sync, sync runs | Not started |
+| **8A** Versions | Upload a new version, same content is skipped, restore a deleted document, version date on passages, admin screens | Done, merged (PR #28) |
+| **8B** Sync engine | Source interface, diff (new, changed, unchanged, deleted), permission-only update, scheduled sync, sync runs | Built, waiting for owner review |
 | **8C** GitHub connector | Import `.md` and `.txt` from a repository, mirror collaborators and teams into groups and rules, Sources screen | Not started |
 
 ## Security rules that apply

@@ -53,6 +53,7 @@ def add_answer_row(db: AsyncSession, query_row: QueryAuditLog, result: AnswerRes
 
 ID_ONLY_KEYS = (
     "document_id", "group_id", "rule_id", "job_id", "fields", "roles", "principal_type", "effect", "permission", "size", "kind",
+    "source_id", "run_id",
 )
 AUDITED_PREFIXES = ("auth.", "admin.", "audit.")
 
