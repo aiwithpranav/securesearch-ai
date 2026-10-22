@@ -6,6 +6,7 @@ trail (not the system_admin); filters, paging and a spreadsheet-safe CSV export 
 with ids only; and forbidden text never reaches any audit table."""
 import csv
 import io
+import re
 import json
 import uuid
 
@@ -357,10 +358,14 @@ def test_the_export_is_a_safe_csv_and_is_recorded_before_it_is_sent(api, people,
     r = api.request("GET", "/audit/export", token=tokens["auditor"])
     assert r.status_code == 200 and r.headers["content-type"].startswith("text/csv")
     assert "attachment" in r.headers["content-disposition"] and r.headers["cache-control"] == "no-store"
-    table = list(csv.reader(io.StringIO(r.text)))
+    assert r.text.startswith("﻿")  # byte order mark: Excel shows special characters correctly
+    table = list(csv.reader(io.StringIO(r.text.lstrip("﻿"))))
     assert table[0] == audit_service.CSV_HEADER and len(table) == 3
-    assert any(row[4] == "'=HYPERLINK(\"http://evil\")" for row in table[1:])  # the formula is defused
-    assert all(not row[4].startswith("=") for row in table[1:])
+    assert any(row[5] == "'=HYPERLINK(\"http://evil\")" for row in table[1:])  # the formula is defused
+    assert all(not row[5].startswith("=") for row in table[1:])
+    first = table[1]  # readable: a name and email instead of an id, a count instead of passage ids, plain time
+    assert first[1] == "Reader" and first[2] == "reader@demo" and first[3] in ("Question", "Search") and first[9] == settings.retrieval_mode
+    assert str(ids["reader"]) not in r.text and re.fullmatch(r"\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", first[0]) and first[7].isdigit()
     assert "24 days" not in r.text and ANSWER_TEXT not in r.text and "Employees receive" not in r.text
     exported = [e for e in rows(pg, "access_events") if e["event"] == "audit.export"]
     assert len(exported) == 1 and str(exported[0]["actor_id"]) == ids["auditor"]
@@ -371,7 +376,7 @@ def test_the_export_honours_filters_and_a_row_limit(api, people, world):
     for q in ("annual leave days", "vpn login phone", "leave carried over"):
         search(api, tokens["reader"], q)
     chat(api, tokens["reader"])
-    count = lambda qs: len(list(csv.reader(io.StringIO(api.request("GET", "/audit/export" + qs, token=tokens["auditor"]).text)))) - 1  # noqa: E731
+    count = lambda qs: len(list(csv.reader(io.StringIO(api.request("GET", "/audit/export" + qs, token=tokens["auditor"]).text.lstrip("﻿"))))) - 1  # noqa: E731
     assert count("") == 4 and count("?kind=CHAT") == 1 and count("?limit=2") == 2 and count("?q=vpn") == 1
 
 

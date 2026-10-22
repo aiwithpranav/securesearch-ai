@@ -130,8 +130,9 @@ async def export_queries(
     db.add(AccessEvent(event="audit.export", actor_id=user.id, detail={"kind": kind or "ALL"}, request_id=getattr(request.state, "request_id", None)))
     await db.commit()
     rows = (await db.scalars(audit.queries_stmt(audit.query_filters(user_id, kind, status, since, until, q)).limit(limit))).all()
+    people = await _people(db, {r.user_id for r in rows})
     return StreamingResponse(
-        audit.csv_rows(iter(rows)), media_type="text/csv; charset=utf-8",
+        audit.csv_rows(iter(rows), people), media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="query-audit.csv"', "Cache-Control": "no-store"},
     )
 

@@ -9,7 +9,7 @@ import csv
 import io
 import uuid
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import ColumnElement, Select, and_, func, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -113,7 +113,7 @@ async def count(db: AsyncSession, stmt: Select) -> int:  # type: ignore[type-arg
 
 # ------------------------------------------------------------------ CSV (safe to open in a spreadsheet)
 
-CSV_HEADER = ["time", "user_id", "kind", "status", "question", "allowed_documents", "retrieved_chunk_ids", "latency_ms", "request_id", "filters"]
+CSV_HEADER = ["time_utc", "who", "email", "type", "result", "question", "documents_readable", "passages_returned", "latency_ms", "search_mode", "reranked", "request_id"]
 
 
 def csv_safe(value: object) -> str:
@@ -122,18 +122,23 @@ def csv_safe(value: object) -> str:
     return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
-def csv_rows(rows: Iterator[QueryAuditLog]) -> Iterator[str]:
+def csv_rows(rows: Iterator[QueryAuditLog], people: dict | None = None) -> Iterator[str]:  # type: ignore[type-arg]
+    """One readable line per question. The file starts with a byte order mark so Excel shows special characters correctly."""
+    people = people or {}
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow(CSV_HEADER)
-    yield buffer.getvalue()
+    yield "﻿" + buffer.getvalue()
     for r in rows:
         buffer.seek(0)
         buffer.truncate(0)
+        who = people.get(r.user_id)
         writer.writerow([
-            csv_safe(r.created_at.isoformat()), csv_safe(r.user_id), csv_safe(r.kind), csv_safe(r.response_status),
-            csv_safe(r.query_text), r.allowed_doc_count, csv_safe(" ".join(str(c) for c in r.retrieved_chunk_ids)),
-            r.latency_ms, csv_safe(r.request_id), csv_safe(r.filters),
+            r.created_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+            csv_safe(who.full_name if who and who.full_name else f"Former user ({str(r.user_id)[:8]})"), csv_safe(who.email if who else ""),
+            "Question" if r.kind == "CHAT" else "Search", csv_safe(r.response_status), csv_safe(r.query_text),
+            r.allowed_doc_count, len(r.retrieved_chunk_ids), r.latency_ms,
+            csv_safe(r.filters.get("mode", "")), "yes" if r.filters.get("rerank") else "no", csv_safe(r.request_id),
         ])
         yield buffer.getvalue()
 

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 20 backend tests (592 total), 37 frontend tests (96 total), 6 mutation checks all caught. Challenges 107 to 113.
 
 ### Changed (Phase 7C)
+- The audit CSV export is readable: name and email instead of an id, a plain UTC time, a passage count instead of long ids, separate search mode and reranked columns, and a byte order mark for Excel.
 - The weak-match note on Find passages now uses 0.30, the same level answers refuse at.
 
 ### Added (Phase 7B, merged)
