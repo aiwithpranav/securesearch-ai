@@ -124,7 +124,7 @@ services:
   # It has no internet access: the embedding model is already inside the image.
   worker:
     image: securesearch-backend:dev
-    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "-B", "--loglevel=INFO", "--concurrency=1"]
     depends_on:
       backend:
         condition: service_healthy

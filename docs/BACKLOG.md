@@ -43,3 +43,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 37 | Dashboard extras | Export of the overview, longer ranges, per-department views, and a chart library if the charts grow. | Later | No |
 | 38 | Clean up passages of old versions | Inactive passages of older versions are kept forever. Add a retention rule (for example keep the last 3 versions). | Phase 9 | No |
 | 39 | Make an old version current again | Today you send the old file as a new version. A button could re-index version N. | Later | No |
+| 40 | Cheaper "unchanged" check | The engine reads every file from the source at each run to compare its SHA-256. A connector could give its own revision (for example a git blob id) so unchanged files are not read. | Later | No |
+

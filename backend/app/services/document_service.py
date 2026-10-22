@@ -169,6 +169,10 @@ async def create_upload(
     sensitivity_level: int,
     allowed_countries: list[str] | None,
     request_id: str | None,
+    *,
+    external_source: str | None = None,
+    external_id: str | None = None,
+    source_url: str | None = None,
 ) -> DocumentOut:
     await _require_department(db, department_id)
 
@@ -199,6 +203,9 @@ async def create_upload(
         status=dm.QUEUED,
         allowed_countries=allowed_countries,
         uploaded_by=actor.id,
+        external_source=external_source,
+        external_id=external_id,
+        source_url=source_url,
     )
     db.add(doc)
     await db.flush()  # the version and job rows need the document row to exist first

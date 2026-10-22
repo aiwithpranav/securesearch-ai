@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.access import resolver as r
 from app.core.errors import AppError
 from app.core.logging import security_event
-from app.models import Department, Document, DocumentAcl, Group, PermissionChangeEvent, Role, User, user_groups
+from app.models import Department, Document, DocumentAcl, Group, PermissionChangeEvent, Role, SyncSource, User, user_groups
 from app.schemas.access import (
     AclOut, DecisionOut, GroupDetail, GroupOut, HistoryOut, MemberOut, PreviewOut, PreviewUser,
 )
@@ -275,9 +275,20 @@ async def create_group(db: AsyncSession, actor: User, name: str, description: st
     return GroupOut(id=group.id, name=group.name, description=group.description, member_count=0)
 
 
+async def _refuse_if_managed(db: AsyncSession, group: Group) -> None:
+    """Teams created by a sync source follow the source. Editing them by hand would be undone at the next sync."""
+    managed = await db.scalar(
+        select(func.count()).select_from(SyncSource).where(func.starts_with(group.name, func.lower(SyncSource.kind) + ":" + SyncSource.name + ":"))
+    )
+    if managed:
+        raise AppError(409, "Conflict", "This team is managed by a sync source. Change it in the source.")
+
+
 async def add_member(db: AsyncSession, actor: User, group_id: int, user_id: uuid.UUID, request_id: str | None) -> GroupDetail:
-    if await db.get(Group, group_id) is None:
+    group = await db.get(Group, group_id)
+    if group is None:
         raise not_found("Group")
+    await _refuse_if_managed(db, group)
     if await db.get(User, user_id) is None:
         raise AppError(422, "Validation failed", "The user does not exist.")
     already = await db.scalar(
@@ -291,8 +302,10 @@ async def add_member(db: AsyncSession, actor: User, group_id: int, user_id: uuid
 
 
 async def remove_member(db: AsyncSession, actor: User, group_id: int, user_id: uuid.UUID, request_id: str | None) -> None:
-    if await db.get(Group, group_id) is None:
+    group = await db.get(Group, group_id)
+    if group is None:
         raise not_found("Group")
+    await _refuse_if_managed(db, group)
     result = await db.execute(
         delete(user_groups).where(user_groups.c.group_id == group_id, user_groups.c.user_id == user_id)
     )

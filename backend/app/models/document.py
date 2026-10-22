@@ -37,6 +37,7 @@ class Document(Base):
     __tablename__ = "documents"
     __table_args__ = (
         CheckConstraint("status IN ('QUEUED','PROCESSING','READY','FAILED')", name="ck_documents_status"),
+        Index("uq_documents_external_item", "external_source", "external_id", unique=True, postgresql_where=text("external_id IS NOT NULL")),
         CheckConstraint("sensitivity_level BETWEEN 0 AND 4", name="ck_documents_sensitivity"),
         CheckConstraint(
             "document_type IN ('POLICY','RUNBOOK','REPORT','PLAYBOOK','FORECAST','CONTRACT','OTHER')",
