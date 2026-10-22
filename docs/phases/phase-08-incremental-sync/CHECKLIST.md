@@ -18,13 +18,14 @@
 - [x] 46 new backend tests (652 total), 18 mutations all caught, real worker and scheduler check
 - [x] Owner approval (merged, PR #29)
 
-## 8C GitHub connector (built, waiting for owner review)
+## 8C GitHub connector (merged, PR #30)
 - [x] Connector (folder, file types, `access.json` longest-prefix teams, `users.json`, repository collaborators), token worker-only, failure codes; ADR 035
 - [x] Sources screen (add a GitHub source, Sync now, automatic sync, interval, last and recent runs), Sources link in the Manage menu
 - [x] `demo-docs/` (six invented documents and the access files)
 - [x] 45 new backend tests (697 total), 16 mutations all caught, 22 new frontend tests (123 total), real-browser check with the real worker, 360 px
-- [ ] Owner manual checks and approval
-- [ ] Live check with the real repository (after the merge, with a short-lived read-only token)
+- [x] Owner manual checks and approval (merged, PR #30)
+- [ ] Live check with the real repository (optional, with a short-lived read-only token; backlog 43)
 
 ## Phase 8 close
-- [ ] Owner approval, PRs merged, tag `v0.8`
+- [x] Owner approval, PRs merged
+- [ ] Tag `v0.8` (after this docs PR is merged)

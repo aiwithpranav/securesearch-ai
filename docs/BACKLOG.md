@@ -46,4 +46,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 40 | Cheaper "unchanged" check | The engine reads every file from the source at each run to compare its SHA-256. A connector could give its own revision (for example a git blob id) so unchanged files are not read. | Later | No |
 | 41 | Real group membership from GitHub | Teams are listed in `access.json` because personal repositories have no teams. For an organisation, read the GitHub teams directly. | Later | No |
 | 42 | Second connector | Google Drive, with an OAuth application. | Later | No |
+| 43 | Live check of the GitHub sync | Run one sync of `demo-docs/` against the real repository with a short-lived read-only token and note the result in the walkthrough. | Optional | No |
 
