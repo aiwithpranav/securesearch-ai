@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from app.access.resolver import readable_ids_stmt
 from app.core.config import settings
 from app.embeddings import embed_query
-from app.models import Document, DocumentChunk
+from app.models import Document, DocumentChunk, DocumentVersion
 from app.retrieval.fusion import rrf
 from app.retrieval.reranker import get_reranker
 
@@ -91,13 +91,14 @@ def _load_hits(session: Session, user_id: uuid.UUID, chunk_ids: list[uuid.UUID])
     stmt = (
         select(
             DocumentChunk.id, DocumentChunk.document_id, Document.title, DocumentChunk.page_number,
-            DocumentChunk.section, DocumentChunk.content, Document.updated_at,
+            DocumentChunk.section, DocumentChunk.content, DocumentVersion.created_at.label("version_date"),
         )
         .join(Document, Document.id == DocumentChunk.document_id)
+        .join(DocumentVersion, DocumentVersion.id == DocumentChunk.document_version_id)
         .where(DocumentChunk.id.in_(chunk_ids), _allowed(user_id))
     )
     return {
-        r.id: Hit(r.id, r.document_id, r.title, r.page_number, r.section, r.content, 0.0, document_updated_at=r.updated_at)
+        r.id: Hit(r.id, r.document_id, r.title, r.page_number, r.section, r.content, 0.0, document_updated_at=r.version_date)
         for r in session.execute(stmt)
     }
 

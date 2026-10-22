@@ -1,4 +1,4 @@
-"""Admin operations on documents: upload, list, edit, soft delete, re-index, jobs, notifications.
+"""Admin operations on documents: upload, new versions, list, edit, soft delete and restore, re-index, jobs, notifications.
 
 Rules enforced here (the routes only call these functions):
 - Nothing returned contains document text (admin is not reader).
@@ -20,7 +20,7 @@ from app.core.logging import security_event
 from app.ingest.validation import ValidatedFile
 from app.models import Department, Document, DocumentChunk, DocumentVersion, IngestionJob, Notification, User
 from app.models import document as dm
-from app.schemas.documents import DocumentOut, JobOut, UserRef
+from app.schemas.documents import DocumentOut, JobOut, UserRef, VersionUploadOut
 from app.schemas.users import DepartmentOut
 from app.storage import StorageError, get_storage
 from app.storage.keys import original_key
@@ -117,6 +117,7 @@ async def _to_out(db: AsyncSession, docs: list[Document]) -> list[DocumentOut]:
                 uploaded_by=UserRef(id=users[d.uploaded_by].id, full_name=users[d.uploaded_by].full_name),
                 created_at=d.created_at,
                 updated_at=d.updated_at,
+                deleted_at=d.deleted_at,
             )
         )
     return out
@@ -127,6 +128,24 @@ async def _get_live(db: AsyncSession, document_id: uuid.UUID) -> Document:
     if doc is None or doc.deleted_at is not None:
         raise not_found()
     return doc
+
+
+async def _get_deleted(db: AsyncSession, document_id: uuid.UUID) -> Document:
+    doc = await db.get(Document, document_id)
+    if doc is None:
+        raise not_found()
+    return doc
+
+
+async def _duplicate_of(db: AsyncSession, sha256: str, except_document_id: uuid.UUID | None = None) -> uuid.UUID | None:
+    """The id of another live document whose latest or any stored version has this exact content."""
+    stmt = (
+        select(Document.id).join(DocumentVersion, DocumentVersion.document_id == Document.id)
+        .where(DocumentVersion.content_hash == sha256, Document.deleted_at.is_(None))
+    )
+    if except_document_id is not None:
+        stmt = stmt.where(Document.id != except_document_id)
+    return await db.scalar(stmt.limit(1))
 
 
 async def _enqueue(job_id: uuid.UUID) -> None:
@@ -153,12 +172,7 @@ async def create_upload(
 ) -> DocumentOut:
     await _require_department(db, department_id)
 
-    existing = await db.scalar(
-        select(Document.id)
-        .join(DocumentVersion, DocumentVersion.document_id == Document.id)
-        .where(DocumentVersion.content_hash == vfile.sha256, Document.deleted_at.is_(None))
-        .limit(1)
-    )
+    existing = await _duplicate_of(db, vfile.sha256)
     if existing is not None:
         raise AppError(
             409, "Conflict", "A document with identical content already exists.",
@@ -219,19 +233,110 @@ async def create_upload(
     return (await _to_out(db, [doc]))[0]
 
 
+async def upload_new_version(
+    db: AsyncSession, actor: User, document_id: uuid.UUID, vfile: ValidatedFile, request_id: str | None
+) -> VersionUploadOut:
+    """A new file for an existing document. Same content as the newest version: nothing happens (FR-15).
+    Otherwise version N+1 is stored and queued; the old version stays searchable until the new one is complete,
+    then the swap is one transaction in the pipeline. Access rules, title and metadata are not touched."""
+    doc = (await db.execute(select(Document).where(Document.id == document_id).with_for_update())).scalar_one_or_none()
+    if doc is None or doc.deleted_at is not None:
+        raise not_found()
+    newest = await db.scalar(
+        select(DocumentVersion).where(DocumentVersion.document_id == doc.id).order_by(DocumentVersion.version_no.desc()).limit(1)
+    )
+    assert newest is not None
+    if newest.content_hash == vfile.sha256:
+        return VersionUploadOut(result="UNCHANGED", version_no=newest.version_no, document=(await _to_out(db, [doc]))[0])
+    other = await _duplicate_of(db, vfile.sha256, except_document_id=doc.id)
+    if other is not None:
+        raise AppError(409, "Conflict", "A document with identical content already exists.", extra={"existing_document_id": str(other)})
+    busy = await db.scalar(
+        select(func.count()).select_from(IngestionJob).where(IngestionJob.document_id == doc.id, IngestionJob.status.in_([dm.QUEUED, dm.PROCESSING]))
+    )
+    if busy:
+        raise AppError(409, "Conflict", "This document is already being processed.")
+
+    version_no = newest.version_no + 1
+    key = original_key(doc.id, version_no, vfile.sha256)
+    storage = get_storage()
+    try:
+        await run_in_threadpool(storage.ensure_bucket)
+        await run_in_threadpool(storage.put_bytes, key, vfile.data, vfile.content_type)
+    except StorageError:
+        raise AppError(503, "Service Unavailable", "The file store is not available. Try again later.") from None
+
+    version_id, job_id = uuid.uuid4(), uuid.uuid4()
+    db.add(DocumentVersion(
+        id=version_id, document_id=doc.id, version_no=version_no, content_hash=vfile.sha256,
+        storage_path=key, size_bytes=vfile.size, content_type=vfile.content_type,
+    ))
+    await db.flush()
+    db.add(IngestionJob(id=job_id, document_id=doc.id, document_version_id=version_id, status=dm.QUEUED, content_hash=vfile.sha256))
+    doc.original_filename = vfile.filename
+    if doc.status == dm.FAILED:  # nothing searchable exists, so the document is waiting again
+        doc.status = dm.QUEUED
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        try:
+            await run_in_threadpool(storage.delete, key)  # do not leave an orphan file behind
+        except StorageError:
+            pass
+        raise
+    await _enqueue(job_id)
+    security_event(
+        "admin.document_version_uploaded", request_id, actor_id=str(actor.id), document_id=str(doc.id),
+        version_no=version_no, size=vfile.size, kind=vfile.kind,
+    )
+    await db.refresh(doc)
+    return VersionUploadOut(result="CREATED", version_no=version_no, document=(await _to_out(db, [doc]))[0])
+
+
+async def restore_document(db: AsyncSession, document_id: uuid.UUID, actor: User, request_id: str | None) -> DocumentOut:
+    """Brings a soft-deleted document back. Its access rules were kept, so it comes back with the same rules.
+    It is not searchable again until its newest version has been re-indexed (one job is queued)."""
+    doc = (await db.execute(select(Document).where(Document.id == document_id).with_for_update())).scalar_one_or_none()
+    if doc is None:
+        raise not_found()
+    if doc.deleted_at is None:
+        raise AppError(409, "Conflict", "This document is not deleted.")
+    version = await db.scalar(
+        select(DocumentVersion).where(DocumentVersion.document_id == doc.id).order_by(DocumentVersion.version_no.desc()).limit(1)
+    )
+    assert version is not None
+    other = await _duplicate_of(db, version.content_hash, except_document_id=doc.id)
+    if other is not None:
+        raise AppError(409, "Conflict", "A document with identical content already exists.", extra={"existing_document_id": str(other)})
+    doc.deleted_at = None
+    doc.status = dm.QUEUED
+    job = IngestionJob(document_id=doc.id, document_version_id=version.id, status=dm.QUEUED, content_hash=version.content_hash)
+    db.add(job)
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise AppError(409, "Conflict", "This document is already being processed.") from None
+    await _enqueue(job.id)
+    security_event("admin.document_restored", request_id, actor_id=str(actor.id), document_id=str(doc.id), job_id=str(job.id))
+    await db.refresh(doc)
+    return (await _to_out(db, [doc]))[0]
+
+
 # ------------------------------------------------------------------ read
 
 async def list_documents(
-    db: AsyncSession, limit: int, offset: int, status: str | None, department_id: int | None
+    db: AsyncSession, limit: int, offset: int, status: str | None, department_id: int | None, deleted: bool = False
 ) -> tuple[list[DocumentOut], int]:
-    where = [Document.deleted_at.is_(None)]
+    where = [Document.deleted_at.is_not(None) if deleted else Document.deleted_at.is_(None)]
     if status:
         where.append(Document.status == status)
     if department_id:
         where.append(Document.department_id == department_id)
     total = await db.scalar(select(func.count()).select_from(Document).where(*where)) or 0
     docs = (await db.scalars(
-        select(Document).where(*where).order_by(Document.created_at.desc()).limit(limit).offset(offset)
+        select(Document).where(*where).order_by(Document.deleted_at.desc() if deleted else Document.created_at.desc()).limit(limit).offset(offset)
     )).all()
     return await _to_out(db, list(docs)), int(total)
 

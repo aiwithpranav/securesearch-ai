@@ -56,6 +56,13 @@ class DocumentOut(BaseModel):
     uploaded_by: UserRef
     created_at: datetime
     updated_at: datetime
+    deleted_at: datetime | None = None  # set only on deleted documents (the deleted list)
+
+
+class VersionUploadOut(BaseModel):
+    result: str  # CREATED (a new version was stored and queued) or UNCHANGED (same content: nothing was done)
+    version_no: int
+    document: DocumentOut
 
 
 class DocumentPage(BaseModel):

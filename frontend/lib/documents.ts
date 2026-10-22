@@ -36,7 +36,10 @@ export type DocumentItem = {
   uploaded_by: { id: string; full_name: string };
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 };
+
+export type VersionUpload = { result: "CREATED" | "UNCHANGED"; version_no: number; document: DocumentItem };
 
 export type DocumentPage = { items: DocumentItem[]; total: number; limit: number; offset: number };
 export type Version = { id: string; version_no: number; content_hash: string; size_bytes: number; content_type: string; created_at: string };
@@ -117,8 +120,25 @@ export function uploadErrorMessage(err: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
+/** What to tell the admin after a new version was sent. */
+export function versionResultText(r: Pick<VersionUpload, "result" | "version_no">): string {
+  return r.result === "UNCHANGED"
+    ? `This file is the same as version ${r.version_no}. Nothing was changed.`
+    : `Version ${r.version_no} was uploaded and is being processed. The current version stays in use until it is ready.`;
+}
+
+/** Errors of "upload a new version" and "restore": the server's own plain sentence is shown for a conflict. */
+export function versionErrorMessage(err: unknown): string {
+  if (err instanceof ApiError && err.status === 409) return err.message;
+  if (err instanceof ApiError && err.status === 404) return "This document was not found.";
+  return uploadErrorMessage(err);
+}
+
 // ----------------------------------------------------------------------------- API calls
 
+export const uploadVersion = (id: string, form: FormData) =>
+  authedApi<VersionUpload>(`/documents/${id}/versions`, { method: "POST", body: form });
+export const restoreDocument = (id: string) => authedApi<DocumentItem>(`/documents/${id}/restore`, { method: "POST" });
 export const listDocuments = (query: string) => authedApi<DocumentPage>(`/documents${query}`);
 export const getDocument = (id: string) => authedApi<DocumentItem>(`/documents/${id}`);
 export const listVersions = (id: string) => authedApi<Version[]>(`/documents/${id}/versions`);
