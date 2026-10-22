@@ -9,7 +9,7 @@
 |---|---|---|
 | **8A** Versions | Upload a new version, same content is skipped, restore a deleted document, version date on passages, admin screens | Done, merged (PR #28) |
 | **8B** Sync engine | Source interface, diff (new, changed, unchanged, deleted), permission-only update, scheduled sync, sync runs | Done, merged (PR #29) |
-| **8C** GitHub connector | Import a folder of `.md`, `.txt`, `.pdf` and `.docx` from a repository, mirror collaborators and teams into groups and rules, Sources screen | Built, waiting for owner review |
+| **8C** GitHub connector | Import a folder of `.md`, `.txt`, `.pdf` and `.docx` from a repository, mirror collaborators and teams into groups and rules, Sources screen | Done, merged (PR #30) |
 
 ## Security rules that apply
 - Deny by default, DENY wins, admin is not reader: a new version, a sync or a restore never widens access.

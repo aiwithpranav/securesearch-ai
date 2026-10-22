@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added (Phase 8C, branch `feat/github-8c`, awaiting owner review)
+
+## [v0.8] - 2026-10-23
+Phase 8 (incremental sync) complete: new versions, restore and the version date (8A), the sync engine with scheduler and API (8B), the GitHub connector and the Sources screen (8C). 697 backend and 123 frontend tests.
+### Added (Phase 8C, merged)
 - GitHub connector: imports a folder of `.md`, `.txt`, `.pdf` and `.docx`; who may read comes from `.securesearch/access.json` (teams, longest folder rule wins) and `users.json`, and by default from the repository's real collaborators. Read-only token, worker only. `demo-docs/` with six invented documents. ADR 035.
 - **Sources** screen (Manage menu): add a GitHub source, Sync now, automatic sync on or off, interval, last run and recent runs in plain words.
 - 45 backend tests (697 total), 16 mutation checks all caught, 22 frontend tests (123 total). Challenges 123 to 127.
