@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added (Phase 7C, branch `feat/dashboards-7c`, awaiting owner review)
+
+## [v0.7] - 2026-10-22
+Phase 7 (audit and evaluation) complete: append-only audit trail (7A), evaluation with canary scanner and 0 leaks on 62 cases (7B), dashboards and screens (7C). 592 backend and 96 frontend tests.
+### Added (Phase 7C, merged)
 - Dashboards API: `GET /dashboards/admin-overview` (system administrator), `GET /dashboards/knowledge-gaps` (system and security administrator; questions normalised, counted and masked, nobody named) and `GET /me/suggested-questions` (built from documents the person may read).
 - Screens: role-based **Manage** menu, **Audit** (filters, details, security events, CSV export), **Overview**, **Knowledge gaps**, **Evaluation** (run history, free Run button with live refresh, metrics, failed cases) and an employee **Home** with ideas to ask and recent questions.
 - 20 backend tests (592 total), 37 frontend tests (96 total), 6 mutation checks all caught. Challenges 107 to 113.

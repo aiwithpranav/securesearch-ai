@@ -20,12 +20,13 @@
 - [x] 46 new tests (572 total), 14 mutations (13 caught, 1 equivalent), real-stack run 62 of 62 with 0 leaks
 - [x] Owner manual checks and approval (merged, PR #24)
 
-## 7C Dashboards (built, waiting for owner review)
+## 7C Dashboards (merged, PR #25)
 - [x] Backend: admin overview, knowledge gaps (masked, no names), suggested questions; 20 tests
 - [x] Manage menu by role; Audit, Overview, Knowledge gaps, Evaluation screens; employee Home
 - [x] Weak-match note aligned to 0.30
 - [x] 96 frontend tests, build passes, 6 mutations caught, real-browser check with temporary people, 360 px
-- [ ] Owner manual checks and approval
+- [x] Owner manual checks and approval (merged, PR #25)
 
 ## Phase 7 close
-- [ ] Owner approval, PRs merged, tag `v0.7`
+- [x] Owner approval, PRs merged
+- [ ] Tag `v0.7` (after this docs PR is merged)

@@ -1,6 +1,6 @@
-# STATUS: Phase 7, Layer 7C (dashboards)
+# STATUS: Phase 7 (audit and evaluation) COMPLETE
 
-Branch: `feat/dashboards-7c` (local, not pushed). `main` has Phases 1 to 6 (tags `v0.1` to `v0.6`), the design refresh, 7A and 7B.
+Branch: `docs/phase-7-close` (docs only). `main` has Phases 1 to 7 (7A PR #23, 7B PR #24, 7C PR #25). Tag `v0.7` after the owner says go.
 
 ## Done
 - Phase 7 plan; ADR 031; Phase 7 docs.
@@ -11,12 +11,11 @@ Branch: `feat/dashboards-7c` (local, not pushed). `main` has Phases 1 to 6 (tags
 - 7C: dashboards API (admin overview, knowledge gaps with masking, suggested questions), a role-based Manage menu, Audit, Overview, Knowledge gaps and Evaluation screens, employee Home with ideas and recent questions, weak-match note aligned to 0.30; 20 new backend tests (592 total), 37 new frontend tests (96 total), 6 mutations all caught; checked in a real browser with temporary people and at 360 px.
 
 ## In progress
-- Nothing. Waiting for owner review of 7C.
+- Nothing. Phase 7 is complete and merged.
 
 ## Exact next action
-1. Owner checks 7C and approves ("7C Approved").
-2. Claude pushes `feat/dashboards-7c` and gives the PR link with click-by-click steps. The owner merges; Claude checks the remote.
-3. Phase 7 close: final checks on main, close-out docs, tag `v0.7` after the owner says "go", then the Phase 8 plan.
+1. Merge this close-out docs PR; Claude checks the remote and tags `v0.7` (owner "go" given for closing).
+2. Claude writes the Phase 8 plan and waits for approval.
 
 ## Blockers
 - None.
@@ -34,4 +33,4 @@ Branch: `feat/dashboards-7c` (local, not pushed). `main` has Phases 1 to 6 (tags
 - Paraphrase answer rate 4 of 8 (backlog 34); the real model has not been evaluated (backlog 35).
 
 ## Resume prompt
-"Read docs/phases/phase-07-audit-and-evaluation/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Layer 7C is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-07-audit-and-evaluation/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\AI\RAG\Secure_Search_AI. Phase 7 is complete. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
