@@ -3,6 +3,7 @@ from app.models.access import DocumentAcl, Group, PermissionChangeEvent, user_gr
 from app.models.audit import AccessEvent, AnswerAuditLog, QueryAuditLog
 from app.models.auth_token import AuthToken
 from app.models.chat import ChatFeedback, SearchHistory
+from app.models.evaluation import EvalCase, EvalResult, EvalRun
 from app.models.document import Document, DocumentChunk, DocumentVersion, IngestionJob, Notification
 from app.models.user import Department, Role, User, user_roles
 
@@ -12,6 +13,9 @@ __all__ = [
     "AuthToken",
     "ChatFeedback",
     "Department",
+    "EvalCase",
+    "EvalResult",
+    "EvalRun",
     "Document",
     "DocumentAcl",
     "DocumentChunk",

@@ -15,7 +15,7 @@ Blueprint sections 9 (retrieval pipe) and 23 (why hybrid) require: authorize fir
 - **Reranker:** `BAAI/bge-reranker-base` (MIT), revision pinned, baked into the Docker image (offline at run time, like the embedding model), CPU only. Scores are the raw logit passed through one sigmoid (0 to 1). It only reorders chunks that already passed the access check.
 - **Modes:** setting `RETRIEVAL_MODE` = `keyword` | `vector` | `hybrid` (default hybrid, kept only if the Phase 7 comparison supports it). Rerank defaults to on in hybrid mode only and can be forced per call, so "hybrid" and "hybrid + reranker" can both be measured.
 - **Query hygiene:** whitespace collapsed, capped at 500 characters; empty or stop-word-only queries return nothing and never raise.
-- **Refusal threshold:** a provisional reranker threshold of **0.03** is recorded from the demo data (off-topic best score at most 0.016, on-topic questions at least 0.044). Phase 6 uses it for refusals and Phase 7 tunes it on the larger question set.
+- **Refusal threshold (changed to 0.30 in Phase 7B, ADR 032):** a provisional reranker threshold of **0.03** is recorded from the demo data (off-topic best score at most 0.016, on-topic questions at least 0.044). Phase 6 uses it for refusals and Phase 7 tunes it on the larger question set.
 
 ## Addition in 5B
 - `POST /search` needs only a signed-in, active user; the allow-list decides the content. Admin has no special search right. Mode is optional (server default); question 1 to 500 characters.

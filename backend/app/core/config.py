@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     chat_limit_per_minute: int = 10  # per person; every answer costs money at the provider
     preview_limit_per_minute: int = 60
     history_page_max: int = 50
-    answer_min_score: float = 0.03  # provisional refusal threshold on the reranker score (ADR 028); tuned in Phase 7
+    answer_min_score: float = 0.30  # refusal threshold on the reranker score: tuned on the 48 answer-or-refuse evaluation cases (ADR 032)
 
     # --- Phase 3B upload and ingestion limits ---
     max_upload_bytes: int = 50 * 1024 * 1024  # NFR-03: 50 MB

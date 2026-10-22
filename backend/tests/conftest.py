@@ -97,7 +97,7 @@ def _mailpit(path: str, method: str = "GET"):
 def clean_state(pg, redis_client):
     """Empty tables, reload reference data, clear rate-limit counters and Mailpit."""
     pg.execute(
-        "TRUNCATE auth_tokens, user_roles, users, roles, departments, groups, answer_audit_logs, query_audit_logs, access_events RESTART IDENTITY CASCADE"
+        "TRUNCATE auth_tokens, user_roles, users, roles, departments, groups, answer_audit_logs, query_audit_logs, access_events, eval_results, eval_runs, eval_cases RESTART IDENTITY CASCADE"
     )
     for name in ("Engineering", "Finance", "HR"):
         pg.execute("INSERT INTO departments (name) VALUES (%s)", (name,))
