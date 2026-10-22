@@ -8,13 +8,14 @@
 | Layer | Content | Status |
 |---|---|---|
 | **8A** Versions | Upload a new version, same content is skipped, restore a deleted document, version date on passages, admin screens | Done, merged (PR #28) |
-| **8B** Sync engine | Source interface, diff (new, changed, unchanged, deleted), permission-only update, scheduled sync, sync runs | Built, waiting for owner review |
-| **8C** GitHub connector | Import `.md` and `.txt` from a repository, mirror collaborators and teams into groups and rules, Sources screen | Not started |
+| **8B** Sync engine | Source interface, diff (new, changed, unchanged, deleted), permission-only update, scheduled sync, sync runs | Done, merged (PR #29) |
+| **8C** GitHub connector | Import a folder of `.md`, `.txt`, `.pdf` and `.docx` from a repository, mirror collaborators and teams into groups and rules, Sources screen | Built, waiting for owner review |
 
 ## Security rules that apply
 - Deny by default, DENY wins, admin is not reader: a new version, a sync or a restore never widens access.
 - A restored document comes back with the rules it had, and is not searchable until it is indexed again.
-- Source-managed rules are only those of groups the connector created (names start with `github:`); rules an administrator added by hand are never touched.
+- Source-managed rules are only those of groups the connector created (names start with `github:<source name>:`); rules an administrator added by hand are never touched.
+- The token goes to the worker only, is read-only, and never appears in a screen, a saved setting, a run, a log or an audit row.
 - Tokens only in `.env`, read-only, never logged.
 
 ## Out of scope

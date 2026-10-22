@@ -73,3 +73,40 @@ Celery beat (already part of Celery) for the schedule, so no new container. A fa
 - An item deleted here, changed in the source and then restored is restored with the old file first; the next run picks up the new one.
 - See `docs/CHALLENGES.md` entries 118 to 122.
 
+## Layer 8C: the GitHub connector and the Sources screen
+
+### 1. What we built
+A real source for the sync engine: a folder of a GitHub repository. Its documents are imported, kept in step, and the repository's own list of people decides who may read them. A **Sources** screen shows and controls it.
+
+### 2. How it works, step by step
+1. **Add a source** (Manage, Sources): repository `owner/name`, branch, folder (here `demo-docs`), the department, type and sensitivity of new documents, how often to sync. The token is never entered on a screen: the server reads `GITHUB_TOKEN` from its own `.env`, and only the background worker holds it.
+2. **What is imported:** `.md`, `.txt`, `.pdf` and `.docx` in that folder. Folders whose name starts with a dot are skipped.
+3. **Who may read:** `demo-docs/.securesearch/access.json` lists teams (with GitHub logins) and which team may read which folder (the most specific folder wins; no match means nobody). `users.json` says which GitHub login is which person in the app.
+4. **Real GitHub permissions:** by default a person must also be a collaborator of the repository. Remove them on GitHub and they lose access here at the next sync, without any document changing.
+5. **Sync now / automatic:** a sync starts at once, or runs by itself every few minutes. The card shows the last run in plain words (for example "3 new, 1 changed, 2 unchanged") and the recent runs; problems are explained (for example "The server has no GitHub token").
+6. Everything else is the 8B engine: only what changed is processed; a permission-only change updates the rules without re-indexing; removed files are soft deleted; a broken or empty source cannot wipe the index.
+
+### 3. Important files
+`backend/app/sync/github.py`, `backend/app/core/config.py` (`github_token`, `github_api_url`), `docker-compose.yml` (worker gets the token and outgoing network), `demo-docs/`, `frontend/lib/sync.ts`, `frontend/app/(portal)/(app)/admin/sources/`. Tests: `backend/tests/test_github_connector.py`, `frontend/lib/sync.test.ts`. ADR 035.
+
+### 4. Tools: why we chose them
+GitHub's REST API through `httpx` (already used for the model). The tests use a fake GitHub (`httpx.MockTransport`), so no test ever touches the network or a token.
+
+### 5. How to run it
+`docker compose build backend && docker compose up -d`, then `cd frontend; npm run dev`. Sign in as `prashant@demo`, Manage, Sources. For a real sync: make a 7-day read-only token (see PREREQUISITES), put `GITHUB_TOKEN=...` in `.env`, `docker compose up -d`, add a source for `aiwithpranav/securesearch-ai` (folder `demo-docs`, branch `main`) and press Sync now. Delete the token afterwards.
+
+### 6. How to test it
+`docker compose exec backend python -m pytest tests/test_github_connector.py -q` (45 tests); `cd frontend; npx vitest run` (123 tests).
+
+### 7. Actual results (checked by me)
+- 697 backend tests and 123 frontend tests pass; type check and production build clean.
+- 16 deliberate mistakes (longest-prefix rule, hidden folders, collaborator check, file types, folder filter, truncated listings, error codes, the retry, the missing-token check, pagination, rate limit, the permission code, damaged access files, repository checks) were all caught.
+- Real worker with outgoing network and no token: a GitHub source added from the screen and started with Sync now closed with "The server has no GitHub token ..."; the interval and the automatic switch changed; no page scrolled sideways at 360 px. The temporary administrator and source were deleted afterwards.
+- The invented demo documents and access files were validated (every file importable, every login mapped, every team defined).
+- NOT yet done: a sync against the real repository (needs the owner's short-lived token).
+
+### 8. Limitations and open issues
+- The demo logins `demo-*` are not real GitHub accounts, so with the collaborator check on only the owner's own login gets access; turn the check off in the source settings to see all demo teams.
+- Every run reads each file again (backlog 40).
+- See `docs/CHALLENGES.md` entries 123 to 127.
+

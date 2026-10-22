@@ -35,7 +35,8 @@ from app.ingest.errors import IngestError
 from app.ingest.validation import validate_file
 from app.models import Document, DocumentAcl, DocumentVersion, Group, SyncRun, SyncSource, User, user_groups
 from app.services import access_service, document_service as svc
-from app.sync.base import REGISTRY, Connector, SourceItem, permission_hash
+from app.sync import github  # noqa: F401  registers the GITHUB source kind
+from app.sync.base import REGISTRY, Connector, SourceError, SourceItem, permission_hash
 from app.worker.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -176,8 +177,9 @@ async def _execute(db: AsyncSession, run_id: uuid.UUID) -> None:
         items = await run_in_threadpool(connector.list_items)
         members = await run_in_threadpool(connector.members)
     except Exception as exc:  # noqa: BLE001  nothing has been changed yet
-        logger.error("sync.source_unreachable type=%s", type(exc).__name__, extra={"fields": {"source_id": str(source.id)}})
-        await _finish(db, run, source, counts, errors, FAILED, "SOURCE_UNREACHABLE")
+        code = exc.code if isinstance(exc, SourceError) else "SOURCE_UNREACHABLE"
+        logger.error("sync.source_failed code=%s type=%s", code, type(exc).__name__, extra={"fields": {"source_id": str(source.id)}})
+        await _finish(db, run, source, counts, errors, FAILED, code)
         return
 
     ids = [i.external_id for i in items]
