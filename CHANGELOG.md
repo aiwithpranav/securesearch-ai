@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 8A, branch `feat/sync-8a`, awaiting owner review)
+- New versions: `POST /documents/{id}/versions` (same content as the newest version does nothing; the old version keeps answering until the new one is complete; rules untouched), restore of a deleted document (`POST /documents/{id}/restore`, `GET /documents?deleted=true`).
+- Screens: "Upload a new version" and the version in use on the document page, Active and Deleted tabs with Restore on the list.
+- ADR 033, Phase 8 docs. 14 backend tests (606 total), 5 frontend tests (101 total), 11 mutation checks all caught. Challenges 114 to 117.
+
+### Changed (Phase 8A)
+- The date shown with a cited passage and in the evidence panel is the date of the passage's version.
+
 ### Security
 - Next.js 16.4.0 to 16.4.2 (fixes a known vulnerability). Tests, type check and build pass.
 

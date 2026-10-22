@@ -9,6 +9,8 @@ import {
   parseCountries,
   uploadErrorMessage,
   validateUploadFile,
+  versionErrorMessage,
+  versionResultText,
   type DocumentItem,
 } from "./documents";
 
@@ -79,5 +81,29 @@ describe("uploadErrorMessage", () => {
     expect(uploadErrorMessage(new ApiError(0, "Network error", "Can't reach the server."))).toBe("Can't reach the server.");
     expect(uploadErrorMessage(new ApiError(500, "t", "internal detail"))).not.toContain("internal");
     expect(uploadErrorMessage(new Error("boom"))).toBe("Something went wrong. Please try again.");
+  });
+});
+
+describe("versionResultText", () => {
+  it("says nothing changed when the content is the same", () => {
+    expect(versionResultText({ result: "UNCHANGED", version_no: 2 })).toBe("This file is the same as version 2. Nothing was changed.");
+  });
+  it("says the old version stays in use while the new one is processed", () => {
+    const t = versionResultText({ result: "CREATED", version_no: 3 });
+    expect(t).toContain("Version 3");
+    expect(t).toContain("stays in use");
+  });
+});
+
+describe("versionErrorMessage", () => {
+  it("shows the server's own sentence for a conflict", () => {
+    expect(versionErrorMessage(new ApiError(409, "Conflict", "This document is already being processed."))).toBe("This document is already being processed.");
+  });
+  it("explains a missing document", () => {
+    expect(versionErrorMessage(new ApiError(404, "Not Found", "Document not found."))).toBe("This document was not found.");
+  });
+  it("falls back to the upload messages", () => {
+    expect(versionErrorMessage(new ApiError(413, "Too big", "x"))).toBe("The file is larger than 50 MB.");
+    expect(versionErrorMessage(new Error("boom"))).toBe("Something went wrong. Please try again.");
   });
 });

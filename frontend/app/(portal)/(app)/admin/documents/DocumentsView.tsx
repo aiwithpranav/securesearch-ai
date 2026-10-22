@@ -9,7 +9,9 @@ import {
   formatDateTime,
   listDepartments,
   listDocuments,
+  restoreDocument,
   STATUS_LABELS,
+  versionErrorMessage,
   type DocumentPage,
   type JobStatus,
 } from "@/lib/documents";
@@ -26,13 +28,17 @@ export function DocumentsView() {
   const [status, setStatus] = useState<JobStatus | "">("");
   const [departmentId, setDepartmentId] = useState("");
   const [offset, setOffset] = useState(0);
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [restoring, setRestoring] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
 
   const query = useCallback(() => {
     const p = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(offset) });
     if (status) p.set("status", status);
     if (departmentId) p.set("department_id", departmentId);
+    if (showDeleted) p.set("deleted", "true");
     return `?${p.toString()}`;
-  }, [offset, status, departmentId]);
+  }, [offset, status, departmentId, showDeleted]);
 
   const load = useCallback(
     async (silent = false) => {
@@ -57,7 +63,20 @@ export function DocumentsView() {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offset, status, departmentId]);
+  }, [offset, status, departmentId, showDeleted]);
+
+  async function onRestore(id: string) {
+    setRestoring(id);
+    setRestoreError(null);
+    try {
+      await restoreDocument(id);
+      await load(true);
+    } catch (e) {
+      setRestoreError(versionErrorMessage(e));
+    } finally {
+      setRestoring(null);
+    }
+  }
 
   useEffect(() => {
     listDepartments().then(setDepartments).catch(() => setDepartments([]));
@@ -83,7 +102,17 @@ export function DocumentsView() {
         </Link>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-4">
+      <div role="group" aria-label="Which documents" className="mt-8 flex gap-2 text-sm">
+        {([false, true] as const).map((d) => (
+          <button key={String(d)} type="button" aria-pressed={showDeleted === d} onClick={() => { setOffset(0); setShowDeleted(d); }}
+            className={`rounded-lg px-4 py-2 ${showDeleted === d ? "bg-surface2 text-text" : "text-muted hover:text-text"}`}>
+            {d ? "Deleted" : "Active"}
+          </button>
+        ))}
+      </div>
+      {restoreError && <p role="alert" className="mt-3 text-sm text-bad">{restoreError}</p>}
+
+      <div className="mt-6 flex flex-wrap gap-4">
         <div>
           <label htmlFor="f-status" className="mb-1 block text-sm text-muted">Status</label>
           <select id="f-status" className={selectClass} value={status}
@@ -112,6 +141,8 @@ export function DocumentsView() {
         ) : page && page.total === 0 ? (
           filtered ? (
             <EmptyState title="No documents match" text="Try a different status or department." />
+          ) : showDeleted ? (
+            <EmptyState title="No deleted documents" text="Documents you delete appear here, and can be restored." />
           ) : (
             <EmptyState
               title="No documents yet"
@@ -133,14 +164,15 @@ export function DocumentsView() {
                     <th scope="col" className="px-4 py-3 font-medium">Sensitivity</th>
                     <th scope="col" className="px-4 py-3 font-medium">Status</th>
                     <th scope="col" className="px-4 py-3 text-right font-medium">Chunks</th>
-                    <th scope="col" className="px-4 py-3 font-medium">Updated</th>
+                    <th scope="col" className="px-4 py-3 font-medium">{showDeleted ? "Deleted" : "Updated"}</th>
+                    {showDeleted && <th scope="col" className="px-4 py-3 font-medium"><span className="sr-only">Restore</span></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {page.items.map((d) => (
                     <tr key={d.id} className="border-t border-line align-top">
                       <td className="px-4 py-3">
-                        <Link href={`/admin/documents/${d.id}`} className="font-medium text-accent2 hover:underline">{d.title}</Link>
+                        {showDeleted ? <span className="font-medium">{d.title}</span> : <Link href={`/admin/documents/${d.id}`} className="font-medium text-accent2 hover:underline">{d.title}</Link>}
                         <div className="text-xs text-muted">{d.original_filename}</div>
                       </td>
                       <td className="px-4 py-3">{d.department.name}</td>
@@ -153,7 +185,15 @@ export function DocumentsView() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums">{d.chunk_count}</td>
-                      <td className="px-4 py-3 text-muted">{formatDateTime(d.updated_at)}</td>
+                      <td className="px-4 py-3 text-muted">{formatDateTime(showDeleted ? d.deleted_at : d.updated_at)}</td>
+                      {showDeleted && (
+                        <td className="px-4 py-3">
+                          <button type="button" onClick={() => void onRestore(d.id)} disabled={restoring !== null}
+                            className="rounded-lg border border-line px-4 py-2 hover:border-accent2 disabled:opacity-50">
+                            {restoring === d.id ? "Restoring…" : "Restore"}
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

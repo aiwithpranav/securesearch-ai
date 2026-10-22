@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ApiError, type Department } from "@/lib/api";
@@ -19,6 +19,10 @@ import {
   reindexDocument,
   SENSITIVITY_LEVELS,
   updateDocument,
+  uploadVersion,
+  validateUploadFile,
+  versionErrorMessage,
+  versionResultText,
   type DocumentItem,
   type Job,
   type Version,
@@ -45,6 +49,8 @@ export function DocumentDetail() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [form, setForm] = useState({ title: "", department_id: "", document_type: "", sensitivity_level: "1", countries: "" });
   const [countryError, setCountryError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [versionNote, setVersionNote] = useState<{ text: string; ok: boolean } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -116,6 +122,30 @@ export function DocumentDetail() {
       await load();
     } catch (err) {
       setActionError(err instanceof ApiError && err.status === 409 ? "This document is already being processed." : "Re-indexing could not be started.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onNewVersion(e: FormEvent) {
+    e.preventDefault();
+    const file = fileInput.current?.files?.[0] ?? null;
+    const problem = validateUploadFile(file);
+    if (problem || !file) {
+      setVersionNote({ text: problem ?? "Please choose a file.", ok: false });
+      return;
+    }
+    setBusy(true);
+    setVersionNote(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const r = await uploadVersion(id, form);
+      setVersionNote({ text: versionResultText(r), ok: true });
+      if (fileInput.current) fileInput.current.value = "";
+      await load();
+    } catch (err) {
+      setVersionNote({ text: versionErrorMessage(err), ok: false });
     } finally {
       setBusy(false);
     }
@@ -251,6 +281,26 @@ export function DocumentDetail() {
         <p className="mt-3 text-sm text-muted">Re-index reads the stored file again and rebuilds the chunks. The current chunks stay in use until the new ones are complete.</p>
       </section>
 
+      <section className={`${card} mt-8`} aria-labelledby="newver-title">
+        <h2 id="newver-title" className="text-xl font-semibold">Upload a new version</h2>
+        <p className="mt-2 text-sm text-muted">
+          Replace the file with a newer one. Access rules and details stay as they are. If the file is identical to the newest version, nothing happens.
+        </p>
+        <form onSubmit={onNewVersion} noValidate className="mt-4 flex flex-wrap items-end gap-3">
+          <div>
+            <label htmlFor="nv-file" className="mb-1 block text-sm font-medium">File (PDF, DOCX, TXT or MD)</label>
+            <input id="nv-file" ref={fileInput} type="file" accept=".pdf,.docx,.txt,.md" disabled={busy || unfinished}
+              className="block w-full max-w-xs text-sm file:mr-3 file:rounded-lg file:border file:border-line file:bg-surface2 file:px-4 file:py-2 file:text-text" />
+          </div>
+          <button type="submit" disabled={busy || unfinished}
+            className="rounded-lg border border-line px-5 py-2.5 hover:border-accent2 disabled:cursor-not-allowed disabled:opacity-50">
+            {busy ? "Uploading…" : "Upload new version"}
+          </button>
+        </form>
+        {unfinished && <p className="mt-3 text-sm text-muted">Wait until the current processing finishes.</p>}
+        {versionNote && <p role={versionNote.ok ? "status" : "alert"} className={`mt-3 text-sm ${versionNote.ok ? "text-ok" : "text-bad"}`}>{versionNote.text}</p>}
+      </section>
+
       <AccessSection documentId={id} />
 
       <section className={`${card} mt-8`} aria-labelledby="hist-title">
@@ -286,6 +336,7 @@ export function DocumentDetail() {
           {versions.map((v) => (
             <li key={v.id} className="flex flex-wrap gap-x-6 gap-y-1">
               <span className="font-medium">Version {v.version_no}</span>
+              {v.version_no === doc.current_version_no && <span className="rounded-full border border-ok/60 px-2 py-0.5 text-xs text-ok">In use</span>}
               <span className="text-muted">{formatBytes(v.size_bytes)}</span>
               <span className="text-muted">{formatDateTime(v.created_at)}</span>
               <span className="font-mono text-xs text-muted" title="SHA-256 fingerprint of the original file">{v.content_hash.slice(0, 12)}…</span>

@@ -4,7 +4,7 @@ Reminder: an admin manages documents but is NOT a reader. No route returns docum
 chunks, previews or the original file."""
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, Request, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_admin
@@ -16,7 +16,7 @@ from app.ingest.errors import IngestError
 from app.ingest.validation import read_limited, validate_file
 from app.models import User
 from app.models import document as dm
-from app.schemas.documents import DocumentOut, DocumentPage, JobOut, VersionOut
+from app.schemas.documents import DocumentOut, DocumentPage, JobOut, VersionOut, VersionUploadOut
 from app.services import document_service as svc
 
 router = APIRouter(tags=["documents"], dependencies=[Depends(require_admin)])
@@ -71,11 +71,12 @@ async def list_documents(
     offset: int = Query(0, ge=0),
     status_filter: str | None = Query(None, alias="status"),
     department_id: int | None = Query(None),
+    deleted: bool = Query(False),
     db: AsyncSession = Depends(get_db),
 ) -> DocumentPage:
     if status_filter is not None and status_filter not in dm.STATUSES:
         raise AppError(422, "Validation failed", f"Status must be one of: {', '.join(dm.STATUSES)}.")
-    items, total = await svc.list_documents(db, limit, offset, status_filter, department_id)
+    items, total = await svc.list_documents(db, limit, offset, status_filter, department_id, deleted)
     return DocumentPage(items=items, total=total, limit=limit, offset=offset)
 
 
@@ -100,6 +101,43 @@ async def delete_document(
 @router.get("/documents/{document_id}/versions", response_model=list[VersionOut])
 async def list_versions(document_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> list[object]:
     return await svc.list_versions(db, document_id)  # type: ignore[return-value]
+
+
+@router.post("/documents/{document_id}/versions", response_model=VersionUploadOut, status_code=status.HTTP_202_ACCEPTED)
+async def upload_version(
+    document_id: uuid.UUID,
+    request: Request,
+    response: Response,
+    file: UploadFile = File(...),
+    actor: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+) -> VersionUploadOut:
+    """A new file for an existing document. Same content as the newest version answers 200 UNCHANGED and does nothing."""
+    allowed, retry = await rate_limit.hit(rate_limit.key_for("upload", str(actor.id)), settings.upload_limit_per_minute, 60)
+    if not allowed:
+        raise AppError(
+            429, "Too many attempts", "Too many uploads. Try again shortly.",
+            headers={"Retry-After": str(retry)}, extra={"retry_after_seconds": retry},
+        )
+    try:
+        data = await read_limited(file)
+        vfile = validate_file(file.filename, data)
+    except IngestError as err:
+        raise _upload_error(err) from None
+    out = await svc.upload_new_version(db, actor, document_id, vfile, _rid(request))
+    if out.result == "UNCHANGED":
+        response.status_code = status.HTTP_200_OK
+    return out
+
+
+@router.post("/documents/{document_id}/restore", response_model=DocumentOut)
+async def restore_document(
+    document_id: uuid.UUID,
+    request: Request,
+    actor: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+) -> DocumentOut:
+    return await svc.restore_document(db, document_id, actor, _rid(request))
 
 
 @router.post("/documents/{document_id}/reindex", status_code=status.HTTP_202_ACCEPTED, response_model=JobOut)

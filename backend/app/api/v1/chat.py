@@ -31,7 +31,7 @@ from app.core.logging import security_event
 from app.db.session import get_db
 from app.db.sync import SyncSession
 from app.llm import LlmClient, LlmError, get_llm
-from app.models import ChatFeedback, Document, DocumentChunk, SearchHistory, User
+from app.models import ChatFeedback, Document, DocumentChunk, DocumentVersion, SearchHistory, User
 from app.schemas.chat import (
     ChatRequest, ChatResponse, ChunkPreviewOut, CitationOut, FeedbackIn, FeedbackOut, HistoryItemOut, HistoryPage,
 )
@@ -219,7 +219,9 @@ async def chunk_preview(
     await _limit("preview", user, settings.preview_limit_per_minute)
     row = (
         await db.execute(
-            select(DocumentChunk, Document).join(Document, Document.id == DocumentChunk.document_id)
+            select(DocumentChunk, Document, DocumentVersion.created_at.label("version_date"))
+            .join(Document, Document.id == DocumentChunk.document_id)
+            .join(DocumentVersion, DocumentVersion.id == DocumentChunk.document_version_id)
             .where(DocumentChunk.id == chunk_id, DocumentChunk.is_active.is_(True))
         )
     ).first()
@@ -229,7 +231,7 @@ async def chunk_preview(
     response.headers["Cache-Control"] = "no-store"
     return ChunkPreviewOut(
         chunk_id=chunk.id, document_id=doc.id, document_title=doc.title, section=chunk.section, page=chunk.page_number,
-        content=chunk.content, document_updated_at=doc.updated_at,
+        content=chunk.content, document_updated_at=row.version_date,
     )
 
 
