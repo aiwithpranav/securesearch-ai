@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { takePendingQuestion } from "@/lib/pendingQuestion";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   allWeak, MAX_QUERY, previewText, relevanceWord, scoreDetails, scorePercent, searchDocuments, searchErrorText, validateQuery, whereText,
   type SearchHit, type SearchResponse,
@@ -71,6 +72,12 @@ export function SearchView() {
   const [historyKey, setHistoryKey] = useState(0);
   const latest = useRef(0); // only the newest request may update the screen
   const trigger = useRef<HTMLElement | null>(null); // the button that opened the panel, to return focus to it
+
+  // A question picked on Home waits in memory; it only fills the box. The person still presses Ask.
+  useEffect(() => {
+    const picked = takePendingQuestion();
+    if (picked) setQuery(picked);
+  }, []);
 
   const isAdmin = user?.roles.includes("system_admin") ?? false;
 

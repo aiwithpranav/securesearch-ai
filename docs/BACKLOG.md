@@ -36,6 +36,8 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 30 | Hydration mismatch with reduced motion on the landing page | Phase 1 components call `useReducedMotion()` while rendering. Fix by reading the preference after mount. | Later | No |
 | 31 | Docker image layers | Changing `requirements.txt` re-installs everything and re-downloads the models (about 15 minutes). Split the model downloads from the pip install. | Phase 9 | No |
 | 32 | Audit retention | The audit trail is kept forever. Add a retention period and an archive step. | Phase 9 | No |
-| 33 | Weak-match note on the Find passages screen | It still uses 0.03 while answers now refuse below 0.30. Align the wording and the level. | 7C | No |
+| 33 | Weak-match note on the Find passages screen | Aligned to 0.30 in 7C. | 7C | Done |
 | 34 | Paraphrase answer rate | Only 4 of 8 paraphrased questions get an answer at threshold 0.30 (the right document is found, the reranker score is low). Try a larger reranker, question rewriting, a second signal in the gate, and a bigger evaluation set. | Later | Yes |
 | 35 | Evaluate with the real model | Run `run_eval --live --yes` when a key is available and compare refusals and citations with the fake-model numbers. | When a key is set | No |
+| 36 | Evaluation against a test copy | Evaluation runs write real audit rows that show up in the audit trail and the gaps report. Run them against a separate database. | Phase 9 | No |
+| 37 | Dashboard extras | Export of the overview, longer ranges, per-department views, and a chart library if the charts grow. | Later | No |

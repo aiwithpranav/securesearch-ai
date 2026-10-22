@@ -35,8 +35,8 @@ export function relevanceWord(score: number): string {
   return p >= 70 ? "Strong match" : p >= 30 ? "Possible match" : "Weak match";
 }
 
-/** Provisional "nothing really matches" level (see ADR 028); Phase 6 uses it for refusals, Phase 7 tunes it. */
-export const WEAK_BELOW = 0.03;
+/** Provisional "nothing really matches" level (see ADR 028); the same level the answers use to refuse (0.30, tuned in Phase 7B). */
+export const WEAK_BELOW = 0.3;
 /** True when even the best passage is a very weak match (only meaningful for scored, reranked results). */
 export const allWeak = (hits: Pick<SearchHit, "score">[]): boolean => hits.length > 0 && Math.max(...hits.map((h) => h.score)) < WEAK_BELOW;
 

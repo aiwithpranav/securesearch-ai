@@ -1,6 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ageText, listHistory, statusText, type HistoryItem } from "@/lib/chat";
+import { getSuggestions } from "@/lib/dashboards";
+import { setPendingQuestion } from "@/lib/pendingQuestion";
 import { OPEN_TOUR_EVENT } from "@/lib/tour";
 import { useSession } from "../../_auth/AuthProvider";
 
@@ -36,6 +41,54 @@ function Steps({ title, steps }: { title: string; steps: Step[] }) {
         ))}
       </ol>
     </section>
+  );
+}
+
+/** Recent questions and ideas to ask. Picking one fills the Ask box (through memory, never the address bar); it does not ask by itself. */
+function QuickStart() {
+  const router = useRouter();
+  const [recent, setRecent] = useState<HistoryItem[] | null>(null);
+  const [ideas, setIdeas] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    listHistory(5).then((p) => setRecent(p.items)).catch(() => setRecent([]));
+    getSuggestions().then((p) => setIdeas(p.items)).catch(() => setIdeas([]));
+  }, []);
+
+  function pick(q: string) {
+    setPendingQuestion(q);
+    router.push("/search");
+  }
+  const chip = "w-full rounded-xl border border-line bg-surface2 px-4 py-3 text-left hover:border-accent2";
+
+  return (
+    <div className="mt-8 grid gap-6 md:grid-cols-2">
+      <section className={card} aria-labelledby="h-ideas">
+        <h2 id="h-ideas" className="text-lg font-semibold">Ideas to ask</h2>
+        <p className="mt-1 text-sm text-muted">Based on the documents you may read.</p>
+        {ideas === null ? <div role="status" aria-label="Loading ideas" className="mt-4 h-24 animate-pulse rounded-lg bg-surface2 motion-reduce:animate-none" />
+          : ideas.length === 0 ? <p className="mt-4 text-sm text-muted">No documents are available to you yet.</p>
+          : <ul className="mt-4 space-y-2">{ideas.map((q) => <li key={q}><button type="button" onClick={() => pick(q)} className={chip}>{q}</button></li>)}</ul>}
+      </section>
+      <section className={card} aria-labelledby="h-recent">
+        <h2 id="h-recent" className="text-lg font-semibold">Your recent questions</h2>
+        <p className="mt-1 text-sm text-muted">Only you can see these. You can delete them on the Ask page.</p>
+        {recent === null ? <div role="status" aria-label="Loading recent questions" className="mt-4 h-24 animate-pulse rounded-lg bg-surface2 motion-reduce:animate-none" />
+          : recent.length === 0 ? <p className="mt-4 text-sm text-muted">You have not asked anything yet.</p>
+          : (
+            <ul className="mt-4 space-y-2">
+              {recent.map((h) => (
+                <li key={h.id}>
+                  <button type="button" onClick={() => pick(h.question)} className={chip}>
+                    <span className="block break-words">{h.question}</span>
+                    <span className="mt-1 block text-xs text-muted">{statusText(h.status)} · {ageText(h.created_at)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+      </section>
+    </div>
   );
 }
 
@@ -75,6 +128,8 @@ export function HomeView() {
         <div><dt className="text-sm text-muted">Clearance level</dt><dd className="mt-1 font-medium">{user.clearance_level}</dd></div>
         <div><dt className="text-sm text-muted">Country</dt><dd className="mt-1 font-medium">{user.country}</dd></div>
       </dl>
+
+      <QuickStart />
 
       <h2 className="mt-12 text-2xl font-semibold tracking-tight">Your first 2 minutes</h2>
       <div className={`mt-6 grid gap-6 ${isAdmin ? "md:grid-cols-2" : ""}`}>

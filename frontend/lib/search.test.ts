@@ -81,7 +81,7 @@ describe("searchErrorText", () => {
 
 describe("allWeak", () => {
   it("is true only when even the best passage is very weak", () => {
-    expect(allWeak([{ score: 0.001 }, { score: 0.02 }])).toBe(true);
+    expect(allWeak([{ score: 0.001 }, { score: 0.2 }])).toBe(true);
     expect(allWeak([{ score: 0.001 }, { score: 0.5 }])).toBe(false);
     expect(allWeak([])).toBe(false);
   });
