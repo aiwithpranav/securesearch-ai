@@ -21,7 +21,13 @@ from app.core.errors import AppError
 from app.db.session import get_db
 from app.models import AccessEvent, AnswerAuditLog, User
 from app.schemas.audit import (
-    AccessEventOut, AccessEventPage, AnswerAuditOut, AnswerAuditPage, PersonRef, QueryAuditOut, QueryAuditPage,
+    AccessEventOut,
+    AccessEventPage,
+    AnswerAuditOut,
+    AnswerAuditPage,
+    PersonRef,
+    QueryAuditOut,
+    QueryAuditPage,
 )
 
 AUDIT_ROLES = {"security_admin", "auditor"}

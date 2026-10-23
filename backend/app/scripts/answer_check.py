@@ -27,6 +27,7 @@ with SyncSession() as s:
     for email, question in CASES:
         uid = s.scalar(select(User.id).where(User.email == email))
         t = time.time()
+        assert uid is not None, email
         r = answer_question(s, uid, question)
         total_in += r.input_tokens
         total_out += r.output_tokens

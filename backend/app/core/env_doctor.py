@@ -1,11 +1,13 @@
-import sys
 import socket
+import sys
 from urllib.parse import urlsplit
+
 from .config import settings
+
 
 def check_env():
     errors = []
-    
+
     # Check for placeholders
     variables_to_check = [
         "APP_ENV", "APP_SECRET_KEY", "JWT_SECRET_KEY",
@@ -19,7 +21,7 @@ def check_env():
         val = getattr(settings, var.lower(), "CHANGE_ME")
         if val == "CHANGE_ME":
             errors.append(f"{var} is missing or still set to CHANGE_ME. Add it to .env, then restart.")
-    
+
     # Check secret keys
     app_key = settings.app_secret_key
     jwt_key = settings.jwt_secret_key
@@ -29,7 +31,7 @@ def check_env():
         errors.append("JWT_SECRET_KEY is too short. It must be at least 32 characters long.")
     if app_key != "CHANGE_ME" and jwt_key != "CHANGE_ME" and app_key == jwt_key:
         errors.append("APP_SECRET_KEY and JWT_SECRET_KEY must be different.")
-    
+
     # Check redis connection via simple socket test (since we don't want to rely on redis library being initialized)
     if settings.redis_url != "CHANGE_ME":
         try:

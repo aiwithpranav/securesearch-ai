@@ -10,7 +10,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select, update
+from sqlalchemy import ColumnElement, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
@@ -336,7 +336,7 @@ async def restore_document(db: AsyncSession, document_id: uuid.UUID, actor: User
 async def list_documents(
     db: AsyncSession, limit: int, offset: int, status: str | None, department_id: int | None, deleted: bool = False
 ) -> tuple[list[DocumentOut], int]:
-    where = [Document.deleted_at.is_not(None) if deleted else Document.deleted_at.is_(None)]
+    where: list[ColumnElement[bool]] = [Document.deleted_at.is_not(None) if deleted else Document.deleted_at.is_(None)]
     if status:
         where.append(Document.status == status)
     if department_id:
@@ -366,7 +366,7 @@ async def update_document(
 ) -> DocumentOut:
     doc = await _get_live(db, document_id)
     if "department_id" in changes and changes["department_id"] is not None:
-        await _require_department(db, int(changes["department_id"]))  # type: ignore[arg-type]
+        await _require_department(db, int(str(changes["department_id"])))
     if "document_type" in changes and changes["document_type"] is not None:
         changes["document_type"] = check_type(str(changes["document_type"]))
     if "allowed_countries" in changes:

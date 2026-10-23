@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 9A, branch `feat/ci-9a`, awaiting owner review)
+- Continuous integration (GitHub Actions): ruff, ESLint, TypeScript, mypy, all tests with a coverage gate on the security code, a named leak gate (canary scan, access oracle, evaluation), a secret scan of the whole history (gitleaks), dependency scans (pip-audit, npm audit), alembic check and an image build. Dependabot, pull request template, CONTRIBUTING, MIT licence, pre-commit config, `scripts/setup_env.sh`, `docs/ci.md`, ADR 036.
+
+### Security (Phase 9A)
+- `pypdf` 6.19.0 to 6.21.1 (8 known vulnerabilities in the PDF parser).
+
+### Changed (Phase 9A)
+- 36 type errors fixed (no behaviour change), imports sorted, a few `raise ... from None`. The Dockerfile downloads the models before the other packages. Challenges 128 to 133.
+
 
 ## [v0.8] - 2026-10-23
 Phase 8 (incremental sync) complete: new versions, restore and the version date (8A), the sync engine with scheduler and API (8B), the GitHub connector and the Sources screen (8C). 697 backend and 123 frontend tests.

@@ -1,7 +1,9 @@
+import socket
+
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+
 from app.core.config import settings
-import socket
 
 router = APIRouter()
 
@@ -13,7 +15,7 @@ async def health():
 async def ready(request: Request):
     status = {"postgres": "ok", "redis": "ok"}
     is_ready = True
-    
+
     # check postgres
     try:
         if settings.database_url != "CHANGE_ME":

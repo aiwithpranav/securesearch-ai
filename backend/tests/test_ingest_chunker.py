@@ -46,7 +46,7 @@ def test_no_chunk_is_only_a_repeat_of_the_previous_overlap():
     chunks = chunk_blocks([Block(sentences(30))], TOK, target=49, overlap=14, max_tokens=60)
     texts = [c.text for c in chunks]
     assert len(set(texts)) == len(texts)
-    last_new = f"Sentence number 29"
+    last_new = "Sentence number 29"
     assert last_new in texts[-1]
     assert not all(t in texts[-2] for t in [texts[-1]])
 

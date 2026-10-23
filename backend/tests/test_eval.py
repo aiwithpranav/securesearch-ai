@@ -9,6 +9,7 @@ from collections import Counter
 
 import pytest
 
+from app.db.sync import SyncSession
 from app.eval import corpus as co
 from app.eval import metrics as mt
 from app.eval.cases import AUTHORIZED, CASES, COUNTS, KEYWORD, MISSING, PARAPHRASE, SCENARIO, UNAUTHORIZED
@@ -18,7 +19,6 @@ from app.eval.scanner import Forbidden, scan, scan_without_question
 from app.scripts.seed_access import GROUPS
 from app.scripts.seed_users import DEPARTMENTS, ROLES, USERS
 from app.scripts.synthetic_docs import _all_text
-from app.db.sync import SyncSession
 from tests import eval_world
 
 # ---------------------------------------------------------------- the scanner (pure)
@@ -221,8 +221,8 @@ def test_a_leak_planted_in_each_place_is_found_in_that_place(pg, world, monkeypa
     import logging
 
     from app.answers import service as answers_service
-    from app.audit import service as audit_service
     from app.api.v1 import search as search_route
+    from app.audit import service as audit_service
 
     if place == "model prompt":
         real = answers_service.build_user_message

@@ -174,7 +174,7 @@ def run_ingestion(
                 .values(is_active=False)
             )
             s.execute(
-                DocumentChunk.__table__.insert(),
+                DocumentChunk.__table__.insert(),  # type: ignore[attr-defined]
                 [
                     {
                         "id": uuid.uuid4(),
