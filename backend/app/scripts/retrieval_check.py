@@ -11,8 +11,8 @@ import time
 
 from sqlalchemy import select
 
-from app.db.sync import SyncSession
 from app.access.resolver import readable_ids_stmt
+from app.db.sync import SyncSession
 from app.models import Document, User
 from app.retrieval import search
 

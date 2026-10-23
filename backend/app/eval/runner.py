@@ -33,7 +33,15 @@ from app.core.config import settings
 from app.db.sync import SyncSession
 from app.eval import metrics as mt
 from app.eval.cases import (
-    AUTHORIZED, CASES, KEYWORD, MISSING, PARAPHRASE, RETRIEVAL_CATEGORIES, SCENARIO, UNAUTHORIZED, Case,
+    AUTHORIZED,
+    CASES,
+    KEYWORD,
+    MISSING,
+    PARAPHRASE,
+    RETRIEVAL_CATEGORIES,
+    SCENARIO,
+    UNAUTHORIZED,
+    Case,
 )
 from app.eval.corpus import CANARIES
 from app.eval.oracle import Oracle
@@ -194,10 +202,16 @@ class _Run:
             _ = u.role_names
             return u
 
-    def sql(self, statement: str, **params: object) -> None:
+    def sql(self, statement: str, **params: object) -> bool:
+        """Runs one statement and saves it. Returns True so a scenario step can use it inside an expression."""
         with SyncSession() as s:
             s.execute(text(statement), params)
             s.commit()
+        return True
+
+    def user_group(self, name: str) -> int:
+        with SyncSession() as s:
+            return int(s.scalar(text("select id from groups where name = :n"), {"n": name}) or 0)
 
     def forbidden_for(self, email: str) -> Forbidden:
         with SyncSession() as s:
@@ -515,13 +529,6 @@ def _scn_not_ready(run: _Run, case: Case) -> CaseResult:
         run.sql("update documents set status = 'READY' where id = :d", d=doc)
 
 
-def _user_group(self: _Run, name: str) -> int:
-    with SyncSession() as s:
-        return int(s.scalar(text("select id from groups where name = :n"), {"n": name}))
-
-
-_Run.user_group = _user_group  # type: ignore[attr-defined]
-
 SCENARIOS: dict[str, Callable[[_Run, Case], CaseResult]] = {
     "REVOCATION": _scn_revocation, "GROUP_REMOVAL": _scn_group_removal, "DEPARTMENT_CHANGE": _scn_department_change,
     "EXPIRED_ACL": _scn_expired_acl, "DENY_BEATS_ALLOW": _scn_deny_beats_allow, "DELETED_DOCUMENT": _scn_deleted_document,
@@ -603,6 +610,7 @@ def finish_run_row(run_id: uuid.UUID, report: RunReport) -> None:
             s.add(EvalResult(run_id=run_id, case_id=r.case.id, category=r.case.category, passed=r.passed, leaked=r.leaked, latency_ms=r.latency_ms,
                              detail={**r.detail, "leaks": [{"where": x.where, "kind": x.kind} for x in r.leaks]}))  # where and what kind, never the text
         row = s.get(EvalRun, run_id)
+        assert row is not None
         row.status, row.finished_at, row.total, row.passed, row.leak_count = "DONE", report.finished_at, len(report.results), report.passed, report.leak_count
         row.summary = {"metrics": report.metrics, "mode_table": report.mode_table}
         s.commit()
@@ -611,6 +619,7 @@ def finish_run_row(run_id: uuid.UUID, report: RunReport) -> None:
 def fail_run_row(run_id: uuid.UUID, code: str) -> None:
     with SyncSession() as s:
         row = s.get(EvalRun, run_id)
+        assert row is not None
         row.status, row.finished_at, row.summary = "FAILED", datetime.now(timezone.utc), {"error": code}
         s.commit()
 

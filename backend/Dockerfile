@@ -18,11 +18,12 @@ RUN adduser --disabled-password --gecos '' appuser
 WORKDIR /app
 RUN chown appuser:appuser /app
 
-COPY requirements.txt requirements-dev.txt ./
-
 # CPU-only PyTorch first. The default Linux wheel pulls about 2 GB of CUDA libraries we do not need.
 RUN pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
-RUN pip install -r requirements.txt -r requirements-dev.txt
+
+# The models come BEFORE the other packages, so changing a package version does not download the models again
+# (about 1 GB; this is what makes CI builds fast with a layer cache). huggingface_hub has the same pin as requirements.txt.
+RUN pip install huggingface_hub==1.33.0
 
 # Bake the embedding model into the image at BUILD time (this is the only step that needs internet).
 # At run time the containers are offline (HF_HUB_OFFLINE=1): no document text ever leaves the machine.
@@ -31,6 +32,9 @@ RUN HF_HUB_OFFLINE=0 python -c "from huggingface_hub import snapshot_download; s
 
 # Same for the cross-encoder reranker (BAAI/bge-reranker-base, MIT licence), pinned to an exact commit.
 RUN HF_HUB_OFFLINE=0 python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='BAAI/bge-reranker-base', revision='2cfc18c9415c912f9d8155881c133215df768a70', local_dir='/opt/models/bge-reranker-base', allow_patterns=['*.json', 'model.safetensors', 'sentencepiece.bpe.model'])"
+
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install -r requirements.txt -r requirements-dev.txt
 
 USER appuser
 

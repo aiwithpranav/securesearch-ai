@@ -34,7 +34,7 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 28 | Reranker speed | About 0.5 to 2 s per search on CPU for 20 candidates, up to 9 s when 6 people search at once. Lower the candidate count or cache if Phase 7 shows the P95 over 5 s. | Phase 7 | No |
 | 29 | Refusal threshold | 0.03 is provisional (tiny question set); tune on the 60+ questions. | Phase 7 | Yes |
 | 30 | Hydration mismatch with reduced motion on the landing page | Phase 1 components call `useReducedMotion()` while rendering. Fix by reading the preference after mount. | Later | No |
-| 31 | Docker image layers | Changing `requirements.txt` re-installs everything and re-downloads the models (about 15 minutes). Split the model downloads from the pip install. | Phase 9 | No |
+| 31 | Docker image layers | Done in 9A: the models are downloaded before the other packages. | Phase 9 | Done |
 | 32 | Audit retention | The audit trail is kept forever. Add a retention period and an archive step. | Phase 9 | No |
 | 33 | Weak-match note on the Find passages screen | Aligned to 0.30 in 7C. | 7C | Done |
 | 34 | Paraphrase answer rate | Only 4 of 8 paraphrased questions get an answer at threshold 0.30 (the right document is found, the reranker score is low). Try a larger reranker, question rewriting, a second signal in the gate, and a bigger evaluation set. | Later | Yes |
@@ -47,4 +47,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 41 | Real group membership from GitHub | Teams are listed in `access.json` because personal repositories have no teams. For an organisation, read the GitHub teams directly. | Later | No |
 | 42 | Second connector | Google Drive, with an OAuth application. | Later | No |
 | 43 | Live check of the GitHub sync | Run one sync of `demo-docs/` against the real repository with a short-lived read-only token and note the result in the walkthrough. | Optional | No |
-
+| 44 | React Compiler warnings | 21 advisory lint warnings from Next.js 16 (data loaded in an effect, animated wrapper created in a component). Move data loading to a small hook or Server Components and declare the wrapper outside the component, then lower the ceiling in `package.json`. | Later | No |
+| 45 | Accessibility and speed checks in CI | Lighthouse and axe on the landing page and the main screens. | 9C | No |

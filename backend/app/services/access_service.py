@@ -19,7 +19,14 @@ from app.core.errors import AppError
 from app.core.logging import security_event
 from app.models import Department, Document, DocumentAcl, Group, PermissionChangeEvent, Role, SyncSource, User, user_groups
 from app.schemas.access import (
-    AclOut, DecisionOut, GroupDetail, GroupOut, HistoryOut, MemberOut, PreviewOut, PreviewUser,
+    AclOut,
+    DecisionOut,
+    GroupDetail,
+    GroupOut,
+    HistoryOut,
+    MemberOut,
+    PreviewOut,
+    PreviewUser,
 )
 
 
@@ -40,7 +47,8 @@ async def _principal_names(db: AsyncSession, rules: list[DocumentAcl]) -> dict[t
     if ids["USER"]:
         for u in (await db.scalars(select(User).where(User.id.in_([uuid.UUID(i) for i in ids["USER"]])))).all():
             names[("USER", str(u.id))] = f"{u.full_name} ({u.email})"
-    for kind, model in (("ROLE", Role), ("GROUP", Group), ("DEPARTMENT", Department)):
+    models: dict[str, Any] = {"ROLE": Role, "GROUP": Group, "DEPARTMENT": Department}
+    for kind, model in models.items():
         if ids[kind]:
             for row in (await db.scalars(select(model).where(model.id.in_([int(i) for i in ids[kind]])))).all():
                 names[(kind, str(row.id))] = row.name
@@ -62,7 +70,7 @@ async def _check_principal(db: AsyncSession, ptype: str, pid: str | None) -> str
             pid = str(uid)
         else:
             num = int(pid)
-            model = {"ROLE": Role, "GROUP": Group, "DEPARTMENT": Department}[ptype]
+            model: Any = {"ROLE": Role, "GROUP": Group, "DEPARTMENT": Department}[ptype]
             exists = await db.scalar(select(func.count()).select_from(model).where(model.id == num))
             pid = str(num)
     except ValueError:
@@ -245,7 +253,7 @@ async def preview(db: AsyncSession, document_id: uuid.UUID, user_id: uuid.UUID) 
 # ------------------------------------------------------------------ groups
 
 async def list_groups(db: AsyncSession) -> list[GroupOut]:
-    counts = dict((await db.execute(select(user_groups.c.group_id, func.count()).group_by(user_groups.c.group_id))).all())
+    counts: dict[int, int] = dict((await db.execute(select(user_groups.c.group_id, func.count()).group_by(user_groups.c.group_id))).all())
     groups = (await db.scalars(select(Group).order_by(Group.name))).all()
     return [GroupOut(id=g.id, name=g.name, description=g.description, member_count=int(counts.get(g.id, 0))) for g in groups]
 

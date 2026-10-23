@@ -1,0 +1,139 @@
+# Continuous integration (Phase 9A). Every pull request into main and every push to main runs these gates.
+# A red check means the change must not be merged. See docs/ci.md for what each gate protects and how to run it locally.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "24"
+
+jobs:
+  backend-lint:
+    name: Backend lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install ruff==0.17.2
+      - run: ruff check .
+        working-directory: backend
+
+  frontend:
+    name: Frontend (lint, types, tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the whole history: a secret removed later is still a leaked secret
+      - name: Scan the repository history
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.0 git /repo --redact --no-banner --exit-code 1
+
+  dependency-scan:
+    name: Dependency scan (pip-audit, npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Python packages (known vulnerabilities)
+        run: |
+          pip install pip-audit==2.10.1
+          pip-audit -r backend/requirements.txt --no-deps --disable-pip --progress-spinner off
+      - name: Frontend packages that ship to users (high and critical only)
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: frontend
+
+  backend-tests:
+    name: Backend (types, tests, leak gate, coverage, image)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build the backend image (the models are baked in; layers are cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          load: true
+          tags: securesearch-backend:dev
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create a throw-away .env (random secrets, never stored)
+        run: bash scripts/setup_env.sh
+
+      - name: Start the stack
+        run: |
+          docker compose up -d --no-build
+          for i in $(seq 1 60); do
+            if [ "$(docker compose ps backend --format '{{.Health}}')" = "healthy" ]; then exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs --tail 80 backend
+          exit 1
+
+      - name: Migrations build the database from nothing (alembic upgrade head)
+        run: docker compose exec -T backend alembic upgrade head
+
+      - name: Database is in step with the models (alembic check)
+        run: docker compose exec -T backend alembic check
+
+      - name: Type check (mypy)
+        run: docker compose exec -T backend mypy
+
+      - name: Leak gate (canary scan, access oracle, evaluation). Any leak fails the build.
+        run: docker compose exec -T backend python -m pytest tests/test_eval.py tests/test_eval_api.py tests/test_access_oracle.py -q -p no:cacheprovider
+
+      - name: All tests with coverage
+        run: docker compose exec -T backend python -m pytest -q -p no:cacheprovider --cov --cov-report=
+
+      - name: Coverage gate for the security-critical code
+        run: |
+          docker compose exec -T backend coverage report --fail-under=80 \
+            --include="app/access/*,app/core/security.py,app/core/rate_limit.py,app/audit/*,app/answers/*,app/sync/*,app/api/deps.py"
+
+      - name: Show the logs when something failed
+        if: failure()
+        run: docker compose logs --tail 120

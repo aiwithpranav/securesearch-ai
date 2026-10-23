@@ -9,10 +9,10 @@ from sqlalchemy import func, select, update
 
 from app.core.config import settings
 from app.db.sync import SyncSession
-from app.models import IngestionJob, SyncRun
 from app.embeddings import embed_documents, model_label
 from app.ingest.errors import IngestError
 from app.ingest.pipeline import MAX_ATTEMPTS, fail_job, run_ingestion
+from app.models import IngestionJob, SyncRun
 from app.sync.engine import execute_run, fail_run, tick
 from app.worker.celery_app import celery_app
 

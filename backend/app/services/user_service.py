@@ -79,7 +79,7 @@ async def create_user(
         await db.flush()
     except IntegrityError:
         await db.rollback()
-        raise AppError(409, "Conflict", "A user with this email already exists.")
+        raise AppError(409, "Conflict", "A user with this email already exists.") from None
     raw = await auth_service.create_reset_token(
         db, user, timedelta(hours=settings.invite_token_hours)
     )
@@ -160,7 +160,7 @@ async def create_role(db: AsyncSession, data: RoleCreate) -> Role:
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise AppError(409, "Conflict", "A role with this name already exists.")
+        raise AppError(409, "Conflict", "A role with this name already exists.") from None
     return role
 
 

@@ -79,14 +79,14 @@ async def main() -> int:
             roles[name] = role
         await db.flush()
 
-        for email, full_name, dept, clearance, country, employment, role_names, active in USERS:
+        for email, full_name, dept_name, clearance, country, employment, role_names, active in USERS:
             if await db.scalar(select(User).where(User.email == email)):
                 continue
             user = User(
                 email=email,
                 full_name=full_name,
                 password_hash=password_hash,
-                department_id=depts[dept].id,
+                department_id=depts[dept_name].id,
                 clearance_level=clearance,
                 country=country,
                 employment_type=employment,

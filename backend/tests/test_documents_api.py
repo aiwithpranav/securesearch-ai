@@ -1,8 +1,8 @@
 """Admin documents API: who may call it, what upload accepts and rejects, and what is never returned."""
 import json
 
-from app.scripts import synthetic_docs as sd
 from app.core.config import settings
+from app.scripts import synthetic_docs as sd
 
 
 def _sample(name):

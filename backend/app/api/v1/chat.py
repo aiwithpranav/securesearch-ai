@@ -22,8 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.access.resolver import acan
 from app.answers.service import ANSWERED, REFUSAL_TEXT, AnswerResult, answer_question
 from app.api.deps import get_current_user
-from app.audit.service import add_answer_row, add_query_row
 from app.api.v1.search import _search_gate
+from app.audit.service import add_answer_row, add_query_row
 from app.core import rate_limit
 from app.core.config import settings
 from app.core.errors import AppError
@@ -33,7 +33,14 @@ from app.db.sync import SyncSession
 from app.llm import LlmClient, LlmError, get_llm
 from app.models import ChatFeedback, Document, DocumentChunk, DocumentVersion, SearchHistory, User
 from app.schemas.chat import (
-    ChatRequest, ChatResponse, ChunkPreviewOut, CitationOut, FeedbackIn, FeedbackOut, HistoryItemOut, HistoryPage,
+    ChatRequest,
+    ChatResponse,
+    ChunkPreviewOut,
+    CitationOut,
+    FeedbackIn,
+    FeedbackOut,
+    HistoryItemOut,
+    HistoryPage,
 )
 
 router = APIRouter(tags=["chat"])

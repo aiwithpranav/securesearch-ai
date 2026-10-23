@@ -7,7 +7,8 @@ document (blueprint 13.2). The rules say who may read what, in the same compact 
 
 Used by: the loader script (real upload and ingestion), the runner, and the tests (which write the same documents
 straight into the test database)."""
-from app.scripts.seed_access import COMPANY, EXEC, RULES as DEMO_RULES
+from app.scripts.seed_access import COMPANY, EXEC
+from app.scripts.seed_access import RULES as DEMO_RULES
 from app.scripts.synthetic_docs import SAMPLES, Sample
 
 Rule = tuple[tuple[str, str | None], str, str]  # ((principal type, name), effect, permission)

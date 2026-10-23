@@ -58,8 +58,8 @@ else:  # pragma: no cover
 from app.core.config import settings  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
 from app.storage import get_storage  # noqa: E402
-
 from tests.constants import TEST_PASSWORD  # noqa: E402
+
 _TEST_HASH = hash_password(TEST_PASSWORD)  # hash once; Argon2 is deliberately slow
 
 
@@ -116,6 +116,7 @@ def clean_state(pg, redis_client):
 @pytest.fixture(scope="session")
 def client(pg):
     from fastapi.testclient import TestClient
+
     from app.main import app
 
     # "with" keeps ONE event loop for the whole test session (and runs startup/shutdown).

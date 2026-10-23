@@ -33,8 +33,9 @@ def test_markdown_code_fences_do_not_create_headings():
 def test_docx_headings_and_tables():
     blocks = parse("docx", sd.build(_sample("pricing-playbook.docx")))
     assert any(b.section == "Discount rules" and "10 percent" in b.text for b in blocks)
-    from docx import Document
     import io
+
+    from docx import Document
 
     doc = Document()
     doc.add_heading("Plan", level=1)

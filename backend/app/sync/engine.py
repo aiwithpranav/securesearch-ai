@@ -34,7 +34,8 @@ from app.db.session import _async_url
 from app.ingest.errors import IngestError
 from app.ingest.validation import validate_file
 from app.models import Document, DocumentAcl, DocumentVersion, Group, SyncRun, SyncSource, User, user_groups
-from app.services import access_service, document_service as svc
+from app.services import access_service
+from app.services import document_service as svc
 from app.sync import github  # noqa: F401  registers the GITHUB source kind
 from app.sync.base import REGISTRY, Connector, SourceError, SourceItem, permission_hash
 from app.worker.celery_app import celery_app
@@ -276,7 +277,7 @@ async def _apply_rules(db: AsyncSession, actor: User, document_id: uuid.UUID, wa
     have = {r.principal_id: r for r in rules}
     changed = False
     for pid, rule in have.items():
-        if int(pid) not in wanted:
+        if int(str(pid)) not in wanted:
             await db.delete(rule)
             changed = True
     for gid in wanted:

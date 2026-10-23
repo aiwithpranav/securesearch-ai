@@ -68,7 +68,7 @@ def _principal_id(s: Session, ptype: str, who: str | None) -> str | None:
     row = s.scalar(select(model_lookup[0]).where(model_lookup[1] == who))
     if row is None:
         raise LookupError(f"{ptype} '{who}' does not exist")
-    return str(row.id)
+    return str(row.id)  # type: ignore[attr-defined]
 
 
 def _snapshot(s: Session, document_id) -> list[dict]:  # type: ignore[no-untyped-def]

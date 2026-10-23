@@ -6,8 +6,8 @@ trail (not the system_admin); filters, paging and a spreadsheet-safe CSV export 
 with ids only; and forbidden text never reaches any audit table."""
 import csv
 import io
-import re
 import json
+import re
 import uuid
 
 import psycopg

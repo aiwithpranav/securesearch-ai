@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useState, useRef, useEffect, ReactNode } from "react";
 
-export function GlowCard({ children, className = "", as = "div" }: { children: ReactNode; className?: string, as?: any }) {
+export function GlowCard({ children, className = "", as = "div" }: { children: ReactNode; className?: string, as?: React.ElementType }) {
   const [isTouchActive, setIsTouchActive] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -57,7 +57,7 @@ export function GlowCard({ children, className = "", as = "div" }: { children: R
     };
   }, [isTouchActive]);
 
-  const Component = motion.create(as as any);
+  const Component = motion.create(as as React.ElementType);
 
   return (
     <Component

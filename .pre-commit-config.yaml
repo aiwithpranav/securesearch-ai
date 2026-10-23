@@ -1,0 +1,19 @@
+# Optional local checks before every commit (Phase 9A). Install once:  pip install pre-commit && pre-commit install
+# They are the quick part of CI: style, YAML, merge-conflict markers, big files and leaked secrets.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.2
+    hooks:
+      - id: ruff
+        files: ^backend/
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1500"]
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks

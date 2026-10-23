@@ -7,7 +7,7 @@ from app.api.deps import require_admin
 from app.core import mailer
 from app.db.session import get_db
 from app.models import User
-from app.schemas.users import RoleAssign, RoleCreate, RoleOut, UserCreate, UserOut, UserUpdate, DepartmentOut
+from app.schemas.users import DepartmentOut, RoleAssign, RoleCreate, RoleOut, UserCreate, UserOut, UserUpdate
 from app.services import user_service
 
 # Every route here needs the system_admin role (checked on the server, from the database).
