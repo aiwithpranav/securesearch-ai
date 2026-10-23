@@ -134,7 +134,7 @@ jobs:
       - name: Create a throw-away .env (random secrets, never stored)
         run: bash scripts/setup_env.sh
 
-      - name: Start the stack (images are downloaded with retries: Docker Hub sometimes answers 502 for a moment)
+      - name: "Start the stack (images are downloaded with retries, because Docker Hub sometimes answers 502 for a moment)"
         run: |
           for attempt in 1 2 3 4; do
             docker compose pull postgres redis mailpit storage && break
