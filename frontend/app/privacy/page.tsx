@@ -15,7 +15,7 @@ export default function Page() {
 
         <section aria-labelledby="p-visit">
           <h2 id="p-visit" className="text-xl font-semibold text-text">Visiting this site</h2>
-          <p className="mt-2">The public pages (home, privacy, terms, security, status) set no cookies and use no analytics, advertising or tracking. They collect no personal data. The &ldquo;Request demo&rdquo; button opens an email draft in your own mail app; we receive nothing unless you send it.</p>
+          <p className="mt-2">The public pages (home, privacy, terms, security, status) set no cookies and use no analytics, advertising or tracking. They collect no personal data. The &ldquo;View on GitHub&rdquo; button is an ordinary link to the project&apos;s repository.</p>
         </section>
 
         <section aria-labelledby="p-account">

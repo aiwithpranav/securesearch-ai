@@ -53,3 +53,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 47 | Request latency metrics | Only counts are kept. Add P95 latency per route group (Prometheus format) if the system grows. | Later | No |
 | 48 | Automated axe run for signed-in screens | A Playwright run with a seeded user would repeat the manual axe audit on every pull request. | Later | No |
 | 49 | Legal review of Privacy and Terms | The texts are plain-language and accurate to the software but not reviewed by a lawyer. | Before real use | No |
+| 50 | Create the first administrator | In production the demo seed refuses to run, so the first administrator is created by hand (deployment guide). Add a `create_admin` command that asks for the password without printing it. | Later | No |
+| 51 | Single sign-on and automatic provisioning | Email and password only today. OIDC login and SCIM-style provisioning are the first things a real company asks for. | Later | No |

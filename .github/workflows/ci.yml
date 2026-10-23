@@ -75,8 +75,12 @@ jobs:
         run: |
           mkdir -p /tmp/lh
           for page in "" login status privacy terms security; do curl -s -o /dev/null "http://localhost:3100/$page"; done
-          for page in "" login status privacy terms security; do
-            npx --yes lighthouse@12.8.2 "http://localhost:3100/$page" --chrome-flags="--headless=new --no-sandbox"               --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="/tmp/lh/${page:-home}.json" --quiet
+          for page in login status privacy terms security; do
+            npx --yes lighthouse@12.8.2 "http://localhost:3100/$page" --chrome-flags="--headless=new --no-sandbox"               --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="/tmp/lh/$page.json" --quiet
+          done
+          # the landing page is the heaviest and the noisiest on a shared runner: three runs, the middle score counts
+          for run in 1 2 3; do
+            npx --yes lighthouse@12.8.2 "http://localhost:3100/" --chrome-flags="--headless=new --no-sandbox"               --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="/tmp/lh/home.$run.json" --quiet
           done
       - name: Scores must stay high (performance 75 on a slow runner, accessibility 95, best practices 90, SEO 90)
         run: node scripts/lighthouse-check.mjs /tmp/lh

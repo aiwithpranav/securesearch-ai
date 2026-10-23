@@ -106,3 +106,37 @@ Open http://localhost:3000/privacy, /terms and /security. Regenerate the API pag
 - Privacy and Terms are plain-language texts, not legal advice.
 - See `docs/CHALLENGES.md` entries 140 to 146.
 
+---
+
+## Layer 9D: launch and showcase
+
+### 1. What we built
+A README that a stranger can use, ten real screenshots, architecture diagrams, a deployment guide, a readiness check for a new computer, a production compose file with a website container, and small landing page changes (GitHub links, a demo-data banner, an honest answer about single sign-on).
+
+### 2. How it works, step by step
+1. **Readiness check:** `scripts/check_prereqs.sh` / `.ps1` only look: Docker running, Compose, Git, Node, free ports, disk, memory, internet to the four download sites, project files, `.env`. They print what is missing and how to fix it, and end with READY or NOT READY.
+2. **Production compose:** `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build` adds restart policies, runs the API without reload in production mode, runs the website in a container and leaves out the test mailbox.
+3. **Docs:** README (pitch, evidence, quick start), `docs/architecture.md` (Mermaid diagrams), `docs/deployment.md` (settings, HTTPS proxy example, backups, updates).
+4. **Screenshots:** taken from the running demo with a headless browser: the same question asked by two people, admin screens, evaluation, status, audit.
+
+### 3. Important files
+`README.md`, `docs/architecture.md`, `docs/deployment.md`, `docs/images/`, `scripts/check_prereqs.sh`, `scripts/check_prereqs.ps1`, `docker-compose.prod.yml`, `frontend/Dockerfile`, `frontend/lib/site.ts`, `backend/app/core/status.py`.
+
+### 4. Tools: why we chose them
+Mermaid (diagrams as text, GitHub draws them), a headless Chrome for repeatable screenshots, a second compose project for the clean-machine test.
+
+### 5. How to run it
+`bash scripts/check_prereqs.sh`, then the Quick start in the README.
+
+### 6. How to test it
+Copy the repository to an empty folder, use another compose project name and other ports, and follow the README word by word. Backend tests: `docker compose exec backend pytest -q`.
+
+### 7. Actual results (checked by me)
+- Clean copy: readiness check READY, `.env` created, build and start, migrations, seed, demo documents and access rules all worked; the engineer got the payments runbook passages, the finance manager got unrelated passages only; the status page showed all four parts up. The test stack was removed afterwards.
+- One bug found by this method and fixed: the status page reported storage down on a fresh install (challenge 147). One sentence in my own README was wrong and was corrected (challenge 148).
+
+### 8. Limitations and open issues
+- Written answers were not shown in screenshots (they need an AI key).
+- The production compose file was tested on this machine only; no cloud or HTTPS proxy was set up.
+- See `docs/CHALLENGES.md` entries 147 to 149 and backlog 50 and 51.
+

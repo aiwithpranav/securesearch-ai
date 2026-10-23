@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 9D, branch `feat/launch-9d`, awaiting owner review)
+- README rewritten for a stranger (pitch, screenshots, architecture, security model, measured evaluation, quick start verified on a clean copy); ten screenshots in `docs/images/`; architecture page with diagrams (system, question flow, ingestion and sync); `docs/deployment.md`.
+- `scripts/check_prereqs.sh` and `.ps1` (is this computer ready, read-only); `docker-compose.prod.yml` and `frontend/Dockerfile` (restart policies, production mode, website as a container, no test mailbox).
+- Landing page: "View on GitHub" buttons and a demo-data banner; honest SSO answer in the FAQ; home guide steps link to their screens.
+- 1 backend test (737 total).
+
+### Fixed (Phase 9D)
+- The status page reported file storage as down on a brand-new installation (the bucket did not exist yet). Challenges 147 to 149.
+
 ### Added (Phase 9C, branch `feat/docs-9c`, awaiting owner review)
 - `SECURITY.md` (private vulnerability reporting), `docs/security.md` (rules, six walls, 16 threats tied to tests, OWASP LLM Top 10, what the project does not do), `docs/api.md` generated from the application with a CI diff, Lighthouse CI job on the six public pages. ADR 038.
 - 4 backend tests (736 total).
