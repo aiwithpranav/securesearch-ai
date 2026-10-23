@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed (Phase 9C)
 - The landing and sign-in dot-sphere animation draws far fewer shapes per frame (same look, much less processor time: main-thread work 5.5 s to 2.1 s in a speed test) and starts 300 ms after the page shows its text.
 - Privacy, Terms and Security pages rewritten to match what the software really does (the sign-in cookie, what goes to the AI provider, retention).
-- Accessibility: empty table-header cells on the audit and evaluation tables and a skipped heading level fixed (axe audit of 14 pages, zero violations). Challenges 140 to 145.
+- Accessibility: empty table-header cells on the audit and evaluation tables and a skipped heading level fixed (axe audit of 14 pages, zero violations). Challenges 140 to 146.
 
 ### Added (Phase 9B, merged)
 - Audit retention (`AUDIT_RETENTION_DAYS`, default 365, never below 30) with a guarded purge (migration `0009`), a nightly job and `maintenance audit-purge`.

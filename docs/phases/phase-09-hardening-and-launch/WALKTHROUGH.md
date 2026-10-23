@@ -104,5 +104,5 @@ Open http://localhost:3000/privacy, /terms and /security. Regenerate the API pag
 ### 8. Limitations and open issues
 - The axe audit of signed-in screens is manual (backlog 48); a person using a screen reader still has to try them.
 - Privacy and Terms are plain-language texts, not legal advice.
-- See `docs/CHALLENGES.md` entries 140 to 145.
+- See `docs/CHALLENGES.md` entries 140 to 146.
 
