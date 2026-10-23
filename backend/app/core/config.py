@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -86,9 +87,26 @@ class Settings(BaseSettings):
     login_ip_limit_per_minute: int = 30
     forgot_ip_limit_per_15min: int = 5
     min_password_length: int = 12
+    # --- Phase 9B operations ---
+    audit_retention_days: int = 365  # audit rows older than this are purged every night; 0 keeps everything (FR-36). Otherwise at least 30.
+    keep_versions: int = 3  # passages of the newest N versions of a document are kept; older ones are removed every night (at least 1)
     mail_from: str = "SecureSearch AI <noreply@securesearch.local>"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @field_validator("audit_retention_days")
+    @classmethod
+    def _retention_floor(cls, v: int) -> int:
+        if v != 0 and v < 30:
+            raise ValueError("AUDIT_RETENTION_DAYS must be 0 (keep everything) or at least 30")
+        return v
+
+    @field_validator("keep_versions")
+    @classmethod
+    def _keep_at_least_one(cls, v: int) -> int:
+        if v < 1:
+            raise ValueError("KEEP_VERSIONS must be at least 1")
+        return v
 
 
 settings = Settings()

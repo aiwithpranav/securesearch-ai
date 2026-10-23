@@ -18,6 +18,7 @@ from app.core.errors import (
     validation_error_handler,
 )
 from app.core.logging import setup_logging
+from app.core.metrics import MetricsMiddleware
 from app.core.middleware import RequestIDMiddleware
 from app.core.redis import close_redis
 from app.db.session import engine
@@ -41,6 +42,7 @@ app = FastAPI(lifespan=lifespan, title="SecureSearch AI API", docs_url="/api/doc
 
 # Middleware
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(MetricsMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin],

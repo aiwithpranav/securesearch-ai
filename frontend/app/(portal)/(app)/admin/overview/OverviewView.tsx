@@ -117,6 +117,27 @@ export function OverviewView() {
         </section>
       </div>
 
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <section className={card} aria-labelledby="h-service">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="h-service" className="text-lg font-semibold">Service, last 24 hours</h2>
+            <Link href="/status" className="text-sm text-accent2 hover:underline">Status page</Link>
+          </div>
+          <dl className="mt-4 grid grid-cols-3 gap-4">
+            <div><dt className="text-sm text-muted">Requests</dt><dd className="mt-1 text-2xl font-semibold">{data.service_24h.requests}</dd></div>
+            <div><dt className="text-sm text-muted">Server errors</dt><dd className="mt-1 text-2xl font-semibold">{data.service_24h.errors_5xx}</dd></div>
+            <div><dt className="text-sm text-muted">Too many requests</dt><dd className="mt-1 text-2xl font-semibold">{data.service_24h.rate_limited}</dd></div>
+          </dl>
+        </section>
+        <section className={card} aria-labelledby="h-retention">
+          <h2 id="h-retention" className="text-lg font-semibold">Audit retention</h2>
+          <p className="mt-4 text-muted">
+            {data.audit_retention.days === 0 ? "Audit records are kept forever." : `Audit records are kept for ${data.audit_retention.days} days, then removed every night.`}
+          </p>
+          {data.audit_retention.days !== 0 && <p className="mt-2 text-sm text-muted"><b className="text-text">{data.audit_retention.records_due}</b> records are past that and will be removed tonight.</p>}
+        </section>
+      </div>
+
       <section className={`${card} mt-6 flex flex-wrap items-center justify-between gap-4`} aria-labelledby="h-eval">
         <div>
           <h2 id="h-eval" className="text-lg font-semibold">Latest evaluation</h2>

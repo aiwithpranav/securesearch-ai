@@ -15,6 +15,9 @@ def _code(exc: ClientError) -> str:
     return str(exc.response.get("Error", {}).get("Code", ""))
 
 
+PAGE_SIZE = 1000  # the most keys the store returns in one answer
+
+
 class S3Storage:
     def __init__(self, endpoint_url: str, access_key: str, secret_key: str, bucket: str, region: str) -> None:
         self.bucket = bucket
@@ -91,11 +94,22 @@ class S3Storage:
             raise StorageError(f"Delete failed ({type(exc).__name__}).") from None
 
     def list_keys(self, prefix: str, limit: int = 1000) -> list[str]:
+        """Up to `limit` keys. The store answers at most PAGE_SIZE at a time, so this asks again until it has them all."""
+        keys: list[str] = []
+        token: str | None = None
         try:
-            r = self._client.list_objects_v2(Bucket=self.bucket, Prefix=prefix, MaxKeys=limit)
+            while len(keys) < limit:
+                args: dict[str, object] = {"Bucket": self.bucket, "Prefix": prefix, "MaxKeys": min(PAGE_SIZE, limit - len(keys))}
+                if token:
+                    args["ContinuationToken"] = token
+                r = self._client.list_objects_v2(**args)
+                keys += [o["Key"] for o in r.get("Contents", [])]
+                token = r.get("NextContinuationToken")
+                if not r.get("IsTruncated") or not token:
+                    break
         except (ClientError, BotoCoreError) as exc:
             raise StorageError(f"List failed ({type(exc).__name__}).") from None
-        return [o["Key"] for o in r.get("Contents", [])]
+        return keys
 
 
 def get_storage() -> S3Storage:
