@@ -18,12 +18,24 @@ if (files.length === 0) {
   process.exit(2);
 }
 
-let failed = false;
+// A page may have several reports (home.1.json, home.2.json, ...): the middle value of each score is used, so one slow moment of a shared runner
+// does not fail the build. A single report (login.json) is used as it is.
+const median = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
+const groups = new Map();
 for (const f of files) {
-  const report = JSON.parse(readFileSync(join(dir, f), "utf8"));
-  const scores = Object.fromEntries(Object.entries(report.categories).map(([k, v]) => [k, Math.round(v.score * 100)]));
+  const name = f.split(".")[0];
+  groups.set(name, [...(groups.get(name) ?? []), f]);
+}
+
+let failed = false;
+for (const [name, reports] of groups) {
+  const all = reports.map((f) => JSON.parse(readFileSync(join(dir, f), "utf8")).categories);
+  const scores = Object.fromEntries(
+    Object.keys(all[0]).map((k) => [k, median(all.map((c) => Math.round(c[k].score * 100)))]),
+  );
   const bad = Object.entries(THRESHOLDS).filter(([k, min]) => (scores[k] ?? 0) < min);
-  console.log(`${bad.length ? "FAIL" : "ok  "} ${f.padEnd(14)} ${Object.entries(scores).map(([k, v]) => `${k} ${v}`).join(", ")}`);
+  const runs = reports.length > 1 ? ` (middle of ${reports.length} runs)` : "";
+  console.log(`${bad.length ? "FAIL" : "ok  "} ${name.padEnd(10)} ${Object.entries(scores).map(([k, v]) => `${k} ${v}`).join(", ")}${runs}`);
   for (const [k, min] of bad) console.log(`       ${k} is ${scores[k]}, needs at least ${min}`);
   if (bad.length) failed = true;
 }
