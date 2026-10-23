@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added (Phase 9B, branch `feat/ops-9b`, awaiting owner review)
+### Added (Phase 9C, branch `feat/docs-9c`, awaiting owner review)
+- `SECURITY.md` (private vulnerability reporting), `docs/security.md` (rules, six walls, 16 threats tied to tests, OWASP LLM Top 10, what the project does not do), `docs/api.md` generated from the application with a CI diff, Lighthouse CI job on the six public pages. ADR 038.
+- 4 backend tests (736 total).
+
+### Changed (Phase 9C)
+- Privacy, Terms and Security pages rewritten to match what the software really does (the sign-in cookie, what goes to the AI provider, retention).
+- Accessibility: empty table-header cells on the audit and evaluation tables and a skipped heading level fixed (axe audit of 14 pages, zero violations). Challenges 140 to 143.
+
+### Added (Phase 9B, merged)
 - Audit retention (`AUDIT_RETENTION_DAYS`, default 365, never below 30) with a guarded purge (migration `0009`), a nightly job and `maintenance audit-purge`.
 - Public status page (`/status`, API `GET /api/v1/status`) with real checks and a worker heartbeat; request, server-error and rate-limit counters in the Overview; audit retention number in the Overview.
 - Nightly cleanup of passages of old versions (`KEEP_VERSIONS`, default 3).

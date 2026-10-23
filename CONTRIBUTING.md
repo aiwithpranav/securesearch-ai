@@ -24,4 +24,4 @@ cd frontend && npm run lint && npm run typecheck && npm test && npm run build
 - Record a decision in `docs/adr/` and a difficulty in `docs/CHALLENGES.md`.
 
 ## Reporting a security problem
-Please do not open a public issue. See [SECURITY.md](SECURITY.md) once it exists, or contact the author directly.
+Please do not open a public issue. See [SECURITY.md](SECURITY.md).
