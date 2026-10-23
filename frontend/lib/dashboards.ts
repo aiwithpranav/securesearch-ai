@@ -17,6 +17,8 @@ export type Overview = {
   failed_ingestions_7d: number;
   latest_evaluation: { started_at: string; status: string; total: number; passed: number; leak_count: number } | null;
   window_days: number;
+  service_24h: { requests: number; errors_5xx: number; rate_limited: number };
+  audit_retention: { days: number; records_due: number };
 };
 export type Gap = { question: string; asked: number; people: number; last_asked: string; suggested_action: string };
 

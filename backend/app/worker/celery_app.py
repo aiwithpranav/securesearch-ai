@@ -7,6 +7,7 @@ Why Celery and not FastAPI background tasks: Celery jobs survive a restart and c
 - prefetch 1: one job at a time per worker slot, so a long job never hides others.
 Jobs MUST therefore be written to be idempotent (running twice gives the same result)."""
 from celery import Celery
+from celery.schedules import crontab
 
 from app.core.config import settings
 
@@ -40,5 +41,10 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     # The scheduler (the worker runs with -B) wakes up every minute; sources decide themselves whether they are due.
-    beat_schedule={"sync-tick": {"task": "sync.tick", "schedule": 60.0}},
+    beat_schedule={
+        "sync-tick": {"task": "sync.tick", "schedule": 60.0},
+        "worker-heartbeat": {"task": "system.heartbeat", "schedule": 60.0},  # lets the status page know the worker is alive
+        "audit-purge": {"task": "audit.purge", "schedule": crontab(hour=3, minute=30)},
+        "old-passages-cleanup": {"task": "ingest.cleanup", "schedule": crontab(hour=4, minute=0)},
+    },
 )

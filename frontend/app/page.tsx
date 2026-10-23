@@ -177,6 +177,7 @@ export default function Home() {
             <Link href="/privacy" className="hover:text-text">Privacy</Link>
             <Link href="/terms" className="hover:text-text">Terms</Link>
             <Link href="/security" className="hover:text-text">Security</Link>
+            <Link href="/status" className="hover:text-text">Status</Link>
           </nav>
         </div>
       </footer>

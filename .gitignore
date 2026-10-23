@@ -7,3 +7,6 @@ __pycache__/
 
 # Local demo credentials (synthetic, never commit)
 demo-credentials.local.txt
+
+# Backups hold the company documents and personal data: never commit them
+backups/

@@ -11,8 +11,12 @@ from collections import defaultdict
 
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.concurrency import run_in_threadpool
 
 from app.access.resolver import readable_ids_stmt
+from app.audit import retention
+from app.core import metrics
+from app.core.config import settings
 from app.models import Document
 
 REFUSED = ("REFUSED_LOW_CONFIDENCE", "REFUSED_NO_ACCESS_EVIDENCE")
@@ -80,6 +84,8 @@ async def admin_overview(db: AsyncSession) -> dict:  # type: ignore[type-arg]
             "passed": latest_eval.passed, "leak_count": latest_eval.leak_count,
         },
         "window_days": 30,
+        "service_24h": await metrics.last_24_hours(),
+        "audit_retention": {"days": settings.audit_retention_days, "records_due": (await run_in_threadpool(retention.run, dry_run=True)).total},
     }
 
 

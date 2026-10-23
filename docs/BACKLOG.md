@@ -35,13 +35,13 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 29 | Refusal threshold | 0.03 is provisional (tiny question set); tune on the 60+ questions. | Phase 7 | Yes |
 | 30 | Hydration mismatch with reduced motion on the landing page | Phase 1 components call `useReducedMotion()` while rendering. Fix by reading the preference after mount. | Later | No |
 | 31 | Docker image layers | Done in 9A: the models are downloaded before the other packages. | Phase 9 | Done |
-| 32 | Audit retention | The audit trail is kept forever. Add a retention period and an archive step. | Phase 9 | No |
+| 32 | Audit retention | Done in 9B (365 days, guarded purge). An archive step (export before purge) is still open. | Phase 9 | Partly |
 | 33 | Weak-match note on the Find passages screen | Aligned to 0.30 in 7C. | 7C | Done |
 | 34 | Paraphrase answer rate | Only 4 of 8 paraphrased questions get an answer at threshold 0.30 (the right document is found, the reranker score is low). Try a larger reranker, question rewriting, a second signal in the gate, and a bigger evaluation set. | Later | Yes |
 | 35 | Evaluate with the real model | Run `run_eval --live --yes` when a key is available and compare refusals and citations with the fake-model numbers. | When a key is set | No |
 | 36 | Evaluation against a test copy | Evaluation runs write real audit rows that show up in the audit trail and the gaps report. Run them against a separate database. | Phase 9 | No |
 | 37 | Dashboard extras | Export of the overview, longer ranges, per-department views, and a chart library if the charts grow. | Later | No |
-| 38 | Clean up passages of old versions | Inactive passages of older versions are kept forever. Add a retention rule (for example keep the last 3 versions). | Phase 9 | No |
+| 38 | Clean up passages of old versions | Done in 9B: the newest 3 versions are kept (`KEEP_VERSIONS`). | Phase 9 | Done |
 | 39 | Make an old version current again | Today you send the old file as a new version. A button could re-index version N. | Later | No |
 | 40 | Cheaper "unchanged" check | The engine reads every file from the source at each run to compare its SHA-256. A connector could give its own revision (for example a git blob id) so unchanged files are not read. | Later | No |
 | 41 | Real group membership from GitHub | Teams are listed in `access.json` because personal repositories have no teams. For an organisation, read the GitHub teams directly. | Later | No |
@@ -49,3 +49,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 43 | Live check of the GitHub sync | Run one sync of `demo-docs/` against the real repository with a short-lived read-only token and note the result in the walkthrough. | Optional | No |
 | 44 | React Compiler warnings | 21 advisory lint warnings from Next.js 16 (data loaded in an effect, animated wrapper created in a component). Move data loading to a small hook or Server Components and declare the wrapper outside the component, then lower the ceiling in `package.json`. | Later | No |
 | 45 | Accessibility and speed checks in CI | Lighthouse and axe on the landing page and the main screens. | 9C | No |
+| 46 | Scheduled backups | Backups are run by hand. Add a scheduled task or cron entry and an off-machine copy. | Later | No |
+| 47 | Request latency metrics | Only counts are kept. Add P95 latency per route group (Prometheus format) if the system grows. | Later | No |

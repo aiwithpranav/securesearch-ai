@@ -6,7 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added (Phase 9A, branch `feat/ci-9a`, awaiting owner review)
+### Added (Phase 9B, branch `feat/ops-9b`, awaiting owner review)
+- Audit retention (`AUDIT_RETENTION_DAYS`, default 365, never below 30) with a guarded purge (migration `0009`), a nightly job and `maintenance audit-purge`.
+- Public status page (`/status`, API `GET /api/v1/status`) with real checks and a worker heartbeat; request, server-error and rate-limit counters in the Overview; audit retention number in the Overview.
+- Nightly cleanup of passages of old versions (`KEEP_VERSIONS`, default 3).
+- `scripts/backup.sh`, `scripts/restore.sh`, `docs/runbook.md` and a restore tested on an empty stack. ADR 037.
+- 35 backend tests (732 total), 9 frontend tests (132 total), 15 mutation checks all caught. Challenges 135 to 139.
+
+### Changed (Phase 9B)
+- The object storage listing pages through results (the store returns at most 1000 keys at a time).
+
+### Added (Phase 9A, merged)
 - Continuous integration (GitHub Actions): ruff, ESLint, TypeScript, mypy, all tests with a coverage gate on the security code, a named leak gate (canary scan, access oracle, evaluation), a secret scan of the whole history (gitleaks), dependency scans (pip-audit, npm audit), alembic check and an image build. Dependabot, pull request template, CONTRIBUTING, MIT licence, pre-commit config, `scripts/setup_env.sh`, `docs/ci.md`, ADR 036.
 
 ### Security (Phase 9A)

@@ -7,9 +7,12 @@ from celery.exceptions import SoftTimeLimitExceeded
 from celery.signals import worker_ready
 from sqlalchemy import func, select, update
 
+from app.audit import retention
 from app.core.config import settings
+from app.core.status import record_heartbeat
 from app.db.sync import SyncSession
 from app.embeddings import embed_documents, model_label
+from app.ingest import cleanup
 from app.ingest.errors import IngestError
 from app.ingest.pipeline import MAX_ATTEMPTS, fail_job, run_ingestion
 from app.models import IngestionJob, SyncRun
@@ -74,6 +77,26 @@ def sync_execute_run(self, run_id: str) -> str:  # type: ignore[no-untyped-def]
 def sync_tick() -> int:
     """Every minute: starts a run for each source that is due."""
     return asyncio.run(tick())
+
+
+@celery_app.task(name="system.heartbeat")
+def heartbeat() -> str:
+    """Every minute: proves to the status page that the worker and the scheduler are alive."""
+    record_heartbeat()
+    return "ok"
+
+
+@celery_app.task(name="audit.purge")
+def audit_purge() -> dict[str, int]:
+    """Every night: removes audit rows older than the retention setting (see app/audit/retention.py)."""
+    counts = retention.run()
+    return {"queries": counts.queries, "answers": counts.answers, "events": counts.events}
+
+
+@celery_app.task(name="ingest.cleanup")
+def ingest_cleanup() -> int:
+    """Every night: removes the passages of document versions older than the newest KEEP_VERSIONS."""
+    return cleanup.run()
 
 
 @celery_app.task(name="system.ping")

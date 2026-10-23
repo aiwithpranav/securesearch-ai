@@ -1,9 +1,11 @@
 import socket
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
+from app.core import rate_limit, status
 from app.core.config import settings
+from app.core.errors import AppError
 
 router = APIRouter()
 
@@ -58,3 +60,14 @@ async def ready(request: Request):
                 "services": status
             }
         )
+
+
+@router.get("/status")
+async def service_status(request: Request, response: Response):
+    """The public status page's data: a name and up or down for each part, and one overall word. Nothing else (see app/core/status.py)."""
+    ip = request.client.host if request.client else "unknown"
+    allowed, retry = await rate_limit.hit(rate_limit.key_for("status", ip), 60, 60)
+    if not allowed:
+        raise AppError(429, "Too many attempts", "Too many requests. Try again shortly.", headers={"Retry-After": str(retry)}, extra={"retry_after_seconds": retry})
+    response.headers["Cache-Control"] = "no-store"
+    return await status.collect()
