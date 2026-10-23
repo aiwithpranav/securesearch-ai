@@ -1,155 +1,147 @@
 # SecureSearch AI
-*Permission-aware enterprise knowledge search (RAG) built for security-first organizations.*
 
-> **Status:** In development. Done and signed off: Phase 1 (landing page, tag `v0.1`), Phase 2 (authentication and user flow, tag `v0.2`) and Phase 3 (documents and ingestion, tag `v0.3`) and Phase 4 (permissions and ACL, tag `v0.4`) Phase 5 (hybrid retrieval, tag `v0.5`) and Phase 6 (answers and citations, tag `v0.6`). Next: Phase 7 (audit and evaluation).
+*Ask your company's documents a question and get a short answer with sources, and only from the documents you are allowed to read.*
 
-## Problem & Solution
-**Problem:** Generic RAG tools lack enterprise-grade security and permissions, risking data leakage of sensitive internal documents to unauthorized users.
-**Solution:** SecureSearch AI provides a modular search system where every query and retrieved chunk strictly respects existing Access Control Lists (ACL), ensuring users only see what they are allowed to see.
+[![CI](https://github.com/aiwithpranav/securesearch-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/aiwithpranav/securesearch-ai/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Current Features
-* **Landing Page (Phase 1):** Dark premium design, interactive demos, and high accessibility standards.
-* **Backend Foundation (Phase 2A):** Dockerized backend with FastAPI, Postgres (pgvector), Redis, and Mailpit. Includes structural validations, JSON logging, and error handling.
+![Landing page](docs/images/01-landing.png)
 
-* **Phase 3A infrastructure (implemented):** a private S3-style file store (`storage`), a background worker (`worker`) and a local embedding model baked into the image.
-* **Phase 3B ingestion (implemented):** admins can upload PDF, DOCX, TXT or MD files through the API; the worker turns them into text chunks with 384-number vectors, safely (a failed job never damages the previous version) and with notifications on failure. No endpoint returns document text (admin is not reader).
-* **Phase 9C privacy and security documents (implemented, awaiting owner review):** accurate Privacy, Terms and Security pages, a [security policy](SECURITY.md), a [security model](docs/security.md) that ties every threat to the test that proves it (and says what the project does not do), an [API reference](docs/api.md) generated from the code, and speed and accessibility checks in CI.
-* **Phase 9B operations (done, merged):** a public **status page** (`/status`), audit records that expire after a configurable time (default 365 days, with a guarded purge), service numbers for the administrator, a nightly tidy-up of old passages, and **backup and restore scripts with a restore that was tested on an empty machine**. See the [runbook](docs/runbook.md).
-* **Phase 9A quality gates (done, merged):** every pull request is checked automatically by GitHub Actions: style, types, about 700 tests, a leak gate (any leak fails the build), a coverage gate on the security code, a secret scan of the whole history and known-vulnerability scans. See [docs/ci.md](docs/ci.md).
-* **Phase 8C GitHub connector (done, merged):** a **Sources** screen (Manage menu) to connect a folder of a GitHub repository. Its documents are imported and kept up to date, and who may read them follows the repository: a team file says which team reads which folder, and by default a person must also be a collaborator, so removing them on GitHub removes their access at the next sync. The read-only token stays in your local `.env` and is held only by the background worker. The folder `demo-docs/` holds six invented documents for the demo.
-* **Phase 8B sync engine (done, merged):** keeps the documents of a source in step with it, doing only what changed: new files are added, unchanged files are skipped, a changed file becomes a new version, a permission-only change updates the access rules without re-indexing, removed files are soft deleted, and team members follow the source (removed from a team means no access at the next question). A broken or empty source cannot wipe the index. It runs on a schedule and on demand; the screen and the GitHub connector come in 8C.
-* **Phase 8A versions (done, merged):** upload a newer file for a document (the same file again does nothing, the old version keeps answering until the new one is ready), restore a deleted document, and the date next to a cited passage is the date of its version.
-* **Phase 7C dashboards (done, merged):** a **Manage** menu that shows only what your role allows, an **Audit** screen with filters and CSV export (security_admin and auditor), an admin **Overview** with simple charts, a **Knowledge gaps** report of unanswered questions (personal details hidden, nobody named), an **Evaluation** dashboard with a free Run button, and an employee **Home** with ideas to ask and your recent questions.
-* **Phase 7B evaluation (merged):** 62 test questions asked as 8 different people over 48 synthetic documents, with a scanner that looks for forbidden text in every answer, search result, prompt, audit row and log. Result on this set: **0 leaks**, Recall@5 1.00, citation correctness 1.00, refusal accuracy 1.00. Full report: [evaluation report](docs/evaluation-report.md).
-* **Phase 7A audit trail (merged):** every search and answer is recorded (who asked what, ids only, never the answer text) in a log the database itself will not let anyone change; security staff can read and export it. The system administrator cannot. The Audit screen is part of 7C.
-* **Phase 6C Ask screen (done, merged):** sign in and use **Ask** in the menu: get a short answer with sources, open the passage behind a source, rate the answer, and see your recent questions. Live answers need an OpenAI key in your local `.env`.
-* **Phase 6B answer API (done, merged):** ask a question and get a short cited answer or one uniform refusal, see the passage behind a citation, keep a private search history and give thumbs up or down. 
-* **Phase 6A answer engine (done, merged):** turns a question into a short answer with citations written only from documents the person may read, or one uniform refusal. Needs an OpenAI key in `.env` for live answers (optional). 
-* **Design refresh (done, merged):** new purple palette across the whole app and an animated dots sphere on the landing page and sign-in pages. After sign-in the app stays calm and stable. No behaviour changed.
-* **Phase 5C search screen (done, merged):** sign in and use **Search** in the menu: type a question, see the best passages from the documents you may read with a relevance bar. Written answers with sources are Phase 6.
-* **Phase 5B search API (done, merged):** `POST /api/v1/search` returns the best passages for a question from the documents the caller may read (rate limited; the question text is never logged). 
-* **Phase 5A search engine (done, merged):** finds the best passages for a question using full-text and meaning-based (vector) search, merges them and reorders them with a local reranker model, always only inside the documents the person may read. Details: [Phase 5 walkthrough](docs/phases/phase-05-hybrid-retrieval/WALKTHROUGH.md).
-* **Phase 4C admin screens (done, merged):** administrators manage people (invite, edit, roles, deactivate), groups and members, and the access rules of each document (allow or deny a person, role, group, department or everyone, with optional expiry), see the history of rule changes and ask "who can read this?" with a plain-English reason. Nobody can read document content yet (search is Phase 5).
-* **Phase 4B rules API (implemented, merged):** administrators create groups and put people in them, add ALLOW or DENY rules to a document, see the history of rule changes, and ask the access preview why a person can or cannot read a document. Demo groups and rules for the 12 demo documents: `docker compose exec backend python -m app.scripts.seed_access`. Nobody can read document content yet (search is Phase 5).
-* **Phase 4A access rules engine (done, merged):** the database tables for groups and document access rules, and one resolver that decides who may read, download or manage a document (deny by default, deny beats allow, admin is not reader, nothing cached). There is **no screen or API for the rules yet** (4B, 4C), so every document is still invisible to everybody except as metadata for administrators. Details: [Phase 4 walkthrough](docs/phases/phase-04-permissions-and-acl/WALKTHROUGH.md).
-* **Phase 3C admin screens (implemented):** administrators get a Documents menu: a list with status and filters, an upload page, a document page (edit, re-index, delete, processing history) and a notification bell for failed processing. Normal users see none of it. There is **no search or answer yet**. Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md). Details: [Phase 3 walkthrough](docs/phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
-* **Auth backend (Phase 2B, implemented):** email + password login (Argon2id), 15-minute access token, rotating refresh cookie with theft detection, lockout, forgot/reset/change password (emails go to Mailpit), admin endpoints for users, roles and departments, 8 seeded demo users. Details: [Phase 2 docs](docs/phases/phase-02-auth-user-flow/WALKTHROUGH.md).
+> **Demo project.** Every document, person and number in this repository is invented. Read [what it does not do](docs/security.md) before putting real documents in.
 
-* **Login UI (Phase 2C, implemented):** `/login` (validation, shake, Caps Lock hint, Remember me, all error states), `/forgot-password`, `/reset-password`, `/home` (your details, first-2-minutes guide, welcome tour), `/profile` (change password, sign out of all devices). Search and documents are **not built yet**; guide steps for them say "Coming in Phase N". Details: [2C walkthrough](docs/phases/phase-02-auth-user-flow/WALKTHROUGH-2C.md).
+## The problem
+A search or chat tool over company documents is only useful if it never shows a person something they may not read. Most RAG demos search everything first and hope to filter later, so a payroll file can leak into an answer, a log line or a prompt.
 
-## Architecture Overview
-The system follows a modular monolith architecture, separating the Next.js frontend from the FastAPI Python backend. Data is persisted in PostgreSQL with pgvector for semantic search, cached in Redis. 
+## The idea
+The permission check happens **inside the database query, before anything is scored**, and is checked again before the answer is written and once more on every cited source. Deny wins, access is deny-by-default, the system administrator is not automatically a reader, and nothing is cached. A leak test with secret marker words runs on every pull request and fails the build if one marker reaches a person who may not read it.
 
-[Read the full Architecture Overview](docs/architecture.md)
+The same question, asked by two different people (an engineer and a finance manager):
 
-Problems met while building, and how they were handled: [docs/CHALLENGES.md](docs/CHALLENGES.md).
+| Engineer (may read the runbook) | Finance manager (may not) |
+|---|---|
+| ![Engineer search](docs/images/02-search-engineer.png) | ![Finance search](docs/images/03-search-finance.png) |
 
-## Security Model (Design Goals)
-These are design goals and have not yet been proven in production:
-- **0-Trust Queries:** Every search validates permissions.
-- **Data Segregation:** No cross-tenant or cross-role data leaks.
-- **Auditability:** Every search and access is logged.
+## What it does
+* **Search and answers:** hybrid retrieval (PostgreSQL full-text + pgvector, merged with RRF, reordered by a local cross-encoder), short answers with citations that are checked against the passages that were sent, one uniform refusal when the evidence is weak.
+* **Access rules:** allow or deny a person, role, group, department or everyone, with optional expiry; a plain-English "who can read this and why" preview; history of every change.
+* **Documents:** upload PDF, DOCX, TXT or MD; background indexing that never damages the previous good version; versions and restore.
+* **Sources:** a GitHub folder is imported and kept up to date by an incremental sync; access follows the repository's team file and collaborators.
+* **Audit:** every search and answer is recorded (ids and outcome, never the answer) in an append-only table the database itself protects; security staff read and export it; the system administrator cannot.
+* **Operations:** public status page, retention, backup and restore scripts (restore tested on an empty machine), dashboards, knowledge gaps (unanswered questions without names), an evaluation dashboard.
 
-## Quick Start
+| Access rules of a document | Evaluation dashboard |
+|---|---|
+| ![Access rules](docs/images/05-access-rules.png) | ![Evaluation](docs/images/07-evaluation.png) |
+| **Audit trail** | **Status page** |
+| ![Audit](docs/images/09-audit.png) | ![Status](docs/images/08-status.png) |
 
-### Frontend (Landing Page)
-Ensure you have Node.js 20.9.0+ installed.
+More screens: [documents](docs/images/04-admin-documents.png), [overview](docs/images/06-overview.png), [knowledge gaps](docs/images/10-knowledge-gaps.png).
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000). Sign-in page: [http://localhost:3000/login](http://localhost:3000/login) (needs the backend below, with demo users seeded). The API address defaults to `http://localhost:8000`; override with `NEXT_PUBLIC_API_URL` (a public URL, not a secret).
+## Architecture
+A modular monolith: FastAPI (plus a worker from the same image), Next.js, PostgreSQL with pgvector, Redis, S3-compatible storage. Local embedding and reranker models; the only optional outside call is to an AI provider to write the answer.
 
-Frontend checks (from `frontend/`): `npm test` (20 unit tests, needs Node 22+), `npm run typecheck`, `npm run build`. Stop the dev server with Ctrl+C.
-
-### Backend (Docker Compose)
-Ensure you have Docker Desktop running.
-
-Run all commands in PowerShell from the repository root.
-
-1. Create `.env` with random secrets (git-ignored; never overwrites an existing `.env`; shows no secrets):
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/setup_env.ps1
-```
-Environment variable names (placeholders only, see `.env.example`): `APP_ENV`, `APP_SECRET_KEY`, `JWT_SECRET_KEY`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `REDIS_URL`, `SMTP_HOST`, `SMTP_PORT`, `FRONTEND_ORIGIN`, `SEED_USER_PASSWORD`, and (Phase 3) `S3_ENDPOINT_URL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`. Never commit `.env`. If you already have a `.env`, the same command only adds the missing keys (no values shown).
-2. Start the services (the first build downloads PyTorch and the embedding model and takes several minutes; if it fails with a network error, run it again):
-```powershell
-docker compose up --build -d
-docker compose ps
-```
-`docker compose ps` should show 6 services, all `(healthy)`: postgres, redis, mailpit, storage, backend, worker.
-3. Create the tables, then the demo users:
-```powershell
-docker compose exec backend alembic upgrade head
-docker compose exec backend python -m app.scripts.seed_users
-docker compose exec backend python -m app.scripts.load_synthetic_docs   # optional: 12 made-up demo documents
-docker compose exec backend python -m app.scripts.seed_access            # optional: demo groups and access rules (after the two above)
-```
-4. Verify:
-- Health: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health) should show `{"status":"ok"}`
-- Ready: [http://localhost:8000/api/v1/ready](http://localhost:8000/api/v1/ready) should show postgres and redis `ok`
-- API docs (try login there): [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
-- Mailpit inbox (reset and invite emails): [http://localhost:8025](http://localhost:8025)
-- Try the admin screens: sign in at http://localhost:3000/login as `prashant@demo`, then open **Documents** (list, upload, edit, re-index, delete). Or try the API: in the API docs log in with `POST /auth/login` as `prashant@demo`, click Authorize with the token, then `POST /documents/upload` (demo files are in `sample-data/synthetic/`). Check `GET /documents` and `GET /ingestion/jobs`.
-- Object storage and worker (no web page, private network): `docker compose exec backend python -m app.scripts.storage_check` should print "Write, read and delete: OK".
-
-Demo users (synthetic): `swara@demo`, `pranav@demo`, `dhanashree@demo`, `akshay@demo`, `sanjana@demo`, `shivam@demo`, `prashant@demo` (admin), `karunesh@demo`. `former@demo` is deactivated on purpose. A fresh seed gives every demo user the shared `SEED_USER_PASSWORD` from your local `.env`. For name-based passwords, keep a local file `demo-credentials.local.txt` (git-ignored, lines like `email: password`) and run `Get-Content demo-credentials.local.txt | docker compose exec -T backend python -m app.scripts.set_user_passwords` from the repository root. These passwords are easy to guess on purpose: use them on a developer machine only, never on a real server.
-
-Stop: `docker compose down` (data kept). `docker compose down -v` also deletes the database.
-
-## Running Tests
-```powershell
-docker compose exec backend pytest -q
-```
-Tests use their own database (`<POSTGRES_DB>_test`) and need the services above running. If you edit test files, copy them in first: `docker compose cp backend/tests/. backend:/app/tests/`. Last run by Claude: 283 passed. Frontend (from `frontend/`): `npm test` runs 20 unit tests.
-
-## Tech Stack
-* **Frontend:** Next.js `16.4.0`, React `19.3.0`, TailwindCSS `4.3.3`, Motion `^14.0.0`, TypeScript `~5.9.3`
-* **Backend:** FastAPI `0.143.0`, Python 3.12, Uvicorn `0.54.0`, SQLAlchemy `2.1.4`, Alembic `1.20.0`, Pydantic `2.14.0`
-* **Infrastructure:** Postgres 17 with pgvector `0.8.0`, Redis `7.4.2`, Mailpit `v1.22.0`, SeaweedFS `4.48` (S3 object storage, replaces archived MinIO, see CR-001)
-* **Documents (Phase 3B):** pypdf `6.19.0`, python-docx `1.2.0`, python-multipart `0.0.32`, pgvector (Python) `0.5.0`; dev only: reportlab `5.0.1`.
-* **Background jobs and AI (Phase 3A):** Celery `5.6.3`, boto3 `1.43.108`, sentence-transformers `6.1.0` with `BAAI/bge-small-en-v1.5` (384-dimension local embeddings, MIT licence), CPU-only PyTorch `2.14.1`. All versions: [ADR 024](docs/adr/024-phase-3-pinned-versions.md).
-
-## Folder Structure
-```text
-.
-├── backend/          # FastAPI Python application and API routes
-├── docs/             # Project documentation and architectural decisions
-│   ├── adr/          # Architecture Decision Records
-│   ├── phases/       # Progress tracking per phase
-│   └── architecture.md # System architecture details
-├── frontend/         # Next.js web application
-├── .env.example      # Environment variable template
-├── docker-compose.yml # Docker infrastructure configuration
-└── README.md         # Project entrypoint
+```mermaid
+flowchart LR
+    user((Person)) --> web[Website<br/>Next.js]
+    web --> api[API<br/>FastAPI]
+    api --> db[(PostgreSQL<br/>+ pgvector)]
+    api --> redis[(Redis)]
+    api --> store[(Object storage)]
+    redis --> worker[Worker<br/>Celery]
+    worker --> db
+    worker --> store
+    api -.->|"question + allowed passages"| llm[AI provider<br/>optional]
 ```
 
-## Roadmap
-Phases follow the blueprint (v1.2). Done: Phases 1, 2 and 3.
-* **Phase 3 (done):** Documents and ingestion (upload, parse, chunk, embed, admin screens)
-* **Phase 4 (done, `v0.4`):** Permissions and ACL (groups, allow/deny rules, admin users and groups screen)
-* **Phase 5 (done, `v0.5`):** Hybrid retrieval (full-text + vector search, rerank)
-* **Phase 6 (done, `v0.6`):** Answers and citations (LLM, refusals, chat UI)
-* **Phase 7:** Audit and evaluation
-* **Phase 8:** Incremental sync and one real connector
-* **Phase 9:** Hardening and launch
+Details, with the full question flow and the sync flow: [docs/architecture.md](docs/architecture.md).
 
-Loose ends and ideas: [docs/BACKLOG.md](docs/BACKLOG.md).
+## Security model
+Six walls, each backed by tests: (1) identity and role read from the database on every request, (2) permission filter inside the keyword query, (3) the same inside the vector query, (4) a recheck before the answer is written, (5) citation and output validation, (6) a leak gate in the build. Plus Argon2id passwords, rotating refresh cookies with theft detection, lockout, rate limits, upload checks, append-only audit, a secret scan of the whole history and dependency scans.
+
+Every threat is tied to the test that proves it, and the gaps are listed (no SSO, no MFA, no independent audit): [docs/security.md](docs/security.md). To report a problem: [SECURITY.md](SECURITY.md).
 
 ## Evaluation
-Not measured yet. Targets are in the blueprint; results will be published after Phase 7.
-*Note: Lighthouse numbers for the frontend were measured locally by the owner on 9 Oct 2026 as Performance 99, Accessibility 96.*
+Measured on 62 questions asked as 8 different people over 48 synthetic documents, run on commit `c1a778c` with the real local models and a stand-in answer writer (so it measures search, permissions, refusals and logging, not the wording of a live model):
 
-## Known Limitations
-* Route protection in the UI is client-side only; the API enforces access. The welcome tour is remembered per browser (it shows again on a new browser). The frontend must run on port 3000 (the backend allows only that address).
-* Admin-initiated password reset is not built (needs a Change Request, see ADR 023).
-* No documents can be ingested or searched yet.
-* Document permissions (ACL) are not implemented yet; only account-level roles exist.
-* Screen-reader and full keyboard-only accessibility checks of the signed-in pages have not been done.
-* Demo accounts have easy-to-guess passwords on purpose. Use them on a developer machine only.
-* Legal pages are drafts and do not constitute legal advice.
+| Measure | Result | Target |
+|---|---|---|
+| Unauthorized leakage | **0 of 62** | 0 |
+| Recall@5 (hybrid + reranker) | 1.00 | 0.85 |
+| Citation correctness | 1.00 | 0.90 |
+| Refusal accuracy | 1.00 | 0.90 |
+| Scenarios (rule revoked, group left, deleted, expired, ...) | 14 of 14 | all |
+| P95 search latency (laptop CPU) | 2.0 s | under 5 s |
 
-## License / Contact
-*Placeholder for license and contact details.*
+Honest limit: the set is small and synthetic, and 4 of 8 paraphrase questions are not answered. Method, tuning and limits: [docs/evaluation-report.md](docs/evaluation-report.md).
+
+## Quick start
+You need Docker (running), Git, Node.js 20.9 or newer (24 tested), about 15 GB of free disk and an internet connection for the first build (it downloads PyTorch and two models; run again if a download fails).
+
+Check the computer first (it only looks, it changes nothing):
+```bash
+bash scripts/check_prereqs.sh            # Linux, macOS, Git Bash
+```
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/check_prereqs.ps1   # Windows
+```
+
+Then, from the repository root:
+```bash
+bash scripts/setup_env.sh                 # Windows: scripts/setup_env.ps1. Creates .env with random secrets
+docker compose up -d --build              # first build takes several minutes
+docker compose exec backend alembic upgrade head
+docker compose exec backend python -m app.scripts.seed_users
+docker compose exec backend python -m app.scripts.load_synthetic_docs
+docker compose exec backend python -m app.scripts.seed_access
+cd frontend && npm ci && npm run dev      # website on http://localhost:3000
+```
+Open <http://localhost:3000/login>. The demo people (all invented) are `swara@demo` (engineer), `pranav@demo` (finance), `dhanashree@demo`, `akshay@demo`, `sanjana@demo` (security administrator), `shivam@demo`, `prashant@demo` (administrator) and `karunesh@demo`; their password is `SEED_USER_PASSWORD` in your local `.env`. Demo passwords are easy to guess on purpose: use them on a developer machine only.
+
+Try it: sign in as `swara@demo`, open **Search**, choose "Find passages" and ask *How do I restart the payments service?*; then sign in as `pranav@demo` and ask the same. The first person gets the runbook passages; the second gets only unrelated passages (for example the leave policy) and cannot tell that the runbook exists.
+
+Optional:
+* More data for the evaluation: `docker compose exec backend python -m app.scripts.load_eval_corpus`, then **Evaluation** in the Manage menu (or `python -m app.scripts.run_eval`).
+* Written answers: put `OPENAI_API_KEY` in your local `.env` (never commit it) and restart the backend.
+* A GitHub source: the folder `demo-docs/` is a ready example; see [ADR 035](docs/adr/035-github-connector.md).
+* Test mailbox (reset and invitation emails): <http://localhost:8025>. API reference (interactive): <http://localhost:8000/api/docs>.
+
+Stop with `docker compose down` (data kept); `docker compose down -v` also deletes the database. Running it for real on a server: [deployment guide](docs/deployment.md). Backup and restore: [runbook](docs/runbook.md).
+
+## Tech stack
+* **Frontend:** Next.js 16.4.2, React 19.3.0, Tailwind CSS 4.3.3, TypeScript 5.9
+* **Backend:** Python 3.12, FastAPI 0.143.0, SQLAlchemy 2.1.4, Alembic 1.20.0, Pydantic 2.14.0, Celery 5.6.3
+* **Data:** PostgreSQL 17 with pgvector 0.8.0, Redis 7.4.2, SeaweedFS 4.48 (S3 API)
+* **Models (local, CPU):** BAAI/bge-small-en-v1.5 (embeddings), BAAI/bge-reranker-base (reranker), PyTorch 2.14.1, sentence-transformers 6.1.0
+* **Quality:** pytest, mypy, ruff, ESLint, Vitest, Lighthouse CI, gitleaks, pip-audit, GitHub Actions
+
+All pins and the reasons: [docs/adr/](docs/adr/).
+
+## Project structure
+```text
+backend/        FastAPI app, worker tasks, migrations, scripts, tests
+frontend/       Next.js website (landing, sign-in, search, admin screens, status)
+demo-docs/      Invented documents for the GitHub-source demo
+sample-data/    Invented documents for local loading
+scripts/        Environment setup, readiness check, backup and restore
+docs/           Architecture, security model, API reference, runbook, ADRs, phases
+```
+
+## Testing
+```bash
+docker compose exec backend pytest -q     # 700+ tests, own database
+cd frontend && npm test                   # 130+ unit tests
+```
+Every pull request also runs style, types, the leak gate, a coverage gate on the security code (94% now), migration checks, secret and dependency scans, Lighthouse and the image build: [docs/ci.md](docs/ci.md).
+
+## Roadmap and known limitations
+Built in nine phases (tags `v0.1` to `v1.0`); the ideas left over are in [docs/BACKLOG.md](docs/BACKLOG.md), the problems met on the way in [docs/CHALLENGES.md](docs/CHALLENGES.md), the history in [CHANGELOG.md](CHANGELOG.md).
+
+Not done, on purpose or yet:
+* Email and password sign-in only: no single sign-on, no automatic user provisioning, no two-factor.
+* One connector (GitHub). Others (Drive, SharePoint, Confluence) are next.
+* Single machine deployment; no high availability.
+* English documents only; the paraphrase recall of the small embedding model is limited (see the evaluation).
+* Legal pages are drafts, not legal advice. No independent security audit.
+
+## Contributing, licence, security
+Issues and pull requests are welcome; every change runs the full checks. Licence: [MIT](LICENSE). Security reports: [SECURITY.md](SECURITY.md).

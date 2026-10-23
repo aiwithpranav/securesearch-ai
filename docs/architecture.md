@@ -1,69 +1,92 @@
-# Architecture Overview
+# Architecture
 
-This document outlines the high-level architecture of SecureSearch AI.
+SecureSearch AI is a **modular monolith**: one FastAPI application (plus a background worker made from the same image) and a Next.js website, on top of PostgreSQL with pgvector. There are no microservices to keep in step; the parts are separated by folders and tested contracts, not by network calls.
 
-## Current State (end of Phase 3)
+## The system
 
-Six services run in Docker Compose, plus the Next.js frontend on the host:
-* **Frontend (Next.js, port 3000):** landing page, sign-in portal, and the administrator's Documents screens (list, upload, document page, notification bell).
-* **backend (FastAPI, port 8000):** sign-in and session API, user/role/department admin API, documents and ingestion API, notifications API.
-* **worker (Celery):** runs ingestion jobs in the background. Same image as the backend. It has **no internet access**; the embedding model is baked into the image.
-* **postgres (with pgvector):** users, roles, departments, tokens, documents, versions, jobs, notifications, and the text chunks with 384-number vectors.
-* **redis:** job queue and rate limit counters. **storage (SeaweedFS, S3 API):** the original uploaded files. **mailpit:** fake inbox for dev emails.
+```mermaid
+flowchart LR
+    user((Person)) --> web["Website<br/>Next.js :3000"]
+    web -->|JSON over HTTPS| api["API<br/>FastAPI :8000"]
 
-There is still **no search and no answers**, and no access rules for documents yet, so administrators see document metadata only and nobody can read document content.
+    subgraph private["Private network (nothing here is reachable from outside)"]
+        api --> db[("PostgreSQL + pgvector<br/>people, rules, passages, vectors, audit")]
+        api --> redis[("Redis<br/>rate limits, queue, heartbeat")]
+        api --> store[("Object storage (SeaweedFS)<br/>original files")]
+        worker["Worker (Celery)<br/>indexing, sync, nightly jobs<br/>same image as the API"]
+        redis --> worker
+        worker --> db
+        worker --> store
+        models["Local models in the image<br/>embeddings + reranker"]
+        api --- models
+        worker --- models
+    end
+
+    api -.->|"question + a few passages the person may read"| llm["AI provider (OpenAI)<br/>optional, only to write the answer"]
+    worker -.->|"read-only token"| gh["GitHub folder<br/>optional source"]
+```
+
+* **Website:** landing, sign-in, search and answers, and the administration screens (documents, access rules, users, groups, sources, audit, overview, evaluation, knowledge gaps) plus a public status page.
+* **API:** sign-in and sessions, documents and ingestion, access rules, retrieval, answers, audit, dashboards, sync. Every route checks who is calling; the full list is [docs/api.md](api.md).
+* **Worker:** indexes uploaded documents, runs source syncs, a heartbeat for the status page, and nightly housekeeping (audit retention, old passages). It is the only service that talks to GitHub, and it holds the GitHub token; the API holds the OpenAI key.
+* **Only the API and the website are reachable from the host.** The database, Redis and the file store are on an internal network.
+
+## How a question is answered
+
+The permission check is **inside the database query**, before anything is scored. The six walls are numbered as in [docs/security.md](security.md).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor P as Person
+    participant A as API
+    participant D as PostgreSQL
+    participant L as AI provider
+    P->>A: question (signed in)
+    A->>A: wall 1: who is this, which role (read from the database)
+    A->>D: wall 2 and 3: keyword search and vector search, both restricted to the documents this person may read
+    D-->>A: candidate passages (only allowed ones)
+    A->>A: fuse the two lists (RRF), rerank with the local cross-encoder
+    A->>D: wall 4: look again, every passage must still be readable
+    A->>A: confidence check (too weak means one uniform refusal)
+    A->>L: question + the few passages, marked as untrusted data
+    L-->>A: JSON: answer + sources
+    A->>A: wall 5: every cited source must be one of the passages sent; no links, HTML or code
+    A->>D: audit row (ids and outcome, never the answer) in the same transaction
+    A-->>P: short answer with sources, or one uniform refusal
+```
+
+If the audit row cannot be written, the person gets nothing ("no audit, no answer"). Wall 6 is the build: a leak test with secret marker words fails the pull request ([docs/ci.md](ci.md)).
+
+## How documents get in and stay current
 
 ```mermaid
 flowchart TD
-    subgraph Frontend [Frontend (Next.js, localhost:3000)]
-        LP[Landing page]
-        Portal[Sign-in portal]
-        Admin[Admin: documents screens]
-    end
-
-    subgraph Private [Docker Compose, private network]
-        API[FastAPI backend /api/v1]
-        W[Celery worker + local embedding model]
-        DB[(PostgreSQL + pgvector)]
-        Q[(Redis: queue, rate limits)]
-        S3[(SeaweedFS: original files)]
-        Mail[Mailpit]
-    end
-
-    User((User)) --> LP
-    User --> Portal
-    Portal --> Admin
-    Admin -->|JSON + file upload| API
-    API -->|metadata, chunks| DB
-    API -->|store original| S3
-    API -->|queue job| Q
-    Q --> W
-    W -->|read original| S3
-    W -->|chunks + vectors| DB
-    API -.->|emails| Mail
+    up["Administrator uploads a file<br/>or a source is synced"] --> check["Check type, real content and size"]
+    check --> keep["Store the original under an id + hash key<br/>(never the file name)"]
+    keep --> job["Queue an indexing job"]
+    job --> w["Worker: parse, cut into passages, embed locally"]
+    w --> swap["One transaction: switch off the old passages,<br/>switch on the new ones"]
+    swap --> ready["Document is READY and searchable"]
+    src["GitHub folder"] -->|"every 15 minutes or Sync now"| diff{"Per item:<br/>new, changed, unchanged,<br/>permissions only, removed"}
+    diff -->|new or changed file| check
+    diff -->|"permissions only"| rules["Update access rules only<br/>(no re-indexing)"]
+    diff -->|removed| soft["Soft delete (restorable)"]
 ```
 
-### How a document becomes searchable data (Phase 3)
-1. An administrator uploads a file. The API checks it (type, real content, size, zip bombs), stores the original under a key made of IDs and a hash, saves a `QUEUED` job and answers at once.
-2. The worker reads the original, extracts text (PDF per page, DOCX and MD headings as sections), cuts it into chunks of about 450 tokens, and turns each chunk into a 384-number vector.
-3. It publishes the new chunks and switches off the old ones in **one database transaction**, so a reader sees the complete old set or the complete new set.
-4. If anything fails, the old chunks stay in use, the job records a fixed error code, and every administrator gets a notification.
-5. Nothing in the API, the screens or the logs contains document text (admin is not reader).
+* A failed indexing job never damages the previous good index.
+* Unchanged files are skipped; a permission-only change does not re-embed anything; a person removed from a team at the source loses access at the next question.
+* A broken or empty source cannot wipe the index (safety stops). Details: [ADR 034](adr/034-sync-engine.md), [ADR 035](adr/035-github-connector.md).
 
-Details: [ADR 026](adr/026-ingestion-design.md), [ADR 025](adr/025-object-storage-seaweedfs.md), [Phase 3 walkthrough](phases/phase-03-documents-and-ingestion/WALKTHROUGH.md).
-
-### How sign-in works (Phase 2)
-1. `POST /auth/login` checks the password (Argon2id) and returns a 15-minute **access token** (kept only in browser memory) plus a **refresh cookie** (`httpOnly`).
-2. The access token holds only the user id. **Roles are read from the database on every request.**
-3. After a reload the portal calls `/auth/refresh`; the server rotates the cookie, and reuse of an old cookie ends the whole session.
+## How sign-in works
+1. `POST /auth/login` checks the password (Argon2id) and returns a 15-minute access token (kept only in browser memory) and an httpOnly refresh cookie.
+2. The access token holds only the person's id. **Roles, groups, clearance and country are read from the database on every request.**
+3. After a reload the website calls `/auth/refresh`; the server rotates the cookie, and reuse of an old cookie ends the whole session.
 
 Details: [ADR 023](adr/023-auth-implementation-details.md).
 
-## Planned Architecture (blueprint phases)
+## Operations
+Retention, the status page, backup and restore: [ADR 037](adr/037-operations.md) and the [runbook](runbook.md). Production start: [deployment guide](deployment.md).
 
-* **Phase 4:** Permissions and ACL (groups, allow/deny rules, admin users and groups screen).
-* **Phase 5:** Hybrid retrieval (full-text + vector search, rerank).
-* **Phase 6:** Answers and citations (LLM, citation validation, refusals, chat UI).
-* **Phase 7:** Audit and evaluation (audit logs, 60+ test cases, dashboards).
-* **Phase 8:** Incremental sync and one real connector.
-* **Phase 9:** Hardening and launch (CI/CD, rate limits, backups, deployment).
+## Decisions
+Every significant choice has a short record in [docs/adr/](adr/); difficulties met on the way are in [CHALLENGES.md](CHALLENGES.md); open ideas are in [BACKLOG.md](BACKLOG.md).

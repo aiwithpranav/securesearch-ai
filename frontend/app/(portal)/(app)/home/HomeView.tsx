@@ -23,9 +23,9 @@ const EMPLOYEE_STEPS: Step[] = [
   { text: "Rate the answer with a thumbs up or down." },
 ];
 const ADMIN_STEPS: Step[] = [
-  { text: "Upload a document.", later: "Phase 3" },
-  { text: "Set who can read it (allow and deny rules).", later: "Phase 4" },
-  { text: "Check its status and the system health.", later: "Phases 3 and 7" },
+  { text: "Upload a document.", href: "/admin/documents/upload" },
+  { text: "Set who can read it (allow and deny rules).", href: "/admin/documents" },
+  { text: "Check its status and the system health.", href: "/admin/overview" },
 ];
 
 function Steps({ title, steps }: { title: string; steps: Step[] }) {

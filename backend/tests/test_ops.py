@@ -201,6 +201,26 @@ def test_the_status_page_is_rate_limited_per_address(client):
     assert codes[:60] == [200] * 60 and 429 in codes[60:]
 
 
+def test_a_brand_new_installation_without_a_bucket_is_not_reported_as_down(client, redis_client, monkeypatch):
+    """Found on a clean machine: the first status check ran before any upload, the bucket did not exist yet, and the page said down."""
+    beat(redis_client)
+
+    class FreshStore:
+        created = False
+
+        def ensure_bucket(self):
+            FreshStore.created = True
+
+        def list_keys(self, prefix, limit=1000):
+            if not FreshStore.created:
+                raise RuntimeError("NoSuchBucket")
+            return []
+
+    monkeypatch.setattr(status, "get_storage", lambda: FreshStore())
+    body = client.get("/api/v1/status").json()
+    assert body["status"] == "operational" and FreshStore.created
+
+
 def test_the_worker_heartbeat_expires_by_itself(redis_client):
     status.record_heartbeat()
     assert 0 < redis_client.ttl(status.HEARTBEAT_KEY) <= status.HEARTBEAT_TTL

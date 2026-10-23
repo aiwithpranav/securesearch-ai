@@ -46,8 +46,14 @@ async def _redis() -> bool:
     return bool(await get_redis().ping())
 
 
+def _check_storage() -> None:
+    storage = get_storage()
+    storage.ensure_bucket()  # a brand-new installation has no bucket until the first upload; that is not an outage
+    storage.list_keys("status-check/", 1)
+
+
 async def _storage() -> bool:
-    await run_in_threadpool(get_storage().list_keys, "status-check/", 1)
+    await run_in_threadpool(_check_storage)
     return True
 
 

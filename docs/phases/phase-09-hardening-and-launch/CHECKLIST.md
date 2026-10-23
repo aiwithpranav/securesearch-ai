@@ -16,8 +16,17 @@
 - [x] `scripts/backup.sh`, `scripts/restore.sh`, `docs/runbook.md`; **a real restore tested on an empty stack** (all counts matched)
 - [x] 35 new backend tests (732 total), 9 new frontend tests (132 total), 15 mutations all caught; real-browser check (status page with a real outage, Overview, 360 px)
 - [ ] Owner manual checks and approval
-## 9C Privacy and security documents (not started)
-## 9D Launch and showcase (not started)
+## 9C Privacy and security documents (merged, PR #34)
+- [x] Privacy, Terms, Security pages; SECURITY.md; docs/security.md; generated docs/api.md with CI diff; Lighthouse in CI; axe audit (14 pages, zero violations)
+
+## 9D Launch and showcase
+- [x] README rewritten, ten screenshots, architecture diagrams, deployment guide
+- [x] `check_prereqs` scripts, production compose file and website Dockerfile
+- [x] Quick start run on a clean copy (separate stack): login and permission-checked search worked; one bug found and fixed (status page on a fresh install)
+- [x] Landing page: GitHub links, demo banner, honest SSO answer
+- [ ] Owner approval, PR merged
+- [ ] Public checklist (owner clicks): repository description and topics, private vulnerability reporting, branch protection with required CI, make public
+- [ ] Release notes and tag `v1.0`
 
 ## Phase 9 close
 - [ ] Owner approval, PRs merged, tag `v1.0`

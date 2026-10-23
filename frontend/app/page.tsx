@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DEMO_HREF } from "@/lib/site";
+import { REPO_URL } from "@/lib/site";
 import { GlowCard } from "./_components/GlowCard";
 import { Reveal } from "./_components/Reveal";
 import { HowItWorks } from "./_components/HowItWorks";
@@ -40,7 +40,7 @@ function Header() {
         </nav>
         <div className="flex items-center gap-2 text-sm">
           <AnimatedButton href="/login" className="rounded-lg px-3 py-2 text-muted hover:text-text">Sign in</AnimatedButton>
-          <AnimatedButton href={DEMO_HREF} className="rounded-lg bg-accent px-4 py-2 font-medium text-bg hover:bg-accent2">Request demo</AnimatedButton>
+          <AnimatedButton href={REPO_URL} className="rounded-lg bg-accent px-4 py-2 font-medium text-bg hover:bg-accent2">View on GitHub</AnimatedButton>
         </div>
       </div>
     </header>
@@ -67,7 +67,7 @@ const faq = [
   ["Where does my data go?", "Search models run on your own infrastructure. The first version plans to use a hosted language model (OpenAI) to write answers, and it receives only the permitted passages. The demo uses synthetic documents only."],
   ["How fast do permission changes apply?", "By design, on the very next search. Permissions are read at query time, not copied into caches."],
   ["Which file types are supported?", "PDF, Word (DOCX), plain text and Markdown. Scanned documents (OCR) are not supported yet."],
-  ["Is single sign-on supported?", "Not in the first version. It is planned next, together with automatic user provisioning."],
+  ["Is single sign-on supported?", "Not yet. Sign-in uses email and password for now; single sign-on and automatic user provisioning are the first things to add."],
   ["What if the answer isn't in my documents?", "You get a plain 'could not find enough accessible source material' message. The system does not guess."],
 ];
 
@@ -77,7 +77,7 @@ export default function Home() {
       <Header />
       <main id="main">
         <div className="border-b border-line bg-surface2 py-2 text-center text-sm text-muted">
-          In development. This page describes the planned product; examples use sample data.
+          Demo project: every document, person and number on this page is invented.
         </div>
 
         <section className="relative overflow-hidden py-20 sm:py-28">
@@ -163,7 +163,7 @@ export default function Home() {
             <Reveal>
               <h2 className="text-3xl font-semibold sm:text-4xl">See it in action</h2>
               <div className="mt-8 flex justify-center gap-3">
-                <AnimatedButton href={DEMO_HREF} className={btnPrimary}>Request demo</AnimatedButton>
+                <AnimatedButton href={REPO_URL} className={btnPrimary}>View on GitHub</AnimatedButton>
                 <AnimatedButton href="/login" className={btnGhost}>Sign in</AnimatedButton>
               </div>
             </Reveal>
