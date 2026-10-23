@@ -114,6 +114,9 @@ jobs:
           docker compose logs --tail 80 backend
           exit 1
 
+      - name: Migrations build the database from nothing (alembic upgrade head)
+        run: docker compose exec -T backend alembic upgrade head
+
       - name: Database is in step with the models (alembic check)
         run: docker compose exec -T backend alembic check
 

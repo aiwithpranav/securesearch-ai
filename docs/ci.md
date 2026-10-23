@@ -8,7 +8,7 @@ Every pull request into `main`, and every push to `main`, runs the gates below (
 | **Frontend** (ESLint, TypeScript, Vitest, build) | The screens | `cd frontend && npm run lint && npm run typecheck && npm test && npm run build` |
 | **Secret scan** (gitleaks, whole history) | No key or password was ever committed | `docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.0 git /repo --redact` |
 | **Dependency scan** (pip-audit, npm audit) | Known vulnerabilities in packages | `pip-audit -r backend/requirements.txt --no-deps --disable-pip` and `cd frontend && npm audit --omit=dev --audit-level=high` |
-| **Database check** (`alembic check`) | The models and the migrations agree | `docker compose exec backend alembic check` |
+| **Database check** (`alembic upgrade head`, then `alembic check`) | The migrations build a database from nothing, and the models and the migrations agree | `docker compose exec backend alembic upgrade head && docker compose exec backend alembic check` |
 | **Type check** (mypy) | Wrong types in the backend | `docker compose exec backend mypy` |
 | **Leak gate** | The product's central promise: nobody sees what they may not. The canary scan, the independent access oracle and the 62-case evaluation. **Any leak fails the build.** | `docker compose exec backend python -m pytest tests/test_eval.py tests/test_eval_api.py tests/test_access_oracle.py` |
 | **All tests** with coverage | Everything else (700 tests) | `docker compose exec backend python -m pytest --cov` |

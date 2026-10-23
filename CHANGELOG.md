@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pypdf` 6.19.0 to 6.21.1 (8 known vulnerabilities in the PDF parser).
 
 ### Changed (Phase 9A)
-- 36 type errors fixed (no behaviour change), imports sorted, a few `raise ... from None`. The Dockerfile downloads the models before the other packages. Challenges 128 to 133.
+- 36 type errors fixed (no behaviour change), imports sorted, a few `raise ... from None`. The Dockerfile downloads the models before the other packages. Challenges 128 to 134.
 
 
 ## [v0.8] - 2026-10-23
