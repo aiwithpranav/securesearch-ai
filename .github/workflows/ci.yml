@@ -90,6 +90,7 @@ jobs:
           fetch-depth: 0  # the whole history: a secret removed later is still a leaked secret
       - name: Scan the repository history
         run: |
+          for attempt in 1 2 3; do docker pull zricethezav/gitleaks:v8.30.0 && break; sleep $((attempt * 15)); done
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.0 git /repo --redact --no-banner --exit-code 1
 
   dependency-scan:
@@ -133,8 +134,13 @@ jobs:
       - name: Create a throw-away .env (random secrets, never stored)
         run: bash scripts/setup_env.sh
 
-      - name: Start the stack
+      - name: Start the stack (images are downloaded with retries: Docker Hub sometimes answers 502 for a moment)
         run: |
+          for attempt in 1 2 3 4; do
+            docker compose pull postgres redis mailpit storage && break
+            echo "Download failed, trying again (attempt $attempt)"
+            sleep $((attempt * 15))
+          done
           docker compose up -d --no-build
           for i in $(seq 1 60); do
             if [ "$(docker compose ps backend --format '{{.Health}}')" = "healthy" ]; then exit 0; fi
