@@ -31,10 +31,11 @@ for _ in $(seq 1 40); do
   [ "$(docker compose ps backend --format '{{.Health}}')" = "healthy" ] && break
   sleep 3
 done
-docker compose exec -T backend alembic upgrade head > /dev/null
+docker compose exec -T backend alembic upgrade head > /dev/null 2>&1
 
 echo "5/6 Putting the uploaded files back ..."
-docker compose exec -T backend python -m app.scripts.storage_archive import < "$dir/files.tar"
+note="$(docker compose exec -T backend python -m app.scripts.storage_archive import < "$dir/files.tar" 2>&1)" || { echo "$note"; echo "Restoring the files failed."; exit 1; }
+echo "  $note"
 
 echo "6/6 Starting everything and comparing with the manifest ..."
 docker compose up -d > /dev/null

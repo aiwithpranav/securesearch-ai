@@ -17,7 +17,9 @@ echo "1/3 Database ..."
 docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc --no-owner' > "$out/database.dump"
 
 echo "2/3 Uploaded files ..."
-docker compose exec -T backend python -m app.scripts.storage_archive export > "$out/files.tar"
+# the tool reports on stderr (stdout carries the files); show that line as normal output so no terminal marks it as an error
+note="$(docker compose exec -T backend python -m app.scripts.storage_archive export 2>&1 > "$out/files.tar")" || { echo "$note"; exit 1; }
+echo "  $note"
 
 echo "3/3 Checking and describing the backup ..."
 count() { docker compose exec -T postgres sh -c "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -tA -c \"$1\"" | tr -d '\r'; }
