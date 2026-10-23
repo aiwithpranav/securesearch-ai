@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { colorAt, dotCount, easeOutCubic, introProgress, seededRandom, spherePoint, sphereRadius, wobble } from "./sphere";
+import { angles, colorAt, dotCount, easeOutCubic, introProgress, level, seededRandom, spherePoint, sphereRadius, wobble, wobbleAt } from "./sphere";
 
 describe("spherePoint", () => {
   it("puts every point on the unit sphere and covers top and bottom", () => {
@@ -77,5 +77,30 @@ describe("dotCount and sphereRadius", () => {
     expect(sphereRadius(3000, 2000)).toBeLessThanOrEqual(290);
     expect(sphereRadius(1280, 900)).toBe(290);
     expect(sphereRadius(360, 800)).toBeGreaterThan(sphereRadius(1280, 900) * 0.4); // visible on a phone
+  });
+});
+
+describe("angles and wobbleAt", () => {
+  it("give exactly the same wobble as wobble() (the angles are only worked out once)", () => {
+    for (let i = 0; i < 60; i++) {
+      const p = spherePoint(i, 60);
+      const [theta, phi] = angles(p);
+      for (const t of [0, 0.4, 3.3, 17]) expect(wobbleAt(theta, phi, t)).toBe(wobble(p, t));
+    }
+  });
+});
+
+describe("level", () => {
+  it("sorts a value into one of the steps and never leaves the range", () => {
+    expect(level(0, 1, 10)).toBe(0);
+    expect(level(0.55, 1, 10)).toBe(5);
+    expect(level(1, 1, 10)).toBe(9);
+    expect(level(5, 1, 10)).toBe(9);
+    expect(level(-1, 1, 10)).toBe(0);
+  });
+  it("copes with a maximum of zero", () => expect(level(0.3, 0, 10)).toBe(0));
+  it("uses every step across the range", () => {
+    const used = new Set(Array.from({ length: 101 }, (_, i) => level(i / 100, 1, 10)));
+    expect(used.size).toBe(10);
   });
 });

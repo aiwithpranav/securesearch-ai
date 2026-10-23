@@ -13,6 +13,8 @@ Every pull request into `main`, and every push to `main`, runs the gates below (
 | **Leak gate** | The product's central promise: nobody sees what they may not. The canary scan, the independent access oracle and the 62-case evaluation. **Any leak fails the build.** | `docker compose exec backend python -m pytest tests/test_eval.py tests/test_eval_api.py tests/test_access_oracle.py` |
 | **All tests** with coverage | Everything else (700 tests) | `docker compose exec backend python -m pytest --cov` |
 | **Coverage gate** | At least 80 % of the security-critical code is exercised: access rules, passwords and tokens, rate limits, the audit trail, answers and citations, sync, sign-in checks | `docker compose exec backend coverage report --fail-under=80 --include="app/access/*,app/core/security.py,app/core/rate_limit.py,app/audit/*,app/answers/*,app/sync/*,app/api/deps.py"` |
+| **API reference** (`docs/api.md`) | The page is generated from the application; CI fails if the committed copy is out of date | `docker compose exec -T backend python -m app.scripts.gen_api_docs > docs/api.md` |
+| **Lighthouse** (six public pages) | Speed and accessibility stay high: performance 75 (a CI runner is slow; local 97 to 100), accessibility 95, best practices 90, SEO 90 | `cd frontend && npm run build && npx next start -p 3100`, then `npx lighthouse http://localhost:3100/` and `node scripts/lighthouse-check.mjs <folder of reports>` |
 | **Image build** | The backend image (with the two models) builds from scratch | `docker compose build backend` |
 
 ## Notes
@@ -21,4 +23,4 @@ Every pull request into `main`, and every push to `main`, runs the gates below (
 - ESLint has a ceiling for warnings (`--max-warnings` in `frontend/package.json`): the number may fall but never grow.
 - Dependabot opens a weekly pull request for each package ecosystem; each one runs these same gates.
 - Optional local checks before every commit: `pip install pre-commit && pre-commit install` (see `.pre-commit-config.yaml`).
-- Lighthouse and axe (accessibility) checks are added in layer 9C.
+- Lighthouse covers the public pages. The signed-in screens were audited by hand with axe-core (zero violations on 14 pages; see ADR 038).

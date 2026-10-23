@@ -48,6 +48,8 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 42 | Second connector | Google Drive, with an OAuth application. | Later | No |
 | 43 | Live check of the GitHub sync | Run one sync of `demo-docs/` against the real repository with a short-lived read-only token and note the result in the walkthrough. | Optional | No |
 | 44 | React Compiler warnings | 21 advisory lint warnings from Next.js 16 (data loaded in an effect, animated wrapper created in a component). Move data loading to a small hook or Server Components and declare the wrapper outside the component, then lower the ceiling in `package.json`. | Later | No |
-| 45 | Accessibility and speed checks in CI | Lighthouse and axe on the landing page and the main screens. | 9C | No |
+| 45 | Accessibility and speed checks in CI | Done in 9C for the public pages (Lighthouse). Signed-in screens: see 48. | 9C | Done |
 | 46 | Scheduled backups | Backups are run by hand. Add a scheduled task or cron entry and an off-machine copy. | Later | No |
 | 47 | Request latency metrics | Only counts are kept. Add P95 latency per route group (Prometheus format) if the system grows. | Later | No |
+| 48 | Automated axe run for signed-in screens | A Playwright run with a seeded user would repeat the manual axe audit on every pull request. | Later | No |
+| 49 | Legal review of Privacy and Terms | The texts are plain-language and accurate to the software but not reviewed by a lawyer. | Before real use | No |

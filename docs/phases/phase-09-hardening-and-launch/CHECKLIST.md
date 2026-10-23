@@ -9,7 +9,7 @@
 - [x] First CI run green on the pull request (the first run found a real problem, fixed)
 - [x] Owner approval (merged, PR #32)
 
-## 9B Operations (built, waiting for owner review)
+## 9B Operations (merged, PR #33)
 - [x] Audit retention (default 365 days, floor 30) with a guarded purge (migration `0009`), nightly job, command line, Overview number
 - [x] `/status` (public, plain) with real checks and a worker heartbeat; public Status page; request, error and "too many requests" counters in the Overview
 - [x] Nightly cleanup of passages of old versions (keep 3); object storage listing pages through results

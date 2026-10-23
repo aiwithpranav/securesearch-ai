@@ -51,6 +51,36 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  lighthouse:
+    name: Lighthouse (speed and accessibility of the public pages)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Start the production server
+        run: |
+          npx next start -p 3100 > /tmp/next.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:3100/ > /dev/null && exit 0; sleep 1; done
+          cat /tmp/next.log; exit 1
+      - name: Measure every public page (each page is loaded once first, so the measured run is not a cold start)
+        run: |
+          mkdir -p /tmp/lh
+          for page in "" login status privacy terms security; do curl -s -o /dev/null "http://localhost:3100/$page"; done
+          for page in "" login status privacy terms security; do
+            npx --yes lighthouse@12.8.2 "http://localhost:3100/$page" --chrome-flags="--headless=new --no-sandbox"               --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="/tmp/lh/${page:-home}.json" --quiet
+          done
+      - name: Scores must stay high (performance 75 on a slow runner, accessibility 95, best practices 90, SEO 90)
+        run: node scripts/lighthouse-check.mjs /tmp/lh
+
   secret-scan:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
@@ -60,6 +90,7 @@ jobs:
           fetch-depth: 0  # the whole history: a secret removed later is still a leaked secret
       - name: Scan the repository history
         run: |
+          for attempt in 1 2 3; do docker pull zricethezav/gitleaks:v8.30.0 && break; sleep $((attempt * 15)); done
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.0 git /repo --redact --no-banner --exit-code 1
 
   dependency-scan:
@@ -103,8 +134,13 @@ jobs:
       - name: Create a throw-away .env (random secrets, never stored)
         run: bash scripts/setup_env.sh
 
-      - name: Start the stack
+      - name: "Start the stack (images are downloaded with retries, because Docker Hub sometimes answers 502 for a moment)"
         run: |
+          for attempt in 1 2 3 4; do
+            docker compose pull postgres redis mailpit storage && break
+            echo "Download failed, trying again (attempt $attempt)"
+            sleep $((attempt * 15))
+          done
           docker compose up -d --no-build
           for i in $(seq 1 60); do
             if [ "$(docker compose ps backend --format '{{.Health}}')" = "healthy" ]; then exit 0; fi
@@ -122,6 +158,11 @@ jobs:
 
       - name: Type check (mypy)
         run: docker compose exec -T backend mypy
+
+      - name: API reference is up to date (docs/api.md is generated from the application)
+        run: |
+          docker compose exec -T backend python -m app.scripts.gen_api_docs > /tmp/api.md
+          diff /tmp/api.md docs/api.md
 
       - name: Leak gate (canary scan, access oracle, evaluation). Any leak fails the build.
         run: docker compose exec -T backend python -m pytest tests/test_eval.py tests/test_eval_api.py tests/test_access_oracle.py -q -p no:cacheprovider

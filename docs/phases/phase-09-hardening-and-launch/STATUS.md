@@ -1,33 +1,32 @@
-# STATUS: Phase 9, Layer 9B (operations)
+# STATUS: Phase 9, Layer 9C (privacy and security documents)
 
-Branch: `feat/ops-9b` (local, not pushed). `main` has Phases 1 to 8 (tag `v0.8`) and layer 9A (PR #32, CI green).
+Branch: `feat/docs-9c` (local, not pushed). `main` has Phases 1 to 8 (tag `v0.8`) and layers 9A (PR #32) and 9B (PR #33).
 
 ## Done
-- 9A merged. 9B plan approved (retention 365 days with a guarded purge, public status page, backup and restore with a tested restore, keep 3 versions).
-- 9B: retention and purge, status and counters, cleanup, backup and restore scripts, runbook, ADR 037; a real restore on an empty stack.
+- 9A and 9B merged, CI green. 9C plan approved (accurate privacy and terms, SECURITY.md, docs/security.md, generated docs/api.md, Lighthouse and axe).
+- 9C: pages and documents written, API reference generated with a CI diff, Lighthouse job, axe audit with fixes, ADR 038.
 
 ## In progress
-- Nothing. Waiting for owner review of 9B, then the CI run on the pull request.
+- Nothing. Waiting for owner review of 9C, then the CI run on the pull request.
 
 ## Exact next action
-1. Owner checks 9B ("9B Approved").
-2. Claude pushes `feat/ops-9b`, gives the PR link; the owner watches the Checks (green) and merges.
-3. Claude writes the 9C plan (privacy and terms made accurate, SECURITY.md, docs/security.md, docs/api.md, accessibility checks).
+1. Owner reads the three public pages and approves ("9C Approved").
+2. Claude pushes `feat/docs-9c`, gives the PR link; the owner watches the Checks (six jobs, all green) and merges.
+3. Claude writes the 9D plan (README, architecture diagram, screenshots, demo script, laptop-ready check command, clean-machine test, history scan, public checklist, tag v1.0).
 
 ## Blockers
 - None.
 
 ## Decisions this session
-- `/health` and `/ready` are unchanged (frozen contract); the new public `/status` carries only names and up or down.
-- The audit purge flag is an accident guard with a 30-day floor, not a defence against someone who controls the database login (written down in ADR 037).
-- Backups are made with Bash scripts (Git Bash on Windows); secrets are never in a backup.
+- Security contact: GitHub private vulnerability reporting (the owner enables it in the repository settings when the repository is made public: Settings, Code security, Private vulnerability reporting).
+- Lighthouse thresholds: performance 75 in CI (the first run scored the landing page 80 on a slow runner against 98 locally), accessibility 95, best practices 90, SEO 90.
+- Voice input was not built; the blueprint's threat T16 is marked not applicable (no silent claim).
 
 ## Prerequisites
-- Docker running.
+- Docker running. (At the end of Phase 9 the owner will enable private vulnerability reporting on GitHub.)
 
 ## Open issues
-- Backups are manual (a schedule is documented in the runbook, not set up).
-- Lighthouse and axe checks come in 9C (backlog 45).
+- The axe audit of signed-in screens is manual (backlog 48).
 
 ## Resume prompt
-"Read docs/phases/phase-09-hardening-and-launch/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\\AI\\RAG\\Secure_Search_AI. Layer 9B is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-09-hardening-and-launch/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\\AI\\RAG\\Secure_Search_AI. Layer 9C is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."

@@ -35,7 +35,7 @@ function QueriesTable({ rows }: { rows: QueryRow[] }) {
     <div className="overflow-x-auto rounded-2xl border border-line">
       <table className="w-full min-w-[720px] text-left text-sm">
         <thead className="bg-surface text-muted">
-          <tr>{["When", "Who", "Type", "Question", "Result", "Time", ""].map((h) => <th key={h} scope="col" className="px-4 py-3 font-medium">{h}</th>)}</tr>
+          <tr>{["When", "Who", "Type", "Question", "Result", "Time", ""].map((h, i) => <th key={i} scope="col" className="px-4 py-3 font-medium">{h || <span className="sr-only">Details</span>}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((r) => (

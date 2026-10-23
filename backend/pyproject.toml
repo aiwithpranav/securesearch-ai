@@ -21,6 +21,7 @@ ignore = [
 "tests/*" = ["F811", "F401", "E501", "E702", "E741", "B007"]  # fixtures are imported from other test modules; test tables are dense
 "app/answers/prompt.py" = ["E501"]  # the prompt text is one long line per rule; changing it changes the prompt version
 "app/eval/runner.py" = ["E501"]  # dense scenario tables
+"app/scripts/gen_api_docs.py" = ["E501"]  # the page text is written as long lines
 
 [tool.mypy]
 python_version = "3.12"

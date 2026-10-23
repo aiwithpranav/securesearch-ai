@@ -39,7 +39,7 @@ function Detail({ run }: { run: RunDetail }) {
       )}
       {run.summary.mode_table && run.summary.mode_table.length > 0 && (
         <section className={`${card} overflow-x-auto`} aria-labelledby="h-modes">
-          <h3 id="h-modes" className="text-lg font-semibold">Which search set-up works best</h3>
+          <h2 id="h-modes" className="text-lg font-semibold">Which search set-up works best</h2>
           <table className="mt-4 w-full min-w-[420px] text-left text-sm">
             <thead className="text-muted"><tr><th scope="col" className="py-2 font-medium">Set-up</th><th scope="col" className="py-2 font-medium">Recall@5</th><th scope="col" className="py-2 font-medium">MRR</th><th scope="col" className="py-2 font-medium">P95</th></tr></thead>
             <tbody>
@@ -51,7 +51,7 @@ function Detail({ run }: { run: RunDetail }) {
         </section>
       )}
       <section className={card} aria-labelledby="h-cases">
-        <h3 id="h-cases" className="text-lg font-semibold">Cases ({run.passed} of {run.total} passed)</h3>
+        <h2 id="h-cases" className="text-lg font-semibold">Cases ({run.passed} of {run.total} passed)</h2>
         {failed.length === 0 ? <p className="mt-2 text-sm text-ok">Every case passed.</p> : (
           <ul className="mt-3 space-y-2 text-sm">
             {failed.map((r) => <li key={r.case_id} className="rounded-lg border border-bad/60 p-3"><b>{r.case_id}</b> · {r.category}{r.leaked && <b className="ml-2 text-bad">LEAK</b>}{r.question && <p className="mt-1 text-muted">{r.question}</p>}</li>)}
@@ -140,7 +140,7 @@ export function EvaluationView() {
             <>
               <div className="overflow-x-auto rounded-2xl border border-line">
                 <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead className="bg-surface text-muted"><tr>{["Started", "Model", "Result", "Passed", "Leaks", ""].map((h) => <th key={h} scope="col" className="px-4 py-3 font-medium">{h}</th>)}</tr></thead>
+                  <thead className="bg-surface text-muted"><tr>{["Started", "Model", "Result", "Passed", "Leaks", ""].map((h, i) => <th key={i} scope="col" className="px-4 py-3 font-medium">{h || <span className="sr-only">Details</span>}</th>)}</tr></thead>
                   <tbody>
                     {runs.map((r) => (
                       <tr key={r.id} className={`border-t border-line ${r.id === selected ? "bg-surface2/60" : ""}`}>

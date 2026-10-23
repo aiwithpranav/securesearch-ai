@@ -8,8 +8,8 @@
 | Layer | Content | Status |
 |---|---|---|
 | **9A** Quality gates | GitHub Actions CI (lint, types, tests, leak gate, coverage, scans, image build), Dependabot, templates, licence, pre-commit, setup script for Linux and macOS | Done, merged (PR #32) |
-| **9B** Operations | Audit retention and a safe purge, status page and metrics, backup and restore with one tested restore, cleanup of old passages | Built, waiting for owner review |
-| **9C** Privacy and security documents | Privacy and terms text made accurate, SECURITY.md, docs/security.md (OWASP LLM Top 10), docs/api.md, accessibility checks | Not started |
+| **9B** Operations | Audit retention and a safe purge, status page and metrics, backup and restore with one tested restore, cleanup of old passages | Done, merged (PR #33) |
+| **9C** Privacy and security documents | Privacy and terms text made accurate, SECURITY.md, docs/security.md (OWASP LLM Top 10), docs/api.md, accessibility checks | Built, waiting for owner review |
 | **9D** Launch and showcase | README, architecture diagram, screenshots, demo script, a readiness check command for a new laptop, clean-machine test, history scan, public checklist, tag v1.0 | Not started |
 
 ## Security rules that apply
