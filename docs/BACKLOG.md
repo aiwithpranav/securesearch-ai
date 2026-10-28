@@ -55,3 +55,6 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 49 | Legal review of Privacy and Terms | The texts are plain-language and accurate to the software but not reviewed by a lawyer. | Before real use | No |
 | 50 | Create the first administrator | In production the demo seed refuses to run, so the first administrator is created by hand (deployment guide). Add a `create_admin` command that asks for the password without printing it. | Later | No |
 | 51 | Single sign-on and automatic provisioning | Email and password only today. OIDC login and SCIM-style provisioning are the first things a real company asks for. | Later | No |
+| 52 | Precomputed access for very large corpora | The allowed-documents query runs on every search. If the scale run shows it is the bottleneck, add precomputed access tables, keeping the revoke-applies-at-once scenarios as tests. | After Phase 10 results | No |
+| 53 | Model fallback and circuit breaker | One retry only today. A second provider and a circuit breaker would keep answers available when the provider is down. | Later | No |
+| 54 | Load test at one million passages and with concurrent people | Phase 10 measures about 100,000 passages on a laptop with one user at a time. | Later | No |
