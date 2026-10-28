@@ -42,6 +42,23 @@ HANDBOOK_FOLDERS: dict[str, tuple[str, int]] = {
     "support": ("Customer Support", 1),
     "marketing": ("Company-wide", 0),
     "company": ("Company-wide", 0),
+    "product-development": ("Engineering", 1),
+    "upstream-studios": ("Engineering", 1),
+    "enterprise-data": ("Engineering", 1),
+    "eta": ("Engineering", 1),
+    "it": ("Engineering", 1),
+    "alliances": ("Sales", 1),
+    "resellers": ("Sales", 1),
+    "solutions-architects": ("Sales", 1),
+    "customer-experience": ("Customer Support", 1),
+    "people-policies": ("HR", 2),
+    "job-description-library": ("HR", 2),
+    "labor-and-employment-notices": ("Legal", 2),
+    "board-meetings": ("Legal", 3),
+    "acquisitions": ("Legal", 3),
+    "entity": ("Legal", 3),
+    "ceo": ("Legal", 3),
+    "leadership": ("Legal", 3),
 }
 
 

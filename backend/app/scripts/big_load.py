@@ -104,6 +104,7 @@ async def _upload(root: Path, limit: int | None) -> tuple[dict[str, list], dict[
                 if exc.status != 409:
                     raise
                 counts["duplicate"] += 1
+                continue
             except IngestError:
                 counts["rejected"] += 1
                 continue

@@ -34,6 +34,9 @@ from tests.test_access_oracle import build_random_world
     ("gitlab/security/standards/index.md", "Security", 3),
     ("gitlab/engineering/handbook.md", "Engineering", 1),
     ("gitlab/company/mission.md", "Company-wide", 0),
+    ("gitlab/board-meetings/2024/minutes.md", "Legal", 3),
+    ("gitlab/people-policies/leave/index.md", "HR", 2),
+    ("gitlab/customer-experience/handbook/index.md", "Customer Support", 1),
     ("gitlab/something-new/page.md", "Company-wide", 0),
     ("other/x.md", "Company-wide", 0),
 ])

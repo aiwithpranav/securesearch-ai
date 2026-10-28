@@ -5,7 +5,9 @@ Run inside the backend container of the SEPARATE big stack:
     python -m app.scripts.big_check                 # latency + leak check, prints a report (exit code 1 on any leak)
 
 The leak check uses the canary markers the loader put into restricted documents. For people who must NOT read a
-document it searches for that document's marker and checks that nothing of it comes back. Which documents a person
+document it searches with the tail of the marked passage (which contains the marker) and with the bare marker, and checks
+that nothing of it comes back. The same searches by people who MAY read it must find it: that is the proof that the
+search is strong enough to surface a leak if there were one. Which documents a person
 may read is decided by an independent plain-Python oracle (app/scale/oracle.py), not by the SQL resolver. On top of
 that, EVERY hit of EVERY query is checked against the oracle. One single violation fails the run.
 Nothing is changed in the database. Synthetic people and public documents only."""
@@ -77,7 +79,7 @@ def run(args: argparse.Namespace) -> int:
         big = [e for e in oracle.by_email if e.startswith("big")]
         people = [e for e in PERSONAS if e in oracle.by_email] + rng.sample(big, min(args.people, len(big)))
         marked = s.execute(text(
-            "select distinct on (document_id) document_id, substring(content from :pat) as canary from document_chunks "
+            "select distinct on (document_id) document_id, content, substring(content from :pat) as canary from document_chunks "
             "where is_active and content like :like"), {"pat": CANARY_PREFIX + "[0-9A-F]{8}", "like": f"%{CANARY_PREFIX}%"}).all()
         titles = s.execute(text("select title from documents where status='READY' and deleted_at is null order by random() limit :n"), {"n": args.latency_queries}).scalars().all()
         report = Report()
@@ -108,18 +110,24 @@ def run(args: argparse.Namespace) -> int:
             (allowed_pairs if oracle.can_read(uid, row.document_id) else forbidden_pairs).append((uid, row))
         forbidden_pairs, allowed_pairs = forbidden_pairs[: args.pairs], allowed_pairs[: args.allowed_pairs]
         for uid, row in forbidden_pairs:
-            hits = retrieve(s, uid, f"Internal reference marker {row.canary}", mode="hybrid", rerank=True)
-            report.check_hits(oracle, uid, hits, row.canary, row.document_id, "forbidden-canary")
-        found = 0
+            hits = retrieve(s, uid, row.content[-300:], mode="hybrid", rerank=True)
+            report.check_hits(oracle, uid, hits, row.canary, row.document_id, "forbidden-passage")
+            hits = retrieve(s, uid, row.canary, mode="hybrid", rerank=False)
+            report.check_hits(oracle, uid, hits, row.canary, row.document_id, "forbidden-marker")
+        found_passage = found_marker = 0
         for uid, row in allowed_pairs:
-            hits = retrieve(s, uid, f"Internal reference marker {row.canary}", mode="hybrid", rerank=True)
-            report.check_hits(oracle, uid, hits, None, None, "allowed-canary")
-            found += any(h.document_id == row.document_id for h in hits)
+            hits = retrieve(s, uid, row.content[-300:], mode="hybrid", rerank=True)
+            report.check_hits(oracle, uid, hits, None, None, "allowed-passage")
+            found_passage += any(h.document_id == row.document_id for h in hits)
+            hits = retrieve(s, uid, row.canary, mode="hybrid", rerank=False)
+            report.check_hits(oracle, uid, hits, None, None, "allowed-marker")
+            found_marker += any(h.document_id == row.document_id for h in hits)
 
     rep: dict[str, Any] = {
         "status": st, "people_sampled": len(people), "marked_documents": len(marked), "queries": report.queries,
         "forbidden_pairs": len(forbidden_pairs), "allowed_pairs": len(allowed_pairs),
-        "allowed_found_in_top": f"{found}/{len(allowed_pairs)}", "violations": len(report.violations),
+        "allowed_found_by_passage": f"{found_passage}/{len(allowed_pairs)}",
+        "allowed_found_by_bare_marker": f"{found_marker}/{len(allowed_pairs)}", "violations": len(report.violations),
         "latency_ms": {k: {"median": round(statistics.median(v)), "p95": round(_pct(v, 95))} for k, v in latency.items()},
         "settings": {"final_k": settings.retrieval_final_k, "rerank_candidates": settings.retrieval_rerank_candidates},
     }
@@ -129,8 +137,9 @@ def run(args: argparse.Namespace) -> int:
     print(f"| People (synthetic) / access rules | {st['synthetic_people']} / {st['access_rules']} |")
     for k, v in rep["latency_ms"].items():
         print(f"| Search {k}: median / P95 | {v['median']} ms / {v['p95']} ms |")
-    print(f"| Forbidden-marker searches (must find nothing) | {len(forbidden_pairs)} |")
-    print(f"| Allowed-marker searches found in the top results | {rep['allowed_found_in_top']} |")
+    print(f"| Forbidden-document searches, 2 each (must find nothing) | {len(forbidden_pairs)} |")
+    print(f"| Same passage search by people who MAY read it: found (shows the search can surface a leak) | {rep['allowed_found_by_passage']} |")
+    print(f"| Bare-identifier search by people who MAY read it: found (exact-ID retrieval, a known weakness) | {rep['allowed_found_by_bare_marker']} |")
     print(f"| Queries checked against the oracle | {report.queries} |")
     print(f"| **Leaks / violations** | **{len(report.violations)}** |")
     for v in report.violations[:10]:
