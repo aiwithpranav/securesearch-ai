@@ -46,6 +46,9 @@ This record stays in the repository after the big stack and the downloaded files
 
    The last row is a real limitation of the answer validator ([ADR 030](../../adr/030-grounded-answers.md)): it blocks replies that contain links, HTML-like text or code. Technical answers very often contain command lines with placeholders such as `<name>` or code blocks. The blocked text is never logged by design, so the exact trigger was not seen; this is the most likely cause. Permissions and leak protection were not involved. Backlog 57.
 
+8. **The Users screen shows only the first 100 people.** Found by looking at the screen with 1,009 accounts. The website asks for one page of 100 (`/users?limit=100`, the API maximum) and has no next-page control, so the other 909 people cannot be reached from the screen (the API itself pages correctly: `total` is 1,009 and `offset` works; the Documents screen and the Overview were fine at 5,850 documents). It was invisible with 9 demo people. Backlog 58.
+9. **Screens that are empty in the scale stack are expected:** Evaluation (the 62-case evaluation runs in the normal demo stack; the scale check is `big_check`), Groups (access in this stack uses roles) and Sources (nothing is synced from GitHub).
+
 Screenshots: not taken in this run (a record of the numbers is kept instead).
 
 ## Trial run (measured, small; before the full run)

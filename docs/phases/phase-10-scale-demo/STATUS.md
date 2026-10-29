@@ -24,7 +24,7 @@ Branch: `feat/scale-10a` (local, not pushed). `main` has Phases 1 to 9 (tag `v1.
 - Synthetic people and rules: roles for team documents (so the system administrator is still not a reader), executives may also read restricted documents, clearance gate as in the demo.
 
 ## Open issues
-- Three weak spots found and recorded, not fixed here (backlog 55, 56 and 57): exact-identifier search ranks poorly at this size; the default search (with the reranker) has P95 5.4 s on this laptop against a 5 s target; "how to" answers with command lines are refused by the answer validator.
+- Four weak spots found and recorded, not fixed here (backlog 55, 56, 57 and 58; 58 is a Users screen that shows only the first 100 people): exact-identifier search ranks poorly at this size; the default search (with the reranker) has P95 5.4 s on this laptop against a 5 s target; "how to" answers with command lines are refused by the answer validator.
 
 ## Resume prompt
 "Read docs/phases/phase-10-scale-demo/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\\AI\\RAG\\Secure_Search_AI. Layer 10A is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
