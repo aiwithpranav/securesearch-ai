@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scale demo: a separate stack (`docker-compose.big.yml`, own database, file store and ports), `scripts/big/download.sh` (public Kubernetes, Docker and GitLab handbook documentation, kept outside Git), `app.scripts.big_load` (synthetic people, cleaning, placement by path, canary markers, access rules) and `app.scripts.big_check` (status, search time per mode, leak check against an independent fast oracle). ADR 039, `docs/phases/phase-10-scale-demo/` with a kept `RESULTS.md`.
 - `docs/error-handling.md` (errors, retries and fallbacks) and `docs/scale-and-limits.md` (what is tested, expected limits, roadmap, rough cost, why no agents).
 - 27 backend tests (`tests/test_scale.py`).
+- Security: `pypdf` 6.21.1 to 6.21.2 (3 new known vulnerabilities in the PDF parser, found by the dependency scan of this pull request).
 - Full run measured (2026-10-29): 5,850 real documents, 90,956 passages, 1,000 people; 1,040 queries checked against the oracle, 0 violations. Findings (exact-identifier search weak, default search P95 5.4 s) recorded in `RESULTS.md`.
 
 ## [v1.0] - 2026-10-24
