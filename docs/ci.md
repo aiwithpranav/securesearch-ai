@@ -14,7 +14,7 @@ Every pull request into `main`, and every push to `main`, runs the gates below (
 | **All tests** with coverage | Everything else (700 tests) | `docker compose exec backend python -m pytest --cov` |
 | **Coverage gate** | At least 80 % of the security-critical code is exercised: access rules, passwords and tokens, rate limits, the audit trail, answers and citations, sync, sign-in checks | `docker compose exec backend coverage report --fail-under=80 --include="app/access/*,app/core/security.py,app/core/rate_limit.py,app/audit/*,app/answers/*,app/sync/*,app/api/deps.py"` |
 | **API reference** (`docs/api.md`) | The page is generated from the application; CI fails if the committed copy is out of date | `docker compose exec -T backend python -m app.scripts.gen_api_docs > docs/api.md` |
-| **Lighthouse** (six public pages) | Speed and accessibility stay high: performance 75 (a CI runner is slow; local 97 to 100; the landing page is measured three times and the middle score counts), accessibility 95, best practices 90, SEO 90 | `cd frontend && npm run build && npx next start -p 3100`, then `npx lighthouse http://localhost:3100/` and `node scripts/lighthouse-check.mjs <folder of reports>` |
+| **Lighthouse** (six public pages) | Speed and accessibility stay high: performance 75 (a CI runner is slow; local 97 to 100; every page is measured three times and the middle score counts), accessibility 95, best practices 90, SEO 90 | `cd frontend && npm run build && npx next start -p 3100`, then `npx lighthouse http://localhost:3100/` and `node scripts/lighthouse-check.mjs <folder of reports>` |
 | **Image build** | The backend image (with the two models) builds from scratch | `docker compose build backend` |
 
 ## Notes

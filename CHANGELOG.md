@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 10A, branch `feat/scale-10a`, awaiting owner review)
+- Scale demo: a separate stack (`docker-compose.big.yml`, own database, file store and ports), `scripts/big/download.sh` (public Kubernetes, Docker and GitLab handbook documentation, kept outside Git), `app.scripts.big_load` (synthetic people, cleaning, placement by path, canary markers, access rules) and `app.scripts.big_check` (status, search time per mode, leak check against an independent fast oracle). ADR 039, `docs/phases/phase-10-scale-demo/` with a kept `RESULTS.md`.
+- `docs/error-handling.md` (errors, retries and fallbacks) and `docs/scale-and-limits.md` (what is tested, expected limits, roadmap, rough cost, why no agents).
+- 27 backend tests (`tests/test_scale.py`).
+- Security: `pypdf` 6.21.1 to 6.21.2 (3 new known vulnerabilities in the PDF parser, found by the dependency scan of this pull request).
+- Full run measured (2026-10-29): 5,850 real documents, 90,956 passages, 1,000 people; 1,040 queries checked against the oracle, 0 violations. Findings (exact-identifier search weak, default search P95 5.4 s) recorded in `RESULTS.md`.
+
+## [v1.0] - 2026-10-24
 ### Added (Phase 9D, branch `feat/launch-9d`, awaiting owner review)
 - README rewritten for a stranger (pitch, screenshots, architecture, security model, measured evaluation, quick start verified on a clean copy); ten screenshots in `docs/images/`; architecture page with diagrams (system, question flow, ingestion and sync); `docs/deployment.md`.
 - `scripts/check_prereqs.sh` and `.ps1` (is this computer ready, read-only); `docker-compose.prod.yml` and `frontend/Dockerfile` (restart policies, production mode, website as a container, no test mailbox).

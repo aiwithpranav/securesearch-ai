@@ -134,7 +134,7 @@ cd frontend && npm test                   # 130+ unit tests
 Every pull request also runs style, types, the leak gate, a coverage gate on the security code (94% now), migration checks, secret and dependency scans, Lighthouse and the image build: [docs/ci.md](docs/ci.md).
 
 ## Roadmap and known limitations
-Built in nine phases (tags `v0.1` to `v1.0`); the ideas left over are in [docs/BACKLOG.md](docs/BACKLOG.md), the problems met on the way in [docs/CHALLENGES.md](docs/CHALLENGES.md), the history in [CHANGELOG.md](CHANGELOG.md).
+Built in nine phases (tags `v0.1` to `v1.0`) plus a scale demo (Phase 10, [results record](docs/phases/phase-10-scale-demo/RESULTS.md)); what is tested, the expected limits and the roadmap: [docs/scale-and-limits.md](docs/scale-and-limits.md); errors, retries and fallbacks: [docs/error-handling.md](docs/error-handling.md). The ideas left over are in [docs/BACKLOG.md](docs/BACKLOG.md), the problems met on the way in [docs/CHALLENGES.md](docs/CHALLENGES.md), the history in [CHANGELOG.md](CHANGELOG.md).
 
 Not done, on purpose or yet:
 * Email and password sign-in only: no single sign-on, no automatic user provisioning, no two-factor.

@@ -1,0 +1,24 @@
+# The scale demo (Phase 10): a SECOND copy of the system with its own database, its own file store and its own ports.
+# The normal stack (docker-compose.yml alone) is never touched. Always use a project name, so volumes stay separate:
+#
+#   export BIG_DATA_DIR=C:/Users/you/ss-big        # where scripts/big/download.sh put the documents
+#   docker compose -p securesearch-big -f docker-compose.yml -f docker-compose.big.yml up -d
+#
+# Remove everything of the demo (the normal stack is not affected):
+#   docker compose -p securesearch-big -f docker-compose.yml -f docker-compose.big.yml down -v
+#
+# API on http://localhost:18000, test mailbox on http://localhost:18025. The worker runs three processes so that
+# indexing many documents is faster (each process loads the two models, about 1.2 GB of memory each).
+services:
+  mailpit:
+    ports: !override
+      - "127.0.0.1:18025:8025"
+  backend:
+    ports: !override
+      - "127.0.0.1:18000:8000"
+    volumes:
+      - ${BIG_DATA_DIR:?set BIG_DATA_DIR to the folder made by scripts/big/download.sh}:/data/big:ro
+  worker:
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "-B", "--loglevel=INFO", "--concurrency=3"]
+    volumes:
+      - ${BIG_DATA_DIR:?set BIG_DATA_DIR to the folder made by scripts/big/download.sh}:/data/big:ro
