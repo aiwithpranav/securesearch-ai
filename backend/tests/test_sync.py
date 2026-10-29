@@ -161,10 +161,14 @@ def test_every_sync_route_needs_sign_in_and_the_admin_role(api, make_user):
             assert api.request(method, path, token=token, json={} if method in ("POST", "PATCH") else None).status_code == 403, (email, method, path)
 
 
+SECRET_TOKEN = "tok-not-a-real-secret"
+SECRET_PASSWORD = "pw-not-a-real-secret"
+
+
 @pytest.mark.parametrize("body, status", [
     ({"name": "x", "kind": "nothing", "config": CONFIG}, 422),
-    ({"name": "x", "kind": "fake", "config": {**CONFIG, "token": "abc"}}, 422),
-    ({"name": "x", "kind": "fake", "config": {**CONFIG, "nested": {"password": "p"}}}, 422),
+    ({"name": "x", "kind": "fake", "config": {**CONFIG, "token": SECRET_TOKEN}}, 422),
+    ({"name": "x", "kind": "fake", "config": {**CONFIG, "nested": {"password": SECRET_PASSWORD}}}, 422),
     ({"name": "x", "kind": "fake", "config": {"document_type": "POLICY"}}, 422),
     ({"name": "x", "kind": "fake", "config": {**CONFIG, "department_id": 999}}, 422),
     ({"name": "x", "kind": "fake", "config": {**CONFIG, "document_type": "MEME"}}, 422),
@@ -177,7 +181,9 @@ def test_a_source_is_only_created_with_valid_settings_and_no_secrets(api, admin,
     r = api.request("POST", "/sync/sources", token=admin, json=body)
     assert r.status_code == status
     assert pg.execute("select count(*) from sync_sources").fetchone()[0] == 0
-    assert "abc" not in r.text
+    # The secrets are not hex-like text: an error body carries a random request id (a UUID), which can contain a short
+    # hex word such as "abc" by chance and used to make this test fail about one run in a hundred.
+    assert SECRET_TOKEN not in r.text and SECRET_PASSWORD not in r.text
 
 
 def test_source_names_are_unique_and_a_source_can_be_switched_off_and_retimed(ctx):
