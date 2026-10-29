@@ -3,8 +3,8 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, type Department } from "@/lib/api";
 import {
-  createUser, deactivateUser, employmentLabel, EMPLOYMENT_TYPES, listRoles, listUsers, setUserRoles, updateUser,
-  type Role, type UserItem,
+  createUser, deactivateUser, employmentLabel, EMPLOYMENT_TYPES, listRoles, listUsers, pageRange, setUserRoles, updateUser,
+  USER_PAGE_SIZE, type Role, type UserItem, type UserStatus,
 } from "@/lib/access";
 import { listDepartments, SENSITIVITY_LEVELS } from "@/lib/documents";
 import { FieldError, FormErrorBox } from "../../../_auth/ui";
@@ -27,6 +27,14 @@ function Status({ active }: { active: boolean }) {
 export function UsersView() {
   const { user: me } = useSession();
   const [users, setUsers] = useState<UserItem[] | null>(null);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [search, setSearch] = useState(""); // what is typed
+  const [q, setQ] = useState(""); // what is searched (after a short pause)
+  const [departmentId, setDepartmentId] = useState("");
+  const [status, setStatus] = useState<UserStatus>("");
+  const [role, setRole] = useState("");
+  const latest = useRef(0); // only the newest request may change the list (answers can arrive out of order)
   const [roles, setRoles] = useState<Role[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [error, setError] = useState<{ message: string; requestId?: string } | null>(null);
@@ -40,19 +48,50 @@ export function UsersView() {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const load = useCallback(async () => {
+    const n = ++latest.current;
     try {
-      setUsers((await listUsers()).items);
+      const page = await listUsers({ offset, q, departmentId, status, role });
+      if (n !== latest.current) return;
+      if (page.items.length === 0 && page.total > 0 && offset > 0) {
+        setOffset(Math.max(0, (Math.ceil(page.total / USER_PAGE_SIZE) - 1) * USER_PAGE_SIZE)); // the page is gone (people were removed): go to the last one
+        return;
+      }
+      setUsers(page.items);
+      setTotal(page.total);
       setError(null);
     } catch (e) {
-      setError({ message: "The users could not be loaded.", requestId: e instanceof ApiError ? e.requestId : undefined });
+      if (n === latest.current) setError({ message: "The users could not be loaded.", requestId: e instanceof ApiError ? e.requestId : undefined });
     }
-  }, []);
+  }, [offset, q, departmentId, status, role]);
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  useEffect(() => {
     listRoles().then(setRoles).catch(() => setRoles([]));
     listDepartments().then(setDepartments).catch(() => setDepartments([]));
-  }, [load]);
+  }, []);
+
+  // The search starts a moment after the last key, and always from the first page.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQ(search.trim());
+      setOffset(0);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const filtered = q !== "" || departmentId !== "" || status !== "" || role !== "";
+  const range = pageRange(offset, USER_PAGE_SIZE, total);
+  function clearFilters() {
+    setSearch("");
+    setQ("");
+    setDepartmentId("");
+    setStatus("");
+    setRole("");
+    setOffset(0);
+  }
 
   function openNew() {
     setForm({ ...emptyForm, department_id: departments[0] ? String(departments[0].id) : "" });
@@ -144,16 +183,48 @@ export function UsersView() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Users</h1>
           <p className="mt-2 text-muted">Invite people, set their department, clearance and roles. Managing users does not give access to documents.</p>
+          {users && <p className="mt-1 text-sm text-muted" aria-live="polite">{filtered ? `${total} ${total === 1 ? "person matches" : "people match"} your search and filters` : `${total} ${total === 1 ? "person" : "people"}`}</p>}
         </div>
         <button type="button" onClick={openNew} className="rounded-lg bg-accent px-5 py-3 font-medium text-bg hover:bg-accent2">Invite user</button>
       </div>
 
       {notice && <p role="status" className="mt-6 rounded-lg border border-ok/60 bg-ok/10 p-3 text-sm text-ok">{notice}</p>}
 
-      <div className="mt-8" aria-live="polite">
+      <div role="search" aria-label="Find people" className="mt-8 flex flex-wrap items-end gap-4">
+        <div className="min-w-[14rem] flex-1">
+          <label htmlFor="f-search" className="mb-1 block text-sm text-muted">Search by name or email</label>
+          <input id="f-search" type="search" className={selectClass} value={search} maxLength={100} autoComplete="off"
+            placeholder="For example: meera" onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <div>
+          <label htmlFor="f-dept" className="mb-1 block text-sm text-muted">Department</label>
+          <select id="f-dept" className={selectClass} value={departmentId} onChange={(e) => { setOffset(0); setDepartmentId(e.target.value); }}>
+            <option value="">All</option>
+            {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="f-role" className="mb-1 block text-sm text-muted">Role</label>
+          <select id="f-role" className={selectClass} value={role} onChange={(e) => { setOffset(0); setRole(e.target.value); }}>
+            <option value="">All</option>
+            {roles.map((r) => <option key={r.id} value={r.name}>{r.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="f-status" className="mb-1 block text-sm text-muted">Status</label>
+          <select id="f-status" className={selectClass} value={status} onChange={(e) => { setOffset(0); setStatus(e.target.value as UserStatus); }}>
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Deactivated</option>
+          </select>
+        </div>
+        {filtered && <button type="button" onClick={clearFilters} className="rounded-lg border border-line px-4 py-3 text-sm hover:border-accent2">Clear</button>}
+      </div>
+
+      <div className="mt-6" aria-live="polite">
         {error && !users ? <ErrorState message={error.message} requestId={error.requestId} onRetry={() => void load()} />
           : !users ? <TableSkeleton />
-          : users.length === 0 ? <EmptyState title="No users" text="Invite the first user." />
+          : users.length === 0 ? (filtered ? <EmptyState title="No one matches" text="Try a different name or clear the filters." /> : <EmptyState title="No users" text="Invite the first user." />)
           : (
             <div className="relative overflow-x-auto rounded-2xl border border-line">
               <table className="w-full min-w-[860px] text-left text-sm">
@@ -185,6 +256,17 @@ export function UsersView() {
               </table>
             </div>
           )}
+        {users && total > 0 && (
+          <nav aria-label="Pages of people" className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <span className="text-muted">{range.from} to {range.to} of {total}</span>
+            <span className="flex gap-2">
+              <button type="button" disabled={!range.hasPrevious} onClick={() => setOffset(Math.max(0, offset - USER_PAGE_SIZE))}
+                className="rounded-lg border border-line px-4 py-2 hover:border-accent2 disabled:opacity-50">Previous</button>
+              <button type="button" disabled={!range.hasNext} onClick={() => setOffset(offset + USER_PAGE_SIZE)}
+                className="rounded-lg border border-line px-4 py-2 hover:border-accent2 disabled:opacity-50">Next</button>
+            </span>
+          </nav>
+        )}
       </div>
 
       <dialog ref={dialogRef} onClose={() => setEditing(null)} aria-labelledby="user-dialog-title"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeRule, diffRules, employmentLabel, expiryText, localInputToIso, reasonText, type SnapshotRule } from "./access";
+import { describeRule, diffRules, employmentLabel, expiryText, localInputToIso, pageRange, reasonText, usersQueryString, USER_PAGE_SIZE, type SnapshotRule } from "./access";
 
 const rule = (id: string, effect: "ALLOW" | "DENY" = "ALLOW", permission: "READ" | "DOWNLOAD" | "MANAGE" = "READ", expires: string | null = null): SnapshotRule => ({
   id, principal_type: "GROUP", principal_name: "HR Team", principal_id: "1", effect, permission, expires_at: expires,
@@ -60,5 +60,39 @@ describe("diffRules", () => {
 describe("employmentLabel", () => {
   it("makes the stored word readable", () => {
     expect(employmentLabel("full_time")).toBe("Full time");
+  });
+});
+
+describe("usersQueryString", () => {
+  it("asks for one page with the default size and no filters", () => {
+    expect(usersQueryString()).toBe(`?limit=${USER_PAGE_SIZE}&offset=0`);
+  });
+  it("adds only the filters that are set and trims the search", () => {
+    const qs = new URLSearchParams(usersQueryString({ limit: 50, offset: 100, q: "  meera ", departmentId: "3", status: "inactive", role: "auditor" }));
+    expect(Object.fromEntries(qs)).toEqual({ limit: "50", offset: "100", q: "meera", department_id: "3", is_active: "false", role: "auditor" });
+  });
+  it("maps the status choices to true and false and leaves 'all' out", () => {
+    expect(new URLSearchParams(usersQueryString({ status: "active" })).get("is_active")).toBe("true");
+    expect(new URLSearchParams(usersQueryString({ status: "" })).has("is_active")).toBe(false);
+  });
+  it("leaves out a blank search and a blank role, and cuts a very long search at 100 characters", () => {
+    expect(usersQueryString({ q: "   ", role: "" })).toBe(`?limit=${USER_PAGE_SIZE}&offset=0`);
+    expect(new URLSearchParams(usersQueryString({ q: "x".repeat(300) })).get("q")).toHaveLength(100);
+  });
+  it("encodes special characters, so they cannot change the query", () => {
+    const qs = new URLSearchParams(usersQueryString({ q: "a&is_active=false#%" }));
+    expect(qs.get("q")).toBe("a&is_active=false#%");
+    expect(qs.has("is_active")).toBe(false);
+  });
+});
+
+describe("pageRange", () => {
+  it("shows 'from to of total' and the buttons that make sense", () => {
+    expect(pageRange(0, 50, 1009)).toEqual({ from: 1, to: 50, hasPrevious: false, hasNext: true });
+    expect(pageRange(1000, 50, 1009)).toEqual({ from: 1001, to: 1009, hasPrevious: true, hasNext: false });
+  });
+  it("handles an empty result and a single page", () => {
+    expect(pageRange(0, 50, 0)).toEqual({ from: 0, to: 0, hasPrevious: false, hasNext: false });
+    expect(pageRange(0, 50, 50)).toEqual({ from: 1, to: 50, hasPrevious: false, hasNext: false });
   });
 });
