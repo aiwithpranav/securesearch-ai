@@ -33,6 +33,19 @@ This record stays in the repository after the big stack and the downloaded files
 5. **Without the reranker**, hybrid search stays under half a second at P95 even at 91,000 passages, so the database side (permission filter, full-text, HNSW vector index) is not the bottleneck at this size.
 6. **Space is not a problem**: about 5.3 KB per passage; 1 million passages would need roughly 5 GB.
 
+7. **Written answers on real technical documentation: explanations work, "how to" answers with commands are often refused.** A live check with the real model (2026-10-29, through the browser and the API, as people with and without the right role):
+
+| Person | Question | Result |
+|---|---|---|
+| Engineer (`swara@demo`) | What is a Kubernetes Deployment? / What is a Pod in Kubernetes? / Why should containers run as a non-root user? | Answered with 2 to 4 cited sources each |
+| HR manager (`dhanashree@demo`) | What is the parental leave policy? / How does GitLab handle vacation and time off? | Answered with cited sources |
+| Engineer | What is the parental leave policy? (HR documents) | Refused (uniform refusal) |
+| HR manager, finance analyst | What is a Kubernetes Deployment? (engineering documents) | Refused (uniform refusal) |
+| Finance analyst | What is the parental leave policy? | Refused (uniform refusal) |
+| Engineer | How do I roll back a deployment in Kubernetes? | **Refused**, although search ranked the right pages first (best score 0.997). The log shows the reason `UNSAFE_OUTPUT` after two model calls. |
+
+   The last row is a real limitation of the answer validator ([ADR 030](../../adr/030-grounded-answers.md)): it blocks replies that contain links, HTML-like text or code. Technical answers very often contain command lines with placeholders such as `<name>` or code blocks. The blocked text is never logged by design, so the exact trigger was not seen; this is the most likely cause. Permissions and leak protection were not involved. Backlog 57.
+
 Screenshots: not taken in this run (a record of the numbers is kept instead).
 
 ## Trial run (measured, small; before the full run)
