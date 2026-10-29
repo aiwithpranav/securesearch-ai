@@ -58,3 +58,5 @@ Ideas and loose ends that are NOT in the current phase. Nothing here is promised
 | 52 | Precomputed access for very large corpora | The allowed-documents query runs on every search. If the scale run shows it is the bottleneck, add precomputed access tables, keeping the revoke-applies-at-once scenarios as tests. | After Phase 10 results | No |
 | 53 | Model fallback and circuit breaker | One retry only today. A second provider and a circuit breaker would keep answers available when the provider is down. | Later | No |
 | 54 | Load test at one million passages and with concurrent people | Phase 10 measures about 100,000 passages on a laptop with one user at a time. | Later | No |
+| 55 | Exact-identifier search at scale | At 91,000 passages a bare unique code is found 25 times in 100: `ts_rank_cd` does not weigh rare words. Add an exact-match boost or BM25-style ranking and re-run `big_check`. | After Phase 10 | No |
+| 56 | Reranker latency with long passages | P95 5.4 s at 91,000 real passages on a laptop CPU (target 5 s): 20 real passages take about 2.5 s to rerank. Try fewer candidates, a passage length cap or a GPU, and measure again. | After Phase 10 | No |

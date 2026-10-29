@@ -4,7 +4,7 @@ Goal: show, with numbers, that SecureSearch AI keeps working and stays leak-free
 
 | Layer | Content | Status |
 |---|---|---|
-| **10A** Scale demo | A separate copy of the system (own database, own file store, own ports), about 100,000 passages from real public documentation, 1,000 synthetic people, a loader, a leak and speed check, a kept record of the results | Built, trial run on 30 files done, full run waiting |
+| **10A** Scale demo | A separate copy of the system (own database, own file store, own ports), about 100,000 passages from real public documentation, 1,000 synthetic people, a loader, a leak and speed check, a kept record of the results | Built and run in full (90,956 passages, 1,000 people, 0 leaks); waiting for owner review |
 
 ## Why a separate stack
 The normal stack and its data (the demo of Phase 1 to 9) are never touched. The scale demo is started with its own project name (`docker compose -p securesearch-big ...`), so its volumes are separate, and everything can be removed with one command when the space is needed again.

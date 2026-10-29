@@ -11,5 +11,5 @@
 - [x] Trial run on 30 files and 200 people in a throw-away stack: all READY, 0 violations; a deliberate mistake in the resolver (clearance ignored) was caught (33 violations)
 - [x] Docs: this folder, ADR 039, `docs/error-handling.md`, `docs/scale-and-limits.md`
 - [ ] Owner approval, PR merged, tag `v1.1`
-- [ ] Full run: download, load about 100,000 passages and 1,000 people, `big_check`, fill `RESULTS.md` with the real numbers and screenshots
+- [x] Full run (2026-10-29): 5,850 real documents, 90,956 passages, 1,000 people, 6,479 rules; 1,040 queries checked, **0 violations**; `RESULTS.md` filled with the real numbers (and the weak spots: exact-identifier search, P95 5.4 s)
 - [ ] Optional later: delete the big stack (`down -v`) and the downloaded folder when space is needed; the record stays

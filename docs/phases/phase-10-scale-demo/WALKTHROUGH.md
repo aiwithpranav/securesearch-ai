@@ -32,9 +32,10 @@ See `RESULTS.md` ("How to recreate this run"). Short form: `bash scripts/big/dow
 ### 7. Actual results (checked by me)
 - Trial in a throw-away stack: 30 files, 200 people, 60 passages, 41 rules. Indexing finished; `big_check`: 93 queries checked against the oracle, 0 violations; the marker of an allowed document was found for 15 of 15 searches.
 - A deliberate mistake in the resolver (the clearance check always true) was injected: `big_check` reported 33 violations. The check can fail.
-- The full run at about 100,000 passages is not done yet; see `RESULTS.md`.
+- **Full run (2026-10-29):** 5,850 real documents, 90,956 passages, 1,000 people, 6,479 rules; indexing about 1 h 50 min; database 507 MB; 1,040 queries checked against the oracle: **0 violations**. Search without the reranker: P95 under half a second. Default search with the reranker: median 4.6 s, P95 5.4 s (above the 5 s target on this laptop). Exact-identifier search is weak at this size (25 of 100). Details and causes: `RESULTS.md`.
 
 ### 8. Limitations and open issues
+- It found two weaknesses that are recorded, not fixed (backlog 55, 56).
 - It is a laptop test: it shows behaviour at volume on one machine, not high availability or cloud scale (`docs/scale-and-limits.md`).
 - Natural-question latency uses page titles as questions; it measures speed, not answer quality.
 - The marker search is a leak test, not a relevance test.

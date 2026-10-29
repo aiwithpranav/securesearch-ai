@@ -6,7 +6,7 @@ An honest page: what has been measured, what has not, where the system is expect
 | Scope | Result |
 |---|---|
 | 62 evaluation cases, 8 people, 48 invented documents | 0 leaks, Recall@5 1.00, P95 search 2.0 s ([evaluation report](evaluation-report.md)) |
-| Scale demo (Phase 10), about 100,000 passages of real public documentation and 1,000 synthetic people on one laptop | See [RESULTS.md](phases/phase-10-scale-demo/RESULTS.md). Until its table is filled, nothing is claimed at that size. |
+| Scale demo (Phase 10): 90,956 passages of real public documentation, 1,000 synthetic people, one laptop CPU | 0 violations in 1,040 queries; search without the reranker P95 under 0.5 s; default search with the reranker median 4.6 s, P95 5.4 s (above the 5 s target); exact-identifier search weak (25 of 100); about 5.3 KB per passage ([RESULTS.md](phases/phase-10-scale-demo/RESULTS.md)) |
 
 ## 2. Why it is expected to scale reasonably (a design argument, not a measurement)
 - Permissions are SQL inside PostgreSQL, so the database does the work and can be indexed and tuned.
@@ -18,7 +18,8 @@ An honest page: what has been measured, what has not, where the system is expect
 | Limit | Why | What would be done (in order) |
 |---|---|---|
 | The allowed-documents query | Each search selects the readable documents first; with very many rules this grows | Look at the query plan and indexes; then precomputed ("materialised") access tables, with the "revoked means refused at once" scenarios kept in the test suite |
-| The reranker | About 2 s per question on a laptop CPU, and it competes with other work | GPU, fewer candidates, batching |
+| The reranker | Measured: about 2.5 s for 20 real passages on a laptop CPU, 4.6 s median end to end at 91,000 passages (P95 5.4 s); cost grows with passage length | GPU, fewer candidates, a cap on passage length, batching |
+| Exact-identifier search | `ts_rank_cd` does not weigh rare words (it is not BM25): a rare code is found 25 times in 100 at 91,000 passages | An exact-match boost or BM25-style ranking (backlog 55) |
 | One machine | One point of failure; limited memory and CPU | Several API and worker replicas, a database replica, a load balancer |
 | Database tuning | Connection count, HNSW settings | A connection pooler, parameter tuning, a read replica |
 | Sync reads every file again | Wasteful for large sources | A content hint such as the Git blob id (backlog 40), parallel indexing, batched embeddings |
