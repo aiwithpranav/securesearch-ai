@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added (Phase 10B, branch `feat/users-10b`, awaiting owner review)
+- Users list at scale: `GET /users` accepts `q` (search), `department_id`, `is_active` and `role` (CR-005, all optional); `total` counts all matches. The Users screen has search, filters and Previous / Next with "x to y of N"; a type-to-search person picker replaces the list of the first 100 people in the Groups members and in the document access rules. 11 backend tests (9 mutation checks caught, 2 equivalent), 8 frontend tests, real-browser check on 1,009 people (15 of 15).
+
 ### Added (Phase 10A, branch `feat/scale-10a`, awaiting owner review)
 - Scale demo: a separate stack (`docker-compose.big.yml`, own database, file store and ports), `scripts/big/download.sh` (public Kubernetes, Docker and GitLab handbook documentation, kept outside Git), `app.scripts.big_load` (synthetic people, cleaning, placement by path, canary markers, access rules) and `app.scripts.big_check` (status, search time per mode, leak check against an independent fast oracle). ADR 039, `docs/phases/phase-10-scale-demo/` with a kept `RESULTS.md`.
 - `docs/error-handling.md` (errors, retries and fallbacks) and `docs/scale-and-limits.md` (what is tested, expected limits, roadmap, rough cost, why no agents).

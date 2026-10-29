@@ -1,30 +1,32 @@
-# STATUS: Phase 10, Layer 10A (scale demo)
+# STATUS: Phase 10, Layer 10B (Users list at scale)
 
-Branch: `feat/scale-10a` (local, not pushed). `main` has Phases 1 to 9 (tag `v1.0`).
+Branch: `feat/users-10b` (local, not pushed). `main` has Phases 1 to 9 (tag `v1.0`) and layer 10A (PR #36).
 
 ## Done
-- Plan approved by the owner (sources: Kubernetes docs, Docker docs, GitLab handbook; about 100,000 passages and 1,000 people; separate stack; data kept outside Git; results kept in `RESULTS.md`).
-- Scripts, helpers, tests and documents written (see CHECKLIST).
-- Trial in a throw-away stack (30 files, 200 people): indexing finished, 0 violations; a deliberate resolver mistake was caught. The throw-away stack and its volumes were removed.
-- Full run (2026-10-29): downloaded three public sources (6,758 Markdown files, about 80 MB), loaded 1,000 people and 5,850 documents, indexed 90,956 passages (about 1 h 50 min), `big_check`: 1,040 queries, 0 violations. Findings recorded in `RESULTS.md`.
+- 10A merged: scale demo (90,956 passages, 1,000 people, 0 violations), findings in `RESULTS.md`.
+- 10B plan approved by the owner (defaults: 50 per page; filters department, role, status; Previous / Next like the Documents screen).
+- Backend: search and filters on `GET /users` (CR-005), 11 tests, mutation checks.
+- Frontend: Users screen with search, filters and paging; `UserPicker` for Groups members and for the document access rules; 8 tests.
+- Real browser check on the scale stack with 1,009 people: 15 of 15 checks.
 
 ## In progress
 - Nothing. Waiting for the owner's review.
 
 ## Exact next action
-1. Owner reviews and approves ("10A Approved"); Claude pushes `feat/scale-10a`, gives the PR link, the owner watches the checks and merges.
-2. Tag `v1.1` after "go". Later, only when the space is needed: delete the big stack with `down -v` and the folder `C:/Users/prana/ss-big`; `RESULTS.md` stays.
+1. Owner approves ("10B Approved"); Claude pushes `feat/users-10b`, gives the PR link, the owner watches the checks and merges.
+2. Tag `v1.1` after "go" (scale demo and Users list at scale in one release).
+3. Later, only when the space is needed: delete the scale stack (`down -v`) and the folder `C:/Users/prana/ss-big`; `RESULTS.md` stays.
 
 ## Blockers
 - None.
 
 ## Decisions this session
-- A separate Phase 10, not a change to Phases 1 to 9 (frozen). Version `v1.1`.
-- Real public Markdown documentation instead of more invented documents: the point is real formatting and real volume.
-- Synthetic people and rules: roles for team documents (so the system administrator is still not a reader), executives may also read restricted documents, clearance gate as in the demo.
+- The same person picker is used wherever a person is chosen from the whole company (Groups members, access rule "Who", access preview), so no screen is limited to 100 people any more.
+- The search is a plain case-insensitive "contains" (LIKE with escaped wildcards): fine for thousands of people; a trigram index is backlog 59.
+- The open weak spots of 10A (backlog 55, 56, 57) stay open: they are search quality and answer rules, not the Users list.
 
 ## Open issues
-- Four weak spots found and recorded, not fixed here (backlog 55, 56, 57 and 58; 58 is a Users screen that shows only the first 100 people): exact-identifier search ranks poorly at this size; the default search (with the reranker) has P95 5.4 s on this laptop against a 5 s target; "how to" answers with command lines are refused by the answer validator.
+- Backlog 55, 56, 57 (exact-identifier search, reranker time, command-line answers), 59 (trigram index for very many people).
 
 ## Resume prompt
-"Read docs/phases/phase-10-scale-demo/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\\AI\\RAG\\Secure_Search_AI. Layer 10A is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
+"Read docs/phases/phase-10-scale-demo/STATUS.md, BRIEF.md and docs/CHALLENGES.md in D:\\AI\\RAG\\Secure_Search_AI. Layer 10B is built and waiting for my review. Continue from the Exact next action. Reply in simple Roman Marathi; keep all repo files in English. I do not use GitHub: give click-by-click steps for PRs."
