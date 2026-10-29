@@ -122,7 +122,32 @@ export function diffRules(prev: SnapshotRule[], next: SnapshotRule[]): { added: 
 
 // ----------------------------------------------------------------------------- API calls
 
-export const listUsers = () => authedApi<UserPage>("/users?limit=100");
+// The Users list pages, searches and filters on the server (Phase 10B). The old call asked for one page of 100 people,
+// so with more than 100 accounts the rest could not be reached.
+export const USER_PAGE_SIZE = 50;
+export type UserStatus = "" | "active" | "inactive";
+export type UserQuery = { limit?: number; offset?: number; q?: string; departmentId?: string; status?: UserStatus; role?: string };
+
+/** The query string for GET /users. Blank values are left out; the search text is trimmed. */
+export function usersQueryString(p: UserQuery = {}): string {
+  const params = new URLSearchParams({ limit: String(p.limit ?? USER_PAGE_SIZE), offset: String(p.offset ?? 0) });
+  const q = p.q?.trim();
+  if (q) params.set("q", q.slice(0, 100));
+  if (p.departmentId) params.set("department_id", p.departmentId);
+  if (p.status === "active") params.set("is_active", "true");
+  if (p.status === "inactive") params.set("is_active", "false");
+  if (p.role) params.set("role", p.role);
+  return `?${params.toString()}`;
+}
+
+/** "from to of total" for a page, and whether Previous and Next make sense. */
+export function pageRange(offset: number, limit: number, total: number) {
+  const from = total === 0 ? 0 : offset + 1;
+  const to = Math.min(offset + limit, total);
+  return { from, to, hasPrevious: offset > 0, hasNext: offset + limit < total };
+}
+
+export const listUsers = (p: UserQuery = {}) => authedApi<UserPage>(`/users${usersQueryString(p)}`);
 export const createUser = (body: Record<string, unknown>) => authedApi<UserItem>("/users", { method: "POST", body });
 export const updateUser = (id: string, body: Record<string, unknown>) => authedApi<UserItem>(`/users/${id}`, { method: "PATCH", body });
 export const setUserRoles = (id: string, roleIds: number[]) =>

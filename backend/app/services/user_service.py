@@ -5,7 +5,7 @@ grant permission to read document content. That rule arrives with documents/ACL.
 import uuid
 from datetime import timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
@@ -15,6 +15,7 @@ from app.core.errors import AppError
 from app.core.logging import security_event
 from app.core.security import hash_password, new_opaque_token
 from app.models import Department, Role, User
+from app.models.user import user_roles
 from app.schemas.users import RoleCreate, UserCreate, UserUpdate
 from app.services import auth_service
 
@@ -26,9 +27,38 @@ def not_found(what: str) -> AppError:
     return AppError(404, "Not Found", f"{what} not found.")
 
 
-async def list_users(db: AsyncSession, limit: int, offset: int) -> tuple[list[User], int]:
-    total = await db.scalar(select(func.count()).select_from(User)) or 0
-    rows = await db.scalars(select(User).order_by(User.email).limit(limit).offset(offset))
+def _like_pattern(text: str) -> str:
+    """A 'contains' pattern for LIKE where the person's own %, _ and backslash are plain characters, not wildcards."""
+    escaped = text.lower().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
+
+
+async def list_users(
+    db: AsyncSession,
+    limit: int,
+    offset: int,
+    q: str | None = None,
+    department_id: int | None = None,
+    is_active: bool | None = None,
+    role: str | None = None,
+) -> tuple[list[User], int]:
+    """One page of people plus the number of ALL people that match (for 'x to y of total').
+    q is a case-insensitive 'contains' search in the e-mail and the name; the filters are exact."""
+    conditions = []
+    if q and q.strip():
+        pattern = _like_pattern(q.strip())
+        conditions.append(or_(func.lower(User.email).like(pattern, escape="\\"), func.lower(User.full_name).like(pattern, escape="\\")))
+    if department_id is not None:
+        conditions.append(User.department_id == department_id)
+    if is_active is not None:
+        conditions.append(User.is_active.is_(is_active))
+    if role:
+        has_role = select(user_roles.c.user_id).join(Role, Role.id == user_roles.c.role_id).where(
+            user_roles.c.user_id == User.id, Role.name == role
+        )
+        conditions.append(has_role.exists())
+    total = await db.scalar(select(func.count()).select_from(User).where(*conditions)) or 0
+    rows = await db.scalars(select(User).where(*conditions).order_by(User.email).limit(limit).offset(offset))
     return list(rows.unique()), int(total)
 
 

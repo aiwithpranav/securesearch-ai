@@ -22,9 +22,13 @@ def _rid(request: Request) -> str | None:
 async def list_users(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    q: str | None = Query(None, max_length=100, description="Search in the e-mail and the name (contains, any case)"),
+    department_id: int | None = Query(None, ge=1),
+    is_active: bool | None = Query(None),
+    role: str | None = Query(None, max_length=64, description="Only people with this role"),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, object]:
-    users, total = await user_service.list_users(db, limit, offset)
+    users, total = await user_service.list_users(db, limit, offset, q, department_id, is_active, role)
     return {
         "items": [UserOut.model_validate(u) for u in users],
         "total": total,

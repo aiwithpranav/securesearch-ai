@@ -2,15 +2,15 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
-import { addMember, createGroup, getGroup, listGroups, listUsers, removeMember, type Group, type GroupDetail, type UserItem } from "@/lib/access";
+import { addMember, createGroup, getGroup, listGroups, removeMember, type Group, type GroupDetail } from "@/lib/access";
 import { FieldError, FormErrorBox } from "../../../_auth/ui";
-import { EmptyState, ErrorState, selectClass, TableSkeleton } from "../_components/ui";
+import { EmptyState, ErrorState, TableSkeleton } from "../_components/ui";
+import { UserPicker } from "../_components/UserPicker";
 
 const inputClass = "w-full rounded-lg border border-line bg-surface2 px-4 py-3 text-text";
 
 export function GroupsView() {
   const [groups, setGroups] = useState<Group[] | null>(null);
-  const [users, setUsers] = useState<UserItem[]>([]);
   const [selected, setSelected] = useState<GroupDetail | null>(null);
   const [error, setError] = useState<{ message: string; requestId?: string } | null>(null);
   const [name, setName] = useState("");
@@ -32,7 +32,6 @@ export function GroupsView() {
 
   useEffect(() => {
     void load();
-    listUsers().then((p) => setUsers(p.items)).catch(() => setUsers([]));
   }, [load]);
 
   async function open(id: number) {
@@ -99,8 +98,6 @@ export function GroupsView() {
       setBusy(false);
     }
   }
-
-  const candidates = users.filter((u) => u.is_active && !selected?.members.some((m) => m.id === u.id));
 
   return (
     <main id="main" className="mx-auto w-full max-w-6xl px-5 py-12">
@@ -174,11 +171,7 @@ export function GroupsView() {
               )}
               <div className="mt-5 flex flex-wrap items-end gap-3 border-t border-line pt-5">
                 <div className="min-w-[14rem] flex-1">
-                  <label htmlFor="g-add" className="mb-1 block text-sm font-medium">Add a person</label>
-                  <select id="g-add" className={selectClass} value={toAdd} onChange={(e) => setToAdd(e.target.value)}>
-                    <option value="">Choose...</option>
-                    {candidates.map((u) => <option key={u.id} value={u.id}>{u.full_name} ({u.email})</option>)}
-                  </select>
+                  <UserPicker id="g-add" label="Add a person" value={toAdd} onChange={setToAdd} excludeIds={selected.members.map((m) => m.id)} />
                 </div>
                 <button type="button" onClick={() => void onAdd()} disabled={!toAdd || busy} className="rounded-lg bg-accent px-5 py-3 font-medium text-bg hover:bg-accent2 disabled:opacity-50">Add</button>
               </div>

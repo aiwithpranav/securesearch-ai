@@ -4,12 +4,13 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ApiError, type Department } from "@/lib/api";
 import {
   accessPreview, addRule, deleteRule, describeRule, diffRules, EFFECT_LABELS, expiryText, listGroups, listRoles, listRules,
-  listUsers, localInputToIso, PERMISSION_LABELS, PRINCIPAL_TYPES, reasonText, ruleHistory, updateRule,
-  type Effect, type Group, type HistoryItem, type Permission, type Preview, type PrincipalType, type Role, type Rule, type SnapshotRule, type UserItem,
+  localInputToIso, PERMISSION_LABELS, PRINCIPAL_TYPES, reasonText, ruleHistory, updateRule,
+  type Effect, type Group, type HistoryItem, type Permission, type Preview, type PrincipalType, type Role, type Rule, type SnapshotRule,
 } from "@/lib/access";
 import { formatDateTime, listDepartments } from "@/lib/documents";
 import { FieldError, FormErrorBox } from "../../../../_auth/ui";
 import { selectClass } from "../../_components/ui";
+import { UserPicker } from "../../_components/UserPicker";
 
 const card = "rounded-2xl border border-line bg-surface p-6";
 
@@ -25,7 +26,6 @@ export function AccessSection({ documentId }: { documentId: string }) {
   const [rules, setRules] = useState<Rule[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [users, setUsers] = useState<UserItem[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -63,15 +63,13 @@ export function AccessSection({ documentId }: { documentId: string }) {
 
   useEffect(() => {
     void load();
-    listUsers().then((p) => setUsers(p.items)).catch(() => setUsers([]));
     listRoles().then(setRoles).catch(() => setRoles([]));
     listGroups().then(setGroups).catch(() => setGroups([]));
     listDepartments().then(setDepartments).catch(() => setDepartments([]));
   }, [load]);
 
   const principalOptions: { value: string; label: string }[] =
-    ptype === "USER" ? users.map((u) => ({ value: u.id, label: `${u.full_name} (${u.email})` }))
-    : ptype === "ROLE" ? roles.map((r) => ({ value: String(r.id), label: r.name }))
+    ptype === "ROLE" ? roles.map((r) => ({ value: String(r.id), label: r.name }))
     : ptype === "GROUP" ? groups.map((g) => ({ value: String(g.id), label: g.name }))
     : ptype === "DEPARTMENT" ? departments.map((d) => ({ value: String(d.id), label: d.name }))
     : [];
@@ -82,11 +80,10 @@ export function AccessSection({ documentId }: { documentId: string }) {
     if (r.principal_type === "COMPANY") return "Everyone";
     const id = String(r.principal_id);
     const found =
-      r.principal_type === "USER" ? users.find((u) => u.id === id)?.full_name
-      : r.principal_type === "ROLE" ? roles.find((x) => String(x.id) === id)?.name
+      r.principal_type === "ROLE" ? roles.find((x) => String(x.id) === id)?.name
       : r.principal_type === "GROUP" ? groups.find((g) => String(g.id) === id)?.name
       : departments.find((d) => String(d.id) === id)?.name;
-    return found ?? "(no longer exists)";
+    return found ?? (r.principal_type === "USER" ? "(a person)" : "(no longer exists)");
   }
   const describeSnapshot = (r: SnapshotRule) => describeRule({ ...r, principal_name: snapshotName(r) });
 
@@ -255,7 +252,13 @@ export function AccessSection({ documentId }: { documentId: string }) {
               {PRINCIPAL_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
-          {ptype !== "COMPANY" && (
+          {ptype === "USER" && (
+            <div>
+              <UserPicker id="r-who" label="Who" value={pid} onChange={(v) => { setPid(v); setPidError(null); }} />
+              {pidError && <FieldError id="r-who-error" message={pidError} />}
+            </div>
+          )}
+          {ptype !== "COMPANY" && ptype !== "USER" && (
             <div>
               <label htmlFor="r-who" className="mb-1 block text-sm font-medium">Who</label>
               <select id="r-who" className={`${selectClass} ${pidError ? "border-bad" : ""}`} value={pid} aria-invalid={pidError ? true : undefined}
@@ -303,11 +306,7 @@ export function AccessSection({ documentId }: { documentId: string }) {
         <h3 className="font-semibold">Who can read this? (preview)</h3>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <div className="min-w-[14rem] flex-1">
-            <label htmlFor="p-user" className="mb-1 block text-sm font-medium">Person</label>
-            <select id="p-user" className={selectClass} value={previewUser} onChange={(e) => { setPreviewUser(e.target.value); setPreview(null); }}>
-              <option value="">Choose...</option>
-              {users.map((u) => <option key={u.id} value={u.id}>{u.full_name} ({u.email})</option>)}
-            </select>
+            <UserPicker id="p-user" label="Person" value={previewUser} activeOnly={false} onChange={(v) => { setPreviewUser(v); setPreview(null); }} />
           </div>
           <button type="button" onClick={() => void onPreview()} disabled={!previewUser} className="rounded-lg border border-line px-5 py-3 hover:border-accent2 disabled:opacity-50">Check access</button>
         </div>
