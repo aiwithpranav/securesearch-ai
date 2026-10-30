@@ -74,6 +74,25 @@ Measured on 62 questions asked as 8 different people over 48 synthetic documents
 
 Honest limit: the set is small and synthetic, and 4 of 8 paraphrase questions are not answered. Method, tuning and limits: [docs/evaluation-report.md](docs/evaluation-report.md).
 
+## At scale (Phase 10)
+The evaluation above uses 48 invented documents and 8 people. To see whether it holds up at volume, the same system was loaded with **5,850 real public documents (Kubernetes, Docker and the GitLab handbook: 90,956 passages) and 1,000 synthetic people** on one laptop, and checked with canary markers and an independent oracle:
+
+| Measure | Result |
+|---|---|
+| Queries checked (every hit compared with the oracle) | 1,040 |
+| **Leaks** | **0** |
+| Search without the reranker, P95 | under 0.5 s |
+| Search with the reranker (default), median / P95 | 4.6 s / 5.4 s (above the 5 s target on a laptop CPU) |
+| Database size | 507 MB (about 5.3 KB per passage) |
+
+The run also found weak spots, which are written down rather than hidden: exact-code search is weak at this size, the reranker is slow with real passages, and "how to" answers with commands are often refused by the answer validator. Method, numbers and findings: [Phase 10 results](docs/phases/phase-10-scale-demo/RESULTS.md); limits and roadmap: [docs/scale-and-limits.md](docs/scale-and-limits.md).
+
+| An engineer asks, on real documentation | The finance analyst asks the same question |
+|---|---|
+| ![Engineer gets a cited answer](docs/images/scale/05-ask-engineer-answer.png) | ![Finance analyst gets one uniform refusal](docs/images/scale/06-ask-finance-refused.png) |
+| **The Users screen with 1,009 people (search and paging)** | **The overview with 5,850 documents** |
+| ![Users search and paging](docs/images/scale/02-users-search-and-paging.png) | ![Overview at scale](docs/images/scale/04-overview-at-scale.png) |
+
 ## Quick start
 You need Docker (running), Git, Node.js 20.9 or newer (24 tested), about 15 GB of free disk and an internet connection for the first build (it downloads PyTorch and two models; run again if a download fails).
 
