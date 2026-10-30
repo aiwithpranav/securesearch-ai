@@ -129,7 +129,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build the backend image (the models are baked in; layers are cached)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           load: true
