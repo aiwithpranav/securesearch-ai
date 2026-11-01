@@ -84,6 +84,6 @@ Stated plainly, so nobody has to find it out:
 - **Someone who controls the database login or the `.env` file controls everything.** The append-only audit tables and the retention purge guard against mistakes and bugs, not against that person ([ADR 037](adr/037-operations.md)).
 
 ## Known limits of the evidence
-- The evaluation is 62 cases over 48 short invented documents: a result for that set, not a promise for any other.
+- The evaluation is 62 cases over 48 short invented documents: a result for that set, not a promise for any other. A separate scale check (5,850 real documents, 90,956 passages, 1,009 people, 1,040 queries compared with an independent oracle) also found 0 leaks ([results](phases/phase-10-scale-demo/RESULTS.md)); it is still a test, not proof for every corpus.
 - The automated runs use a stand-in answer writer; a run with the real model is still open (backlog 35).
 - With the refusal threshold at 0.30, only 4 of 8 paraphrased questions are answered (the right document is found, but the model is not asked); this is a deliberate trade for safety (backlog 34).

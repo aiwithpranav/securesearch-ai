@@ -72,6 +72,8 @@ Measured on 62 questions asked as 8 different people over 48 synthetic documents
 | Scenarios (rule revoked, group left, deleted, expired, ...) | 14 of 14 | all |
 | P95 search latency (laptop CPU) | 2.0 s | under 5 s |
 
+![The evaluation screen: 62 of 62 cases passed, 0 leaks](docs/images/07-evaluation.png)
+
 Honest limit: the set is small and synthetic, and 4 of 8 paraphrase questions are not answered. Method, tuning and limits: [docs/evaluation-report.md](docs/evaluation-report.md).
 
 ## At scale (Phase 10)
@@ -84,6 +86,10 @@ The evaluation above uses 48 invented documents and 8 people. To see whether it 
 | Search without the reranker, P95 | under 0.5 s |
 | Search with the reranker (default), median / P95 | 4.6 s / 5.4 s (above the 5 s target on a laptop CPU) |
 | Database size | 507 MB (about 5.3 KB per passage) |
+
+![The scale check: 1,040 queries checked against the oracle, 0 leaks](docs/images/scale/07-leak-check-1040.png)
+
+The output above is a second run of the same check on 2026-11-02 (a quieter laptop, so the reranker was faster: P95 4.6 s). The table is the first full run. Both found 0 leaks.
 
 The run also found weak spots, which are written down rather than hidden: exact-code search is weak at this size, the reranker is slow with real passages, and "how to" answers with commands are often refused by the answer validator. Method, numbers and findings: [Phase 10 results](docs/phases/phase-10-scale-demo/RESULTS.md); limits and roadmap: [docs/scale-and-limits.md](docs/scale-and-limits.md).
 
