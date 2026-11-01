@@ -41,7 +41,7 @@ export default function Page() {
 
         <section aria-labelledby="s-proof">
           <h2 id="s-proof" className="text-xl font-semibold text-text">Evidence, not claims</h2>
-          <p className="mt-2">An evaluation asks 62 questions as 8 different people over 48 invented documents, including prompt-injection attempts and 14 situations where access changes. On this set it found <b className="text-text">0 leaks</b>. That is a result for this test set, not a promise for any other; the full report and its limits are in the project&apos;s repository.</p>
+          <p className="mt-2">An evaluation asks 62 questions as 8 different people over 48 invented documents, including prompt-injection attempts and 14 situations where access changes. On this set it found <b className="text-text">0 leaks</b>. A separate check at scale (5,850 real documents, about 91,000 passages, 1,000 synthetic people, 1,040 queries compared with an independent oracle) also found <b className="text-text">0 leaks</b>. These are results for these test sets, not a promise for any other; the full report and its limits are in the project&apos;s repository.</p>
         </section>
 
         <section aria-labelledby="s-report">
