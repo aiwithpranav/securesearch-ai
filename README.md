@@ -89,7 +89,9 @@ The evaluation above uses 48 invented documents and 8 people. To see whether it 
 
 ![The scale check: 1,040 queries checked against the oracle, 0 leaks](docs/images/scale/07-leak-check-1040.png)
 
-The output above is a second run of the same check on 2026-11-02 (a quieter laptop, so the reranker was faster: P95 4.6 s). The table is the first full run. Both found 0 leaks.
+![Result summary of the scale check (not a screen of the app)](docs/images/scale/08-scale-check-card.png)
+
+The terminal output and the summary card above come from a second run of the same check on 2026-11-02 (a quieter laptop, so the reranker was faster: P95 4.6 s). The table is the first full run. Both found 0 leaks.
 
 The run also found weak spots, which are written down rather than hidden: exact-code search is weak at this size, the reranker is slow with real passages, and "how to" answers with commands are often refused by the answer validator. Method, numbers and findings: [Phase 10 results](docs/phases/phase-10-scale-demo/RESULTS.md); limits and roadmap: [docs/scale-and-limits.md](docs/scale-and-limits.md).
 
