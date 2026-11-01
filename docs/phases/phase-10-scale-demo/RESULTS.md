@@ -49,7 +49,11 @@ This record stays in the repository after the big stack and the downloaded files
 8. **The Users screen shows only the first 100 people.** Found by looking at the screen with 1,009 accounts. The website asks for one page of 100 (`/users?limit=100`, the API maximum) and has no next-page control, so the other 909 people cannot be reached from the screen (the API itself pages correctly: `total` is 1,009 and `offset` works; the Documents screen and the Overview were fine at 5,850 documents). It was invisible with 9 demo people. Backlog 58. **Fixed in Phase 10B** (search, filters and paging; see its walkthrough).
 9. **Screens that are empty in the scale stack are expected:** Evaluation (the 62-case evaluation runs in the normal demo stack; the scale check is `big_check`), Groups (access in this stack uses roles) and Sources (nothing is synced from GitHub).
 
-Screenshots: not taken in this run (a record of the numbers is kept instead).
+Screenshots of the screens at scale are in the README (`docs/images/scale/`). The check itself is a script, so it has two pictures: the real terminal output of a second run on 2026-11-02, and a result summary card (not a screen of the app). That second run found 0 violations again; its search times were lower (reranker median 4.2 s, P95 4.6 s) because the laptop was less busy.
+
+![Terminal output of big_check](../../images/scale/07-leak-check-1040.png)
+
+![Result summary of the scale check](../../images/scale/08-scale-check-card.png)
 
 ## Trial run (measured, small; before the full run)
 30 files, 200 people, 60 passages, 41 rules, in a throw-away stack on the same code:
