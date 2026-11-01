@@ -113,7 +113,12 @@ jobs:
       - name: Python packages (known vulnerabilities)
         run: |
           pip install pip-audit==2.10.1
-          pip-audit -r backend/requirements.txt --no-deps --disable-pip --progress-spinner off
+          # the vulnerability service (pypi.org) sometimes times out: try up to 3 times; a real finding fails all 3
+          for attempt in 1 2 3; do
+            pip-audit -r backend/requirements.txt --no-deps --disable-pip --progress-spinner off && exit 0
+            echo "pip-audit failed (attempt $attempt of 3)"; sleep 20
+          done
+          exit 1
       - name: Frontend packages that ship to users (high and critical only)
         run: npm audit --omit=dev --audit-level=high
         working-directory: frontend

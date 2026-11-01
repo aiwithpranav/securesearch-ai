@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 27 backend tests (`tests/test_scale.py`).
 - Security: `pypdf` 6.21.1 to 6.21.2 (3 new known vulnerabilities in the PDF parser, found by the dependency scan of this pull request).
 - Security: `pypdf` 6.21.2 to 6.21.4 (7 more known vulnerabilities in the PDF parser, found by the dependency scan).
+- CI: the Python dependency scan tries up to 3 times (pypi.org sometimes times out); a real finding still fails.
 - Full run measured (2026-10-29): 5,850 real documents, 90,956 passages, 1,000 people; 1,040 queries checked against the oracle, 0 violations. Findings (exact-identifier search weak, default search P95 5.4 s) recorded in `RESULTS.md`.
 
 ## [v1.0] - 2026-10-24
